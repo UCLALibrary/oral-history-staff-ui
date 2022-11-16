@@ -1,0 +1,25 @@
+version: "3.1"
+services:
+  django:
+    build: .
+    volumes: 
+      - .:/home/django/oral-history-staff-ui
+    env_file:
+      - .docker-compose_django.env
+      - .docker-compose_db.env
+    ports: 
+      # Variables here must be set in environment, or in .env - not in any env_file
+      - "8000:8000"
+    depends_on:
+      - db
+    extra_hosts:
+      # For access to remote database via ssh tunnel on host
+      - "host.docker.internal:host-gateway"
+  db:
+    image: postgres:12
+    env_file:
+      - .docker-compose_db.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+volumes:
+  pg_data:
