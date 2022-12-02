@@ -1,0 +1,98 @@
+[
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 1,
+        "fields": {
+            "status": "In progress",
+            "status_description": "the record is being actively catalog."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 2,
+        "fields": {
+            "status": "Completed",
+            "status_description": "the resource and the metadata record are complete and ready to be part of the collection."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 3,
+        "fields": {
+            "status": "Pending",
+            "status_description": "either the resource or the metadata have issues such that a decision needs to be made about whether the resource or metadata should be in the collection."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 4,
+        "fields": {
+            "status": "Derived",
+            "status_description": "New record created by deriving it from an existing record."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 5,
+        "fields": {
+            "status": "Imported",
+            "status_description": "the record was created through programmatic means."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 6,
+        "fields": {
+            "status": "Needs QA",
+            "status_description": "the resource needs to have metadata quality assurance performed."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 7,
+        "fields": {
+            "status": "Needs Review",
+            "status_description": "the resource (not metadata) is awaiting or is undergoing a review process."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 8,
+        "fields": {
+            "status": "Sealed",
+            "status_description": "Anything with this status should not be published to the web."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 9,
+        "fields": {
+            "status": "Migrated",
+            "status_description": "the record has been migrated to Islandora."
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 10,
+        "fields": {
+            "status": "Record proofed; needs metadata review",
+            "status_description": "record ready for review by CMC staff"
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 11,
+        "fields": {
+            "status": "Needs expert metadata review",
+            "status_description": "initial review by CMC staff completed; needs further work by subject expert"
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemStatus",
+        "pk": 12,
+        "fields": {
+            "status": "Completed with minimal metadata",
+            "status_description": "the resource and the metadata record are complete and ready to be part of the collection."
+        }
+    }
+]
