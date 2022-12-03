@@ -9,3 +9,8 @@ class ItemStatus(models.Model):
 
     class Meta:
         verbose_name_plural = "Item statuses"
+
+
+class ItemType(models.Model):
+    type = models.CharField(max_length=40)
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
