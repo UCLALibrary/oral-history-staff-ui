@@ -134,5 +134,21 @@
             "type": "Video",
             "parent": 3
         }
+    },
+    {
+        "model": "oh_staff_ui.ProjectItem",
+        "pk": 1,
+        "fields": {
+            "ark": 1,
+            "create_date": 1,
+            "created_by": 1,
+            "last_edit_date": 1, 
+            "last_modified_by": 1,
+            "parent": 1,
+            "sequence": 1,
+            "status": 1,
+            "title": 1,
+            "type": 1
+        }
     }
 ]
