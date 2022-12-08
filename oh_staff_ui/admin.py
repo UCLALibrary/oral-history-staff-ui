@@ -18,7 +18,7 @@ class ProjectItem(admin.ModelAdmin):
         "ark",
         "create_date",
         "created_by",
-        "last_edit_date",
+        "last_modified_date",
         "last_modified_by",
         "parent",
         "sequence",
