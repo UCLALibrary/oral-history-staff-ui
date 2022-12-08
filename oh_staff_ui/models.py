@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 # Create your models here.
 
@@ -25,14 +25,22 @@ class ProjectItem(models.Model):
     ark = models.CharField(max_length=40, blank=False, null=False)
     create_date = models.DateField()
     created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=True, null=True, related_name='+'
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="+",
     )
     last_edit_date = models.DateField()
     last_modified_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=True, null=True, related_name='+'
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="+",
     )
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
-    sequence = models.IntegerField()
+    sequence = models.IntegerField(blank=True, null=True)
     status = models.ForeignKey(
         ItemStatus, on_delete=models.SET_NULL, blank=True, null=True
     )

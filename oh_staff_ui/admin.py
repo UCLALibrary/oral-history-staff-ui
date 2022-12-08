@@ -20,6 +20,7 @@ class ProjectItem(admin.ModelAdmin):
         "created_by",
         "last_edit_date",
         "last_modified_by",
+        "parent",
         "sequence",
         "status",
         "title",
