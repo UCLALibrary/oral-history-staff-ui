@@ -24,14 +24,20 @@ class ProjectItem(models.Model):
 
     ark = models.CharField(max_length=40, blank=False, null=False)
     create_date = models.DateField()
-    created_by = models.ForeignKey(User)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, blank=True, null=True, related_name='+'
+    )
     last_edit_date = models.DateField()
-    last_modified_by = models.ForeignKey(User)
-    parent = models.ForeignKey("self")
+    last_modified_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, blank=True, null=True, related_name='+'
+    )
+    parent = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
     sequence = models.IntegerField()
-    status = models.ForeignKey(ItemStatus, blank=True, null=True)
+    status = models.ForeignKey(
+        ItemStatus, on_delete=models.SET_NULL, blank=True, null=True
+    )
     title = models.CharField(max_length=256, blank=False, null=False)
-    type = models.ForeignKey(ItemType, blank=True, null=True)
+    type = models.ForeignKey(ItemType, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.title
