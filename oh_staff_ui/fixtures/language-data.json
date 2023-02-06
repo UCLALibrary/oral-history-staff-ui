@@ -1,0 +1,18 @@
+[
+    {
+        "model": "oh_staff_ui.Language",
+        "pk": 1,
+        "fields": {
+            "language": "eng",
+            "source": 4
+        }
+    },
+    {
+        "model": "oh_staff_ui.Language",
+        "pk": 2,
+        "fields": {
+            "language": "spa",
+            "source": 4
+        }
+    }
+]
