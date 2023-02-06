@@ -1,0 +1,72 @@
+[
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 1,
+        "fields": {
+            "source": "AAT"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 2,
+        "fields": {
+            "source": "CLA_Topic"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 3,
+        "fields": {
+            "source": "COHR"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 4,
+        "fields": {
+            "source": "ISO639-2"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 5,
+        "fields": {
+            "source": "LCNAF"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 6,
+        "fields": {
+            "source": "LCSH"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 7,
+        "fields": {
+            "source": "OHBS"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 8,
+        "fields": {
+            "source": "copyrightMD"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 9,
+        "fields": {
+            "source": "local"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AuthoritySource",
+        "pk": 10,
+        "fields": {
+            "source": "MODS"
+        }
+    }
+]

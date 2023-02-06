@@ -51,3 +51,20 @@ class ProjectItem(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class AuthoritySource(models.Model):
+    source = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.source
+
+
+class Language(models.Model):
+    language = models.CharField(max_length=256, blank=False, null=False)
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.language

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ItemStatus, ItemType, ProjectItem
+from .models import ItemStatus, ItemType, ProjectItem, AuthoritySource, Language
 
 
 @admin.register(ItemStatus)
@@ -26,3 +26,13 @@ class ProjectItem(admin.ModelAdmin):
         "title",
         "type",
     )
+
+
+@admin.register(AuthoritySource)
+class AuthoritySource(admin.ModelAdmin):
+    list_display = ("source",)
+
+
+@admin.register(Language)
+class Language(admin.ModelAdmin):
+    list_display = ("language", "source")
