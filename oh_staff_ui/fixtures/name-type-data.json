@@ -1,0 +1,44 @@
+[
+    {
+        "model": "oh_staff_ui.NameType",
+        "pk": 1,
+        "fields": {
+            "type": "authorOfIntroduction"
+        }
+    },
+    {
+        "model": "oh_staff_ui.NameType",
+        "pk": 2,
+        "fields": {
+            "type": "interviewee"
+        }
+    },
+    {
+        "model": "oh_staff_ui.NameType",
+        "pk": 3,
+        "fields": {
+            "type": "interviewer"
+        }
+    },
+    {
+        "model": "oh_staff_ui.NameType",
+        "pk": 4,
+        "fields": {
+            "type": "publisher"
+        }
+    },
+    {
+        "model": "oh_staff_ui.NameType",
+        "pk": 5,
+        "fields": {
+            "type": "subject"
+        }
+    },
+    {
+        "model": "oh_staff_ui.NameType",
+        "pk": 6,
+        "fields": {
+            "type": "repository"
+        }
+    }
+]
