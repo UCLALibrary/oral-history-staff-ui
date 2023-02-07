@@ -68,3 +68,23 @@ class Language(models.Model):
 
     def __str__(self):
         return self.language
+
+
+class NameType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class Name(models.Model):
+    value = models.CharField(max_length=256, blank=False, null=False)
+    type = models.ForeignKey(
+        NameType, on_delete=models.CASCADE, blank=False, null=False
+    )
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.value
