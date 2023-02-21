@@ -7,6 +7,8 @@ from .models import (
     Language,
     Name,
     NameType,
+    Subject,
+    SubjectType,
 )
 
 
@@ -53,4 +55,14 @@ class NameType(admin.ModelAdmin):
 
 @admin.register(Name)
 class Name(admin.ModelAdmin):
+    list_display = ("value", "type", "source")
+
+
+@admin.register(SubjectType)
+class NameType(admin.ModelAdmin):
+    list_display = ("type",)
+
+
+@admin.register(Subject)
+class Subject(admin.ModelAdmin):
     list_display = ("value", "type", "source")
