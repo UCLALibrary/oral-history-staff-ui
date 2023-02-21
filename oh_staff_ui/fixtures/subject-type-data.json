@@ -1,0 +1,37 @@
+[
+    {
+        "model": "oh_staff_ui.SubjectType",
+        "pk": 1,
+        "fields": {
+            "type": "level1"
+        }
+    },
+    {
+        "model": "oh_staff_ui.SubjectType",
+        "pk": 2,
+        "fields": {
+            "type": "level2"
+        }
+    },
+    {
+        "model": "oh_staff_ui.SubjectType",
+        "pk": 3,
+        "fields": {
+            "type": "geographicPlace"
+        }
+    },
+    {
+        "model": "oh_staff_ui.SubjectType",
+        "pk": 4,
+        "fields": {
+            "type": "corporateName"
+        }
+    },
+    {
+        "model": "oh_staff_ui.SubjectType",
+        "pk": 5,
+        "fields": {
+            "type": "conceptTopic"
+        }
+    }
+]

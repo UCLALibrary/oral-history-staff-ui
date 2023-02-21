@@ -88,3 +88,23 @@ class Name(models.Model):
 
     def __str__(self):
         return self.value
+
+
+class SubjectType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class Subject(models.Model):
+    value = models.CharField(max_length=256, blank=False, null=False)
+    type = models.ForeignKey(
+        SubjectType, on_delete=models.CASCADE, blank=False, null=False
+    )
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.value

@@ -1,0 +1,20 @@
+[
+    {
+        "model": "oh_staff_ui.Subject",
+        "pk": 1,
+        "fields": {
+            "value": "Arts, Literature, Music, and Film",
+            "type": 1,
+            "source": 6
+        }
+    },
+    {
+        "model": "oh_staff_ui.Subject",
+        "pk": 2,
+        "fields": {
+            "value": "Art",
+            "type": 2,
+            "source": 6
+        }
+    }
+]
