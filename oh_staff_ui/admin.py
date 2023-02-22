@@ -13,6 +13,10 @@ from .models import (
     AltIdType,
     AltTitle,
     AltTitleType,
+    Description,
+    DescriptionType,
+    Publisher,
+    PublisherType,
 )
 
 
@@ -73,20 +77,40 @@ class Subject(admin.ModelAdmin):
 
 
 @admin.register(AltIdType)
-class NameType(admin.ModelAdmin):
+class AltIdType(admin.ModelAdmin):
     list_display = ("type",)
 
 
 @admin.register(AltId)
-class Subject(admin.ModelAdmin):
+class AltId(admin.ModelAdmin):
     list_display = ("value", "type", "source")
 
 
 @admin.register(AltTitleType)
-class NameType(admin.ModelAdmin):
+class AltTitleType(admin.ModelAdmin):
     list_display = ("type",)
 
 
 @admin.register(AltTitle)
-class Subject(admin.ModelAdmin):
+class AltTitle(admin.ModelAdmin):
+    list_display = ("value", "type", "source")
+
+
+@admin.register(DescriptionType)
+class DescriptionType(admin.ModelAdmin):
+    list_display = ("type",)
+
+
+@admin.register(Description)
+class Description(admin.ModelAdmin):
+    list_display = ("value", "type", "source")
+
+
+@admin.register(PublisherType)
+class PublisherType(admin.ModelAdmin):
+    list_display = ("type",)
+
+
+@admin.register(Publisher)
+class Publisher(admin.ModelAdmin):
     list_display = ("value", "type", "source")
