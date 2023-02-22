@@ -1,0 +1,23 @@
+[
+    {
+        "model": "oh_staff_ui.AltTitleType",
+        "pk": 1,
+        "fields": {
+            "type": "descriptive"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AltTitleType",
+        "pk": 2,
+        "fields": {
+            "type": "other"
+        }
+    },
+    {
+        "model": "oh_staff_ui.AltTitleType",
+        "pk": 3,
+        "fields": {
+            "type": "parallel"
+        }
+    }
+]
