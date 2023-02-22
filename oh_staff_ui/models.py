@@ -108,3 +108,43 @@ class Subject(models.Model):
 
     def __str__(self):
         return self.value
+
+
+class AltTitleType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class AltTitle(models.Model):
+    value = models.CharField(max_length=512, blank=False, null=False)
+    type = models.ForeignKey(
+        AltTitleType, on_delete=models.CASCADE, blank=False, null=False
+    )
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.value
+
+
+class AltIdType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class AltId(models.Model):
+    value = models.CharField(max_length=256, blank=False, null=False)
+    type = models.ForeignKey(
+        AltIdType, on_delete=models.CASCADE, blank=False, null=False
+    )
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.value
