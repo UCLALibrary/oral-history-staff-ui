@@ -148,3 +148,43 @@ class AltId(models.Model):
 
     def __str__(self):
         return self.value
+
+
+class DescriptionType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class Description(models.Model):
+    value = models.CharField(max_length=1024, blank=False, null=False)
+    type = models.ForeignKey(
+        DescriptionType, on_delete=models.CASCADE, blank=False, null=False
+    )
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.value
+
+
+class PublisherType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class Publisher(models.Model):
+    value = models.CharField(max_length=256, blank=False, null=False)
+    type = models.ForeignKey(
+        PublisherType, on_delete=models.CASCADE, blank=False, null=False
+    )
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.value

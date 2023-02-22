@@ -1,0 +1,72 @@
+[
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 1,
+        "fields": {
+            "type": "abstract"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 2,
+        "fields": {
+            "type": "note"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 3,
+        "fields": {
+            "type": "tableOfContents"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 4,
+        "fields": {
+            "type": "adminnote"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 5,
+        "fields": {
+            "type": "interviewerhistory"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 6,
+        "fields": {
+            "type": "processinterview"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 7,
+        "fields": {
+            "type": "personpresent"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 8,
+        "fields": {
+            "type": "place"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 9,
+        "fields": {
+            "type": "supportingdocuments"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DescriptionType",
+        "pk": 10,
+        "fields": {
+            "type": "biographicalNote"
+        }
+    }
+]

@@ -1,0 +1,16 @@
+[
+    {
+        "model": "oh_staff_ui.PublisherType",
+        "pk": 1,
+        "fields": {
+            "type": "publisherName"
+        }
+    },
+    {
+        "model": "oh_staff_ui.PublisherType",
+        "pk": 2,
+        "fields": {
+            "type": "placeOfOrigin"
+        }
+    }
+]

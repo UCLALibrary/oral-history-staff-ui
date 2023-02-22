@@ -1,0 +1,11 @@
+[
+    {
+        "model": "oh_staff_ui.Description",
+        "pk": 1,
+        "fields": {
+            "value": "The interviews in the series African American Architects of Los Angeles document the work of selected African American architects who have enhanced the built environment, principally in the Los Angeles metropolitan area.",
+            "type": 1,
+            "source": 1
+        }
+    }
+]
