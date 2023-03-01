@@ -1,0 +1,12 @@
+{% extends 'oh_staff_ui/base.html' %}
+
+{% block content %}
+<form name="add_item" id="add_item" method="POST">
+    {% csrf_token %}
+    <table>
+        {{ form.as_table }}
+    </table>
+    <br>
+    <button type="submit">Add Item</button>
+</form>
+{% endblock %}
