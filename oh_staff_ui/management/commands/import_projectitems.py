@@ -22,29 +22,27 @@ class Command(BaseCommand):
         with open(filepath, mode="r") as f:
             dict_reader = DictReader(f)
             projectitem_dicts = list(dict_reader)
-        total_rows = len(projectitem_dicts)
-        print(f"Found {total_rows} ProjectItems to import.")
 
-        # start with known top-level ProjectItem
-        # handled outside of main loop due to lack of parent
+        # start with known top-level ProjectItem to be deleted
         added_items = []
         root_item = next(
             item for item in projectitem_dicts if item["ARK"] == "21198/zz0008zh0f"
         )
-        # create and save ProjectItem for root object
-        p = ProjectItem(
-            ark=root_item["ARK"],
-            create_date=self.format_date(root_item["CREATE_DATE"]),
-            created_by=self.get_or_create_user(root_item["CREATED_BY"]),
-            last_modified_date=self.format_date(root_item["LAST_MODIFIED_DATE"]),
-            last_modified_by=self.get_or_create_user(root_item["LAST_MODIFIED_BY"]),
-            sequence=self.format_sequence(root_item["SEQUENCE"]),
-            status=ItemStatus.objects.get(status=root_item["STATUS"]),
-            title=root_item["TITLE"],
-            type=ItemType.objects.get(type=root_item["TYPE"]),
-        )
-        p.save()
-        added_items.append(root_item)
+        projectitem_dicts.remove(root_item)
+        # count rows after removal of root item, for display only
+        total_rows = len(projectitem_dicts)
+        print(f"Found {total_rows} ProjectItems to import.")
+
+        # identify immediate children of root item (series)
+        # and add without a parent
+        series_items = [
+            item
+            for item in projectitem_dicts
+            if item["PARENT_ARK"] == "21198/zz0008zh0f"
+        ]
+        for series in series_items:
+            self.add_projectitem(series, has_parent=False)
+            added_items.append(series)
 
         # main logical loop
         # until we've added all items, look in imported data for children of added items
@@ -69,19 +67,20 @@ class Command(BaseCommand):
                 output_items.append(line)
         return output_items
 
-    def add_projectitem(self, pi_dict: dict) -> list:
+    def add_projectitem(self, pi_dict: dict, has_parent=True) -> list:
         p = ProjectItem(
             ark=pi_dict["ARK"],
             create_date=self.format_date(pi_dict["CREATE_DATE"]),
             created_by=self.get_or_create_user(pi_dict["CREATED_BY"]),
             last_modified_date=self.format_date(pi_dict["LAST_MODIFIED_DATE"]),
             last_modified_by=self.get_or_create_user(pi_dict["LAST_MODIFIED_BY"]),
-            parent=ProjectItem.objects.get(ark=pi_dict["PARENT_ARK"]),
             sequence=self.format_sequence(pi_dict["SEQUENCE"]),
             status=ItemStatus.objects.get(status=pi_dict["STATUS"]),
             title=pi_dict["TITLE"],
             type=ItemType.objects.get(type=pi_dict["TYPE"]),
         )
+        if has_parent:
+            p.parent = ProjectItem.objects.get(ark=pi_dict["PARENT_ARK"])
         p.save()
 
     def format_date(self, date: str) -> str:
