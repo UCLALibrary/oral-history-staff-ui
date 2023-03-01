@@ -89,7 +89,7 @@ class Command(BaseCommand):
 
     def format_sequence(self, seq) -> int:
         if seq == "":
-            seq = 1
+            seq = 0
         return seq
 
     def get_or_create_user(self, email: str) -> User:
