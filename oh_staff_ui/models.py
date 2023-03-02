@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
-
-# Create your models here.
+from django.utils import timezone
 
 
 class ItemStatus(models.Model):
@@ -15,6 +14,12 @@ class ItemStatus(models.Model):
         verbose_name_plural = "Item statuses"
 
 
+def get_default_status():
+    # Provides default value for new ProjectItem status field.
+    # Caution: Must be updated if this literal value changes.
+    return ItemStatus.objects.get(status="In progress").id
+
+
 class ItemType(models.Model):
     type = models.CharField(max_length=40)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
@@ -25,29 +30,35 @@ class ItemType(models.Model):
 
 class ProjectItem(models.Model):
     ark = models.CharField(max_length=40, blank=False, null=False)
-    create_date = models.DateField()
+    create_date = models.DateField(blank=False, null=False, default=timezone.now)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
-        blank=True,
-        null=True,
+        blank=False,
+        null=False,
         related_name="+",
     )
-    last_modified_date = models.DateField()
+    last_modified_date = models.DateField(blank=False, null=False, default=timezone.now)
     last_modified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
-        blank=True,
-        null=True,
+        blank=False,
+        null=False,
         related_name="+",
     )
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
-    sequence = models.IntegerField(blank=False, null=False, default=1)
+    sequence = models.IntegerField(blank=False, null=False, default=0)
     status = models.ForeignKey(
-        ItemStatus, on_delete=models.SET_NULL, blank=True, null=True
+        ItemStatus,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        default=get_default_status,
     )
     title = models.CharField(max_length=256, blank=False, null=False)
-    type = models.ForeignKey(ItemType, on_delete=models.SET_NULL, blank=True, null=True)
+    type = models.ForeignKey(
+        ItemType, on_delete=models.PROTECT, blank=False, null=False
+    )
 
     def __str__(self):
         return self.title

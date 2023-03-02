@@ -1,6 +1,4 @@
 from django.shortcuts import render
-from datetime import datetime
-
 from django.contrib.auth.decorators import login_required
 from oh_staff_ui.forms import ProjectItemForm
 from oh_staff_ui.models import ProjectItem
@@ -19,14 +17,12 @@ def add_item(request):
             ark = "fake ark"
             # TODO: Get real user info
             user = request.user
-            now = datetime.now()
             new_item = ProjectItem(
                 ark=ark,
                 sequence=form.cleaned_data["sequence"],
                 title=form.cleaned_data["title"],
-                create_date=now,
+                type=form.cleaned_data["type"],
                 created_by=user,
-                last_modified_date=now,
                 last_modified_by=user,
             )
             new_item.save()

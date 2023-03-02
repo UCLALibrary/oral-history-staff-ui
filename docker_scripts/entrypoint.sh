@@ -23,6 +23,17 @@ if [ "$DJANGO_RUN_ENV" = "dev" ]; then
   # Create default superuser for dev environment, using django env vars.
   # Logs will show error if this exists, which is OK.
   python manage.py createsuperuser --no-input
+
+  # Make sure necessary lookup tables have at least sample data.
+  # seed-data has ItemType, ItemStatus, and 3 sample ProjectItem records.
+  python manage.py loaddata seed-data
+  python manage.py loaddata authority-source-data language-data
+  python manage.py loaddata name-type-data name-data
+  python manage.py loaddata subject-type-data subject-data
+  python manage.py loaddata altid-type-data alttitle-type-data
+  python manage.py loaddata altid-data alttitle-data
+  python manage.py loaddata description-type-data publisher-type-data
+  python manage.py loaddata description-data publisher-data
 fi
 
 if [ "$DJANGO_RUN_ENV" = "dev" ]; then
