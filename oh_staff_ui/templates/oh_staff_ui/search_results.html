@@ -1,0 +1,21 @@
+{% extends 'oh_staff_ui/base.html' %}
+
+{% block content %}
+{% if results %}
+<table style="width: 100%">
+    <tr>
+        <th>ARK</th>
+        <th>Title</th>
+    </tr>
+    {% for item in results %}
+    <tr>
+        <td style="border: 1px solid"><a href="{% url 'edit_item' item.id %}">{{ item.ark }}</a></td>
+        <td style="border: 1px solid">{{ item.title}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No results found.</p>
+{% endif %}
+
+{% endblock %}
