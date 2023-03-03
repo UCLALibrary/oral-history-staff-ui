@@ -74,7 +74,7 @@ class AuthoritySource(models.Model):
 class Language(models.Model):
     language = models.CharField(max_length=256, blank=False, null=False)
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
@@ -91,10 +91,10 @@ class NameType(models.Model):
 class Name(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
     type = models.ForeignKey(
-        NameType, on_delete=models.CASCADE, blank=False, null=False
+        NameType, on_delete=models.PROTECT, blank=False, null=False
     )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
@@ -111,10 +111,10 @@ class SubjectType(models.Model):
 class Subject(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
     type = models.ForeignKey(
-        SubjectType, on_delete=models.CASCADE, blank=False, null=False
+        SubjectType, on_delete=models.PROTECT, blank=False, null=False
     )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
@@ -131,10 +131,10 @@ class AltTitleType(models.Model):
 class AltTitle(models.Model):
     value = models.CharField(max_length=512, blank=False, null=False)
     type = models.ForeignKey(
-        AltTitleType, on_delete=models.CASCADE, blank=False, null=False
+        AltTitleType, on_delete=models.PROTECT, blank=False, null=False
     )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
@@ -151,10 +151,10 @@ class AltIdType(models.Model):
 class AltId(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
     type = models.ForeignKey(
-        AltIdType, on_delete=models.CASCADE, blank=False, null=False
+        AltIdType, on_delete=models.PROTECT, blank=False, null=False
     )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
@@ -171,10 +171,10 @@ class DescriptionType(models.Model):
 class Description(models.Model):
     value = models.CharField(max_length=1024, blank=False, null=False)
     type = models.ForeignKey(
-        DescriptionType, on_delete=models.CASCADE, blank=False, null=False
+        DescriptionType, on_delete=models.PROTECT, blank=False, null=False
     )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
@@ -191,10 +191,10 @@ class PublisherType(models.Model):
 class Publisher(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
     type = models.ForeignKey(
-        PublisherType, on_delete=models.CASCADE, blank=False, null=False
+        PublisherType, on_delete=models.PROTECT, blank=False, null=False
     )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
