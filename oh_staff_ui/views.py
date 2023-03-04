@@ -4,6 +4,7 @@ from django.http.request import HttpRequest  # for code completion
 from django.http.response import HttpResponse  # for code completion
 from oh_staff_ui.forms import ProjectItemForm, ItemSearchForm
 from oh_staff_ui.models import ProjectItem
+from .views_utils import *
 
 
 @login_required
@@ -59,11 +60,8 @@ def item_search(request: HttpRequest) -> HttpResponse:
 @login_required
 def search_results(request: HttpRequest, search_type: str, query: str) -> HttpResponse:
     if search_type == "title":
-        results = (
-            ProjectItem.objects.filter(title__icontains=query)
-            .order_by("title")
-            .values()
-        )
+        full_query = construct_keyword_query(query)
+        results = ProjectItem.objects.filter(full_query).order_by("title").values()
     elif search_type == "ark":
         results = (
             ProjectItem.objects.filter(ark__icontains=query).order_by("ark").values()
