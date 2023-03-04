@@ -1,0 +1,7 @@
+.search-results {
+   width: 100%;
+}
+
+.search-results td {
+    border: 1px solid;
+}
