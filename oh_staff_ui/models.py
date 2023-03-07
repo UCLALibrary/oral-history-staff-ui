@@ -74,11 +74,20 @@ class AuthoritySource(models.Model):
 class Language(models.Model):
     language = models.CharField(max_length=256, blank=False, null=False)
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.language
+
+
+class ItemLanguageUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    language = models.ForeignKey(
+        Language, on_delete=models.PROTECT, blank=False, null=False
+    )
 
 
 class NameType(models.Model):
@@ -90,15 +99,22 @@ class NameType(models.Model):
 
 class Name(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
-    type = models.ForeignKey(
-        NameType, on_delete=models.CASCADE, blank=False, null=False
-    )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
+
+
+class ItemNameUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    name = models.ForeignKey(Name, on_delete=models.PROTECT, blank=False, null=False)
+    type = models.ForeignKey(
+        NameType, on_delete=models.PROTECT, blank=False, null=False
+    )
 
 
 class SubjectType(models.Model):
@@ -110,15 +126,24 @@ class SubjectType(models.Model):
 
 class Subject(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
-    type = models.ForeignKey(
-        SubjectType, on_delete=models.CASCADE, blank=False, null=False
-    )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
+
+
+class ItemSubjectUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    subject = models.ForeignKey(
+        Subject, on_delete=models.PROTECT, blank=False, null=False
+    )
+    type = models.ForeignKey(
+        SubjectType, on_delete=models.PROTECT, blank=False, null=False
+    )
 
 
 class AltTitleType(models.Model):
@@ -130,15 +155,24 @@ class AltTitleType(models.Model):
 
 class AltTitle(models.Model):
     value = models.CharField(max_length=512, blank=False, null=False)
-    type = models.ForeignKey(
-        AltTitleType, on_delete=models.CASCADE, blank=False, null=False
-    )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
+
+
+class ItemAltTitleUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    alt_title = models.ForeignKey(
+        AltTitle, on_delete=models.PROTECT, blank=False, null=False
+    )
+    type = models.ForeignKey(
+        AltTitleType, on_delete=models.PROTECT, blank=False, null=False
+    )
 
 
 class AltIdType(models.Model):
@@ -150,15 +184,22 @@ class AltIdType(models.Model):
 
 class AltId(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
-    type = models.ForeignKey(
-        AltIdType, on_delete=models.CASCADE, blank=False, null=False
-    )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
+
+
+class ItemAltIdUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    alt_id = models.ForeignKey(AltId, on_delete=models.PROTECT, blank=False, null=False)
+    type = models.ForeignKey(
+        AltIdType, on_delete=models.PROTECT, blank=False, null=False
+    )
 
 
 class DescriptionType(models.Model):
@@ -170,15 +211,24 @@ class DescriptionType(models.Model):
 
 class Description(models.Model):
     value = models.CharField(max_length=1024, blank=False, null=False)
-    type = models.ForeignKey(
-        DescriptionType, on_delete=models.CASCADE, blank=False, null=False
-    )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
+
+
+class ItemDescriptionUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    description = models.ForeignKey(
+        Description, on_delete=models.PROTECT, blank=False, null=False
+    )
+    type = models.ForeignKey(
+        DescriptionType, on_delete=models.PROTECT, blank=False, null=False
+    )
 
 
 class PublisherType(models.Model):
@@ -190,12 +240,21 @@ class PublisherType(models.Model):
 
 class Publisher(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
-    type = models.ForeignKey(
-        PublisherType, on_delete=models.CASCADE, blank=False, null=False
-    )
     source = models.ForeignKey(
-        AuthoritySource, on_delete=models.CASCADE, blank=False, null=False
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
+
+
+class ItemPublisherUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    publisher = models.ForeignKey(
+        Publisher, on_delete=models.PROTECT, blank=False, null=False
+    )
+    type = models.ForeignKey(
+        PublisherType, on_delete=models.PROTECT, blank=False, null=False
+    )

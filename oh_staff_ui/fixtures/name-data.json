@@ -4,7 +4,6 @@
         "pk": 1,
         "fields": {
             "value": "Henderson, Wesley H.",
-            "type": 3,
             "source": 9
         }
     },
@@ -13,7 +12,6 @@
         "pk": 2,
         "fields": {
             "value": "Williams, Harold L.",
-            "type": 2,
             "source": 9
         }
     }

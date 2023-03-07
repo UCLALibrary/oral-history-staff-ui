@@ -63,7 +63,7 @@ class NameType(admin.ModelAdmin):
 
 @admin.register(Name)
 class Name(admin.ModelAdmin):
-    list_display = ("value", "type", "source")
+    list_display = ("value", "source")
 
 
 @admin.register(SubjectType)
@@ -73,7 +73,7 @@ class NameType(admin.ModelAdmin):
 
 @admin.register(Subject)
 class Subject(admin.ModelAdmin):
-    list_display = ("value", "type", "source")
+    list_display = ("value", "source")
 
 
 @admin.register(AltIdType)
@@ -83,7 +83,7 @@ class AltIdType(admin.ModelAdmin):
 
 @admin.register(AltId)
 class AltId(admin.ModelAdmin):
-    list_display = ("value", "type", "source")
+    list_display = ("value", "source")
 
 
 @admin.register(AltTitleType)
@@ -93,7 +93,7 @@ class AltTitleType(admin.ModelAdmin):
 
 @admin.register(AltTitle)
 class AltTitle(admin.ModelAdmin):
-    list_display = ("value", "type", "source")
+    list_display = ("value", "source")
 
 
 @admin.register(DescriptionType)
@@ -103,7 +103,7 @@ class DescriptionType(admin.ModelAdmin):
 
 @admin.register(Description)
 class Description(admin.ModelAdmin):
-    list_display = ("value", "type", "source")
+    list_display = ("value", "source")
 
 
 @admin.register(PublisherType)
@@ -113,4 +113,4 @@ class PublisherType(admin.ModelAdmin):
 
 @admin.register(Publisher)
 class Publisher(admin.ModelAdmin):
-    list_display = ("value", "type", "source")
+    list_display = ("value", "source")

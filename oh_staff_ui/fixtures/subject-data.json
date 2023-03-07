@@ -4,7 +4,6 @@
         "pk": 1,
         "fields": {
             "value": "Arts, Literature, Music, and Film",
-            "type": 1,
             "source": 6
         }
     },
@@ -13,7 +12,6 @@
         "pk": 2,
         "fields": {
             "value": "Art",
-            "type": 2,
             "source": 6
         }
     }
