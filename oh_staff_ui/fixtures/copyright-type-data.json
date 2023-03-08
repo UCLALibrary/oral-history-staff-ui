@@ -1,0 +1,16 @@
+[
+    {
+        "model": "oh_staff_ui.CopyrightType",
+        "pk": 1,
+        "fields": {
+            "type": "rightsHolderName"
+        }
+    },
+    {
+        "model": "oh_staff_ui.CopyrightType",
+        "pk": 2,
+        "fields": {
+            "type": "copyrightStatus"
+        }
+    }
+]

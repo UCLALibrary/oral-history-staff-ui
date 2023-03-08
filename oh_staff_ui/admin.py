@@ -17,6 +17,8 @@ from .models import (
     DescriptionType,
     Publisher,
     PublisherType,
+    Copyright,
+    CopyrightType,
 )
 
 
@@ -113,4 +115,14 @@ class PublisherType(admin.ModelAdmin):
 
 @admin.register(Publisher)
 class Publisher(admin.ModelAdmin):
+    list_display = ("value", "source")
+
+
+@admin.register(CopyrightType)
+class CopyrightType(admin.ModelAdmin):
+    list_display = ("type",)
+
+
+@admin.register(Copyright)
+class Copyright(admin.ModelAdmin):
     list_display = ("value", "source")

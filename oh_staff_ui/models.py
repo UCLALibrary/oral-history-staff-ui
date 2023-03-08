@@ -258,3 +258,32 @@ class ItemPublisherUsage(models.Model):
     type = models.ForeignKey(
         PublisherType, on_delete=models.PROTECT, blank=False, null=False
     )
+
+
+class CopyrightType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class Copyright(models.Model):
+    value = models.CharField(max_length=256, blank=False, null=False)
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.value
+
+
+class ItemCopyrightUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    publisher = models.ForeignKey(
+        Copyright, on_delete=models.PROTECT, blank=False, null=False
+    )
+    type = models.ForeignKey(
+        CopyrightType, on_delete=models.PROTECT, blank=False, null=False
+    )
