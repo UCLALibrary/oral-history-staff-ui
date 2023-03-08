@@ -12,3 +12,11 @@ class ProjectItemForm(forms.Form):
     sequence = forms.CharField(
         required=True, max_length=3, widget=forms.TextInput(attrs={"size": 3})
     )
+
+
+class ItemSearchForm(forms.Form):
+    search_types = [("ark", "ARK"), ("title", "Title")]
+    search_type = forms.ChoiceField(choices=search_types)
+    query = forms.CharField(
+        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+    )
