@@ -5,8 +5,17 @@
 <ul>
     <li>id: {{ item.id }}</li>
     <li>title: {{ item.title }}</li>
+    <li>ARK: {{ item.ark }}</li>
     <li>create_date: {{ item.create_date }}</li>
 </ul>
-
+{{ item_form.as_div }}
+<br>
+<table>
+    {{ name_formset.as_table }}
+</table>
+<br>
+<table>
+    {{ subject_formset.as_table }}
+</table>
 {% endblock %}
 

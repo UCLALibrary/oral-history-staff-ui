@@ -105,7 +105,7 @@ class Name(models.Model):
     )
 
     def __str__(self):
-        return self.value
+        return f"{self.value} ({self.source})"
 
 
 class ItemNameUsage(models.Model):

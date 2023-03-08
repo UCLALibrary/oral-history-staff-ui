@@ -2,9 +2,14 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest  # for code completion
 from django.http.response import HttpResponse  # for code completion
-from oh_staff_ui.forms import ProjectItemForm, ItemSearchForm
+from oh_staff_ui.forms import (
+    ProjectItemForm,
+    ItemSearchForm,
+    NameUsageFormset,
+    SubjectUsageFormset,
+)
 from oh_staff_ui.models import ProjectItem
-from .views_utils import *
+from oh_staff_ui.views_utils import construct_keyword_query
 
 
 @login_required
@@ -39,7 +44,25 @@ def add_item(request: HttpRequest) -> HttpResponse:
 def edit_item(request: HttpRequest, item_id: int) -> HttpResponse:
     # TODO: Real form, and view, for editing item and its associated metadata.
     item = ProjectItem.objects.get(pk=item_id)
-    return render(request, "oh_staff_ui/edit_item.html", {"item": item})
+    if request.method == "POST":
+        # item_form = ProjectItemForm(request.POST)
+        pass
+    else:
+        # TODO: Get data via utility functions
+        data = {"title": item.title, "type": item.type, "sequence": item.sequence}
+        item_form = ProjectItemForm(data)
+        name_formset = NameUsageFormset(prefix="names")
+        subject_formset = SubjectUsageFormset(prefix="subjects")
+    return render(
+        request,
+        "oh_staff_ui/edit_item.html",
+        {
+            "item": item,
+            "item_form": item_form,
+            "name_formset": name_formset,
+            "subject_formset": subject_formset,
+        },
+    )
 
 
 @login_required
