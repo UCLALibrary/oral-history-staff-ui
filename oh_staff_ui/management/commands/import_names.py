@@ -19,19 +19,27 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # open and read input CSV - assuming it's in the fixtures folder
         filepath = os.path.join("oh_staff_ui/fixtures", options["filename"])
-        print(os.listdir("oh_staff_ui/fixtures"))
         with open(filepath, mode="r") as f:
             dict_reader = DictReader(f)
             name_dicts = list(dict_reader)
 
-        print(f"Found {len(name_dicts)} rows to import.")
+        print(f"Found {len(name_dicts)} rows of name usage to import.")
         for row in name_dicts:
             item = ProjectItem.objects.get(ark=row["ARK"])
             source = self.get_or_create_source(row["SOURCE"])
             name = self.get_or_create_name(source, row["VALUE"])
             type = self.get_or_create_nametype(row["TYPE"])
-            usage = ItemNameUsage(item=item, name=name, type=type)
-            usage.save()
+            # avoid duplicates - only add ItemNameUsages that don't exist yet
+            if not ItemNameUsage.objects.filter(
+                item=item, name=name, type=type
+            ).exists():
+                usage = ItemNameUsage(item=item, name=name, type=type)
+                usage.save()
+        print("Finished importing names associated with items.")
+        total_names = Name.objects.filter().count()
+        total_name_usage = ItemNameUsage.objects.filter().count()
+        print(f"Total Names in database: {total_names}")
+        print(f"Total Item Name Usages in database: {total_name_usage}")
 
     def get_or_create_source(self, source=str) -> AuthoritySource:
         if AuthoritySource.objects.filter(source=source).exists():
