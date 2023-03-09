@@ -281,7 +281,7 @@ class ItemCopyrightUsage(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
-    publisher = models.ForeignKey(
+    copyright = models.ForeignKey(
         Copyright, on_delete=models.PROTECT, blank=False, null=False
     )
     type = models.ForeignKey(
