@@ -132,4 +132,4 @@ class Copyright(admin.ModelAdmin):
 
 @admin.register(Format)
 class Format(admin.ModelAdmin):
-    list_display = ("value",)
+    list_display = ("item", "value",)
