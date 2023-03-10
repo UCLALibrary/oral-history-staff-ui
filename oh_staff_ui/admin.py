@@ -19,6 +19,7 @@ from .models import (
     PublisherType,
     Copyright,
     CopyrightType,
+    Format
 )
 
 
@@ -36,6 +37,7 @@ class ItemType(admin.ModelAdmin):
 class ProjectItem(admin.ModelAdmin):
     list_display = (
         "ark",
+        "coverage",
         "create_date",
         "created_by",
         "last_modified_date",
@@ -126,3 +128,8 @@ class CopyrightType(admin.ModelAdmin):
 @admin.register(Copyright)
 class Copyright(admin.ModelAdmin):
     list_display = ("value", "source")
+
+
+@admin.register(Format)
+class Format(admin.ModelAdmin):
+    list_display = ("item", "value",)

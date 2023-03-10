@@ -30,6 +30,7 @@ class ItemType(models.Model):
 
 class ProjectItem(models.Model):
     ark = models.CharField(max_length=40, blank=False, null=False)
+    coverage = models.CharField(max_length=256, blank=True, null=True)
     create_date = models.DateField(blank=False, null=False, default=timezone.now)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -287,3 +288,13 @@ class ItemCopyrightUsage(models.Model):
     type = models.ForeignKey(
         CopyrightType, on_delete=models.PROTECT, blank=False, null=False
     )
+
+
+class Format(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    value = models.CharField(max_length=1024, blank=False, null=False)
+
+    def __str__(self):
+        return self.value
