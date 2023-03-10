@@ -30,6 +30,7 @@ class ItemType(models.Model):
 
 class ProjectItem(models.Model):
     ark = models.CharField(max_length=40, blank=False, null=False)
+    coverage = models.CharField(max_length=256, blank=True, null=True)
     create_date = models.DateField(blank=False, null=False, default=timezone.now)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -289,59 +290,11 @@ class ItemCopyrightUsage(models.Model):
     )
 
 
-class RelationType(models.Model):
-    type = models.CharField(max_length=256, blank=False, null=False)
-
-    def __str__(self):
-        return self.type
-
-
-class Relation(models.Model):
-    value = models.CharField(max_length=1024, blank=False, null=False)
-
-    def __str__(self):
-        return self.value
-
-
-class ItemRelationUsage(models.Model):
-    item = models.ForeignKey(
-        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
-    )
-    relation = models.ForeignKey(
-        Relation, on_delete=models.PROTECT, blank=False, null=False
-    )
-    type = models.ForeignKey(
-        RelationType, on_delete=models.PROTECT, blank=False, null=False
-    )
-
-
 class Format(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
     value = models.CharField(max_length=1024, blank=False, null=False)
 
     def __str__(self):
         return self.value
-
-
-class ItemFormatUsage(models.Model):
-    item = models.ForeignKey(
-        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
-    )
-    format = models.ForeignKey(
-        Format, on_delete=models.PROTECT, blank=False, null=False
-    )
-
-
-class Coverage(models.Model):
-    value = models.CharField(max_length=1024, blank=False, null=False)
-
-    def __str__(self):
-        return self.value
-
-
-class ItemCoverageUsage(models.Model):
-    item = models.ForeignKey(
-        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
-    )
-    coverage = models.ForeignKey(
-        Coverage, on_delete=models.PROTECT, blank=False, null=False
-    )

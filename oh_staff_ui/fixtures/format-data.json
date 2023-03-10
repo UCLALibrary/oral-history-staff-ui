@@ -3,6 +3,7 @@
         "model": "oh_staff_ui.Format",
         "pk": 1,
         "fields": {
+            "item": 1,
             "value": "57 pages"
         }
     }

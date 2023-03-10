@@ -1,9 +1,0 @@
-[
-    {
-        "model": "oh_staff_ui.Coverage",
-        "pk": 1,
-        "fields": {
-            "value": "1950-1960"
-        }
-    }
-]

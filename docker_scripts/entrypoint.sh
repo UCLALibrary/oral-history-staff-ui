@@ -35,8 +35,6 @@ if [ "$DJANGO_RUN_ENV" = "dev" ]; then
   python manage.py loaddata description-type-data publisher-type-data
   python manage.py loaddata description-data publisher-data
   python manage.py loaddata copyright-type-data copyright-data
-  python manage.py loaddata relation-type-data relation-data
-  python manage.py loaddata coverage-data
   python manage.py loaddata format-data
 fi
 
