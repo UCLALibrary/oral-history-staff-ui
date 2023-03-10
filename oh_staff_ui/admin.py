@@ -19,6 +19,10 @@ from .models import (
     PublisherType,
     Copyright,
     CopyrightType,
+    Format,
+    Coverage,
+    Relation,
+    RelationType,
 )
 
 
@@ -126,3 +130,23 @@ class CopyrightType(admin.ModelAdmin):
 @admin.register(Copyright)
 class Copyright(admin.ModelAdmin):
     list_display = ("value", "source")
+
+
+@admin.register(RelationType)
+class RelationType(admin.ModelAdmin):
+    list_display = ("type",)
+
+
+@admin.register(Relation)
+class Relation(admin.ModelAdmin):
+    list_display = ("value",)
+
+
+@admin.register(Format)
+class Format(admin.ModelAdmin):
+    list_display = ("value",)
+
+
+@admin.register(Coverage)
+class Coverage(admin.ModelAdmin):
+    list_display = ("value",)

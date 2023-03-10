@@ -1,0 +1,9 @@
+[
+    {
+        "model": "oh_staff_ui.Format",
+        "pk": 1,
+        "fields": {
+            "value": "57 pages"
+        }
+    }
+]
