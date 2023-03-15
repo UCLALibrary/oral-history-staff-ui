@@ -1,5 +1,9 @@
 from django import forms
-from oh_staff_ui.models import ItemType, Name, NameType, Subject, SubjectType
+from oh_staff_ui.models import (
+    ItemType,
+    Name,
+    NameType,
+)
 
 
 class ProjectItemForm(forms.Form):
@@ -22,7 +26,8 @@ class ItemSearchForm(forms.Form):
     )
 
 
-class NameUsage(forms.Form):
+class NameUsageForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
     type = forms.ModelChoiceField(
         queryset=NameType.objects.all().order_by("type"),
         empty_label="Please select a qualifier:",
@@ -33,18 +38,15 @@ class NameUsage(forms.Form):
     )
 
 
-NameUsageFormset = forms.formset_factory(NameUsage, extra=1, can_delete=True)
+# class SubjectUsage(forms.Form):
+#     type = forms.ModelChoiceField(
+#         queryset=SubjectType.objects.all().order_by("type"),
+#         empty_label="Please select a qualifier:",
+#     )
+#     subject = forms.ModelChoiceField(
+#         queryset=Subject.objects.all().order_by("value"),
+#         empty_label="Please select a subject:",
+#     )
 
 
-class SubjectUsage(forms.Form):
-    type = forms.ModelChoiceField(
-        queryset=SubjectType.objects.all().order_by("type"),
-        empty_label="Please select a qualifier:",
-    )
-    subject = forms.ModelChoiceField(
-        queryset=Subject.objects.all().order_by("value"),
-        empty_label="Please select a subject:",
-    )
-
-
-SubjectUsageFormset = forms.formset_factory(SubjectUsage, extra=1, can_delete=True)
+# SubjectUsageFormset = forms.formset_factory(SubjectUsage, extra=1, can_delete=True)

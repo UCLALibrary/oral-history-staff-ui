@@ -4,18 +4,27 @@
 <p>The form for editing an item and its added metadata will go here</p>
 <ul>
     <li>id: {{ item.id }}</li>
-    <li>title: {{ item.title }}</li>
     <li>ARK: {{ item.ark }}</li>
-    <li>create_date: {{ item.create_date }}</li>
+    <li>created: {{ item.create_date }} by {{ item.created_by }}</li>
+    <li>updated: {{ item.last_modified_date }} by {{ item.last_modified_by }}</li>
 </ul>
-{{ item_form.as_div }}
-<br>
-<table>
-    {{ name_formset.as_table }}
-</table>
-<br>
-<table>
-    {{ subject_formset.as_table }}
-</table>
+<form name="edit_item" id="edit_item" method="POST">
+    {% csrf_token %}
+    {{ item_form.as_div }}
+    <br>
+    {{ name_formset.management_form }}
+    <table>
+        {% for name_form in name_formset %}
+        <tr>
+            <td>{% if forloop.first %}Name(s):{% endif %}</td>
+            <td>{{ name_form.usage_id }} {{ name_form.type }}</td>
+            <td>{{ name_form.name }}</td>
+            <td>Delete? {{ name_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <button type="submit">Save</button>
+</form>
 {% endblock %}
 
