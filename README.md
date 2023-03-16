@@ -38,6 +38,7 @@ The container runs via `docker_scripts/entrypoint.sh`, which
 * Waits for the database to be completely available.  This can take 5-10 seconds, depending on your hardware.
 * Applies any pending migrations (DEV environment only).
 * Creates a generic Django superuser, if one does not already exist (DEV environment only).
+* Loads fixtures to populate lookup tables and to add a few sample records.
 * Starts the Django application server.
 
 ### Setup
@@ -77,6 +78,11 @@ The container runs via `docker_scripts/entrypoint.sh`, which
    $ docker-compose exec django python manage.py migrate
    # Populate database with seed data (once it exists...)
    $ docker-compose exec django python manage.py loaddata --app oh_staff_ui seed-data
+   #
+   # Load full set of item data
+   $ docker-compose exec django python manage.py import_projectitems oh-projectitems-export-3.csv
+   # Load full set of name data
+   $ docker-compose exec django python manage.py import_names name-md-export.csv
    ```
 7. Connect to the running application via browser
 
