@@ -47,10 +47,12 @@ def add_item(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def edit_item(request: HttpRequest, item_id: int) -> HttpResponse:
+    logger.info("\n==========================================")
     if request.method == "POST":
+        logger.info(f"REQUEST.POST: {request.POST}")
         save_all_item_data(item_id, request)
     context = get_edit_item_context(item_id)
-    logger.info(f"{context=}")
+    logger.info(f"CONTEXT: {context}")
     return render(request, "oh_staff_ui/edit_item.html", context)
 
 

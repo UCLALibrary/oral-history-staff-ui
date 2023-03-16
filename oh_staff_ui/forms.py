@@ -3,6 +3,8 @@ from oh_staff_ui.models import (
     ItemType,
     Name,
     NameType,
+    Subject,
+    SubjectType,
 )
 
 
@@ -38,15 +40,13 @@ class NameUsageForm(forms.Form):
     )
 
 
-# class SubjectUsage(forms.Form):
-#     type = forms.ModelChoiceField(
-#         queryset=SubjectType.objects.all().order_by("type"),
-#         empty_label="Please select a qualifier:",
-#     )
-#     subject = forms.ModelChoiceField(
-#         queryset=Subject.objects.all().order_by("value"),
-#         empty_label="Please select a subject:",
-#     )
-
-
-# SubjectUsageFormset = forms.formset_factory(SubjectUsage, extra=1, can_delete=True)
+class SubjectUsageForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    type = forms.ModelChoiceField(
+        queryset=SubjectType.objects.all().order_by("type"),
+        empty_label="Please select a qualifier:",
+    )
+    subject = forms.ModelChoiceField(
+        queryset=Subject.objects.all().order_by("value"),
+        empty_label="Please select a subject:",
+    )

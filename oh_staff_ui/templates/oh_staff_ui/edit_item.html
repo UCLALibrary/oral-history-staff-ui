@@ -1,7 +1,6 @@
 {% extends 'oh_staff_ui/base.html' %}
 
 {% block content %}
-<p>The form for editing an item and its added metadata will go here</p>
 <ul>
     <li>id: {{ item.id }}</li>
     <li>ARK: {{ item.ark }}</li>
@@ -13,6 +12,7 @@
     {{ item_form.as_div }}
     <br>
     {{ name_formset.management_form }}
+    {{ subject_formset.management_form }}
     <table>
         {% for name_form in name_formset %}
         <tr>
@@ -20,6 +20,14 @@
             <td>{{ name_form.usage_id }} {{ name_form.type }}</td>
             <td>{{ name_form.name }}</td>
             <td>Delete? {{ name_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for subject_form in subject_formset %}
+        <tr>
+            <td>{% if forloop.first %}Subject(s):{% endif %}</td>
+            <td>{{ subject_form.usage_id }} {{ subject_form.type }}</td>
+            <td>{{ subject_form.subject }}</td>
+            <td>Delete? {{ subject_form.DELETE }}</td>
         </tr>
         {% endfor %}
     </table>
