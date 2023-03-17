@@ -1,6 +1,11 @@
 {% extends 'oh_staff_ui/base.html' %}
 
 {% block content %}
+
+{% for custom_error in custom_errors %}
+    <p>{{ custom_error }}</p>
+{% endfor %}
+
 <form name="add_item" id="add_item" method="POST">
     {% csrf_token %}
     <table>

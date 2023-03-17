@@ -19,6 +19,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
+# Run-time environment, which controls some logic
+RUN_ENV = os.getenv("DJANGO_RUN_ENV")
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
@@ -182,3 +185,6 @@ LOGGING = {
 
 # Login
 LOGIN_REDIRECT_URL = "/"
+
+# ARK minter
+ARK_MINTER = os.getenv("DJANGO_ARK_MINTER")
