@@ -1,4 +1,7 @@
 import logging
+import requests
+import uuid
+from django.conf import settings
 from django.db.models import Q
 from django.forms import BaseFormSet, formset_factory
 from django.http.request import HttpRequest  # for code completion
@@ -23,6 +26,27 @@ def construct_keyword_query(query: str) -> Q:
         # OR the assembled set of words with the full query.
         full_q = full_q | words_q
     return full_q
+
+
+def get_ark() -> str:
+    # Real ARK minter returns simple text response which looks like this:
+    # id: 21198/zz002kpxs1
+    if settings.RUN_ENV == "dev":
+        # Create an obviously fake, unique-ish ARK, for local development
+        ark = f"FAKE/{uuid.uuid4().hex[0:10]}"
+        return ark
+    else:
+        # Production ARKs depend on an external service, which can fail.
+        try:
+            response = requests.get(settings.ARK_MINTER)
+            # If response.ok, no error; otherwise, raises HTTPError
+            response.raise_for_status()
+            ark = response.text.strip()[4:]
+            return ark
+        except requests.HTTPError as http_error:
+            logger.fatal(http_error)
+            # Kick it back to the calling view
+            raise
 
 
 def get_edit_item_context(item_id: int) -> dict:

@@ -1,4 +1,5 @@
 import logging
+from requests.exceptions import HTTPError
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest  # for code completion
@@ -10,6 +11,7 @@ from oh_staff_ui.forms import (
 from oh_staff_ui.models import ProjectItem
 from oh_staff_ui.views_utils import (
     construct_keyword_query,
+    get_ark,
     get_edit_item_context,
     save_all_item_data,
 )
@@ -24,22 +26,33 @@ def add_item(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             # Minimal data from form;
             # most other fields set by db defaults or web service.
-            # TODO: Get this from web service
-            ark = "fake ark"
-            # User must be logged in, so is present in request
-            user = request.user
-            new_item = ProjectItem(
-                ark=ark,
-                sequence=form.cleaned_data["sequence"],
-                title=form.cleaned_data["title"],
-                type=form.cleaned_data["type"],
-                created_by=user,
-                last_modified_by=user,
-            )
-            new_item.save()
-            # Pass newly created item to edit form
-            item_id = new_item.pk
-            return redirect("edit_item", item_id=item_id)
+
+            # Production ARKs depend on an external service, which can fail.
+            try:
+                ark = get_ark()
+                # User must be logged in, so is present in request
+                user = request.user
+                new_item = ProjectItem(
+                    ark=ark,
+                    sequence=form.cleaned_data["sequence"],
+                    title=form.cleaned_data["title"],
+                    type=form.cleaned_data["type"],
+                    created_by=user,
+                    last_modified_by=user,
+                )
+                new_item.save()
+                # Pass newly created item to edit form
+                item_id = new_item.pk
+                return redirect("edit_item", item_id=item_id)
+            except HTTPError:
+                custom_errors = [
+                    "The ARK minter was unable to provide an ARK. Your record was not saved."
+                ]
+                return render(
+                    request,
+                    "oh_staff_ui/add_item.html",
+                    {"form": form, "custom_errors": custom_errors},
+                )
     else:
         form = ProjectItemForm()
         return render(request, "oh_staff_ui/add_item.html", {"form": form})
