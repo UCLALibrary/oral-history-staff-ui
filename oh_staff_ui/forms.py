@@ -1,10 +1,13 @@
 from django import forms
 from oh_staff_ui.models import (
+    ItemStatus,
     ItemType,
     Name,
     NameType,
     Subject,
     SubjectType,
+    get_default_status,
+    get_default_type,
 )
 
 
@@ -13,10 +16,20 @@ class ProjectItemForm(forms.Form):
         required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
     )
     type = forms.ModelChoiceField(
-        required=True, queryset=ItemType.objects.all().order_by("type"), initial="Audio"
+        required=True,
+        queryset=ItemType.objects.all().order_by("type"),
+        initial=get_default_type,
     )
     sequence = forms.CharField(
         required=True, max_length=3, widget=forms.TextInput(attrs={"size": 3})
+    )
+    coverage = forms.CharField(
+        required=False, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+    )
+    status = forms.ModelChoiceField(
+        required=True,
+        queryset=ItemStatus.objects.all().order_by("status"),
+        initial=get_default_status,
     )
 
 

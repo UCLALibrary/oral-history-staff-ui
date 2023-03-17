@@ -54,7 +54,13 @@ def get_edit_item_context(item_id: int) -> dict:
     item = ProjectItem.objects.get(pk=item_id)
     # item_form is "bound" with this data
     item_form = ProjectItemForm(
-        data={"title": item.title, "type": item.type, "sequence": item.sequence}
+        data={
+            "title": item.title,
+            "type": item.type,
+            "sequence": item.sequence,
+            "coverage": item.coverage,
+            "status": item.status,
+        }
     )
     name_formset = get_name_formset(item_id)
     subject_formset = get_subject_formset(item_id)
@@ -116,7 +122,9 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         logger.info(f"SUBJECTS: {subject_formset.cleaned_data}")
         # Item data
         item = ProjectItem.objects.get(pk=item_id)
+        item.coverage = item_form.cleaned_data["coverage"]
         item.sequence = item_form.cleaned_data["sequence"]
+        item.status = item_form.cleaned_data["status"]
         item.title = item_form.cleaned_data["title"]
         item.type = item_form.cleaned_data["type"]
         item.last_modified_date = timezone.now()

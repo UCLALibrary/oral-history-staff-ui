@@ -6,6 +6,13 @@
     <li>ARK: {{ item.ark }}</li>
     <li>created: {{ item.create_date }} by {{ item.created_by }}</li>
     <li>updated: {{ item.last_modified_date }} by {{ item.last_modified_by }}</li>
+    <li>Parent:
+        {% if item.parent %}
+        <a href="{% url 'edit_item' item.parent.id %}">{{ item.parent }}</a>
+        {% else %}
+        {{ item.parent }}
+        {% endif %}
+    </li>
 </ul>
 <form name="edit_item" id="edit_item" method="POST">
     {% csrf_token %}
