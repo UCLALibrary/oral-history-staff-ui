@@ -6,8 +6,18 @@ from django.db.models import Q
 from django.forms import BaseFormSet, formset_factory
 from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
-from oh_staff_ui.forms import ProjectItemForm, NameUsageForm, SubjectUsageForm
-from oh_staff_ui.models import ProjectItem, ItemNameUsage, ItemSubjectUsage
+from oh_staff_ui.forms import (
+    ProjectItemForm,
+    NameUsageForm,
+    PublisherUsageForm,
+    SubjectUsageForm,
+)
+from oh_staff_ui.models import (
+    ProjectItem,
+    ItemNameUsage,
+    ItemPublisherUsage,
+    ItemSubjectUsage,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +74,12 @@ def get_edit_item_context(item_id: int) -> dict:
     )
     name_formset = get_name_formset(item_id)
     subject_formset = get_subject_formset(item_id)
+    publisher_formset = get_publisher_formset(item_id)
     return {
         "item": item,
         "item_form": item_form,
         "name_formset": name_formset,
+        "publisher_formset": publisher_formset,
         "subject_formset": subject_formset,
     }
 
@@ -90,6 +102,28 @@ def get_name_formset(item_id: int) -> BaseFormSet:
     return name_formset
 
 
+def get_publisher_formset(item_id: int) -> BaseFormSet:
+    PublisherUsageFormset = formset_factory(
+        PublisherUsageForm, extra=1, can_delete=True
+    )
+    # Build list of dictionaries of initial values.
+    publishers = ItemPublisherUsage.objects.filter(item=item_id).order_by("id")
+    publisher_list = []
+    for publisher in publishers:
+        publisher_list.append(
+            {
+                "usage_id": publisher.id,
+                "type": publisher.type,
+                "publisher": publisher.publisher,
+            }
+        )
+    # publisher_formset is "unbound" with this initial data
+    publisher_formset = PublisherUsageFormset(
+        initial=publisher_list, prefix="publishers"
+    )
+    return publisher_formset
+
+
 def get_subject_formset(item_id: int) -> BaseFormSet:
     SubjectUsageFormset = formset_factory(SubjectUsageForm, extra=1, can_delete=True)
     # Build list of dictionaries of initial values.
@@ -110,9 +144,13 @@ def get_subject_formset(item_id: int) -> BaseFormSet:
 
 def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     NameUsageFormset = formset_factory(NameUsageForm, extra=1, can_delete=True)
+    PublisherUsageFormset = formset_factory(
+        PublisherUsageForm, extra=1, can_delete=True
+    )
     SubjectUsageFormset = formset_factory(SubjectUsageForm, extra=1, can_delete=True)
     item_form = ProjectItemForm(request.POST)
     name_formset = NameUsageFormset(request.POST, prefix="names")
+    publisher_formset = PublisherUsageFormset(request.POST, prefix="publishers")
     subject_formset = SubjectUsageFormset(request.POST, prefix="subjects")
 
     if item_form.is_valid() & name_formset.is_valid() & subject_formset.is_valid():
@@ -132,6 +170,7 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         item.save()
         # Other, optional, metadata types
         save_item_names(item, name_formset.cleaned_data)
+        save_item_publishers(item, publisher_formset.cleaned_data)
         save_item_subjects(item, subject_formset.cleaned_data)
 
 
@@ -169,6 +208,28 @@ def save_item_names(item: ProjectItem, name_formset_data: list) -> None:
                     name_usage.delete()
             else:
                 name_usage.save()
+
+
+# TODO: Refactor save_item_XXXX() to minimize similar/identical code
+def save_item_publishers(item: ProjectItem, publisher_formset_data: list) -> None:
+    # List of dictionaries, some/all of which can be empty
+    for publisher_usage_data in publisher_formset_data:
+        if valid_metadata_usage(publisher_usage_data):
+            # Populate object
+            publisher_usage = ItemPublisherUsage(
+                publisher=publisher_usage_data["publisher"],
+                type=publisher_usage_data["type"],
+                item=item,
+            )
+            # Existing object with real id
+            if publisher_usage_data["usage_id"] > 0:
+                publisher_usage.id = publisher_usage_data["usage_id"]
+            # Only delete if record already exists; otherwise, just don't save
+            if publisher_usage_data["DELETE"]:
+                if publisher_usage.id:
+                    publisher_usage.delete()
+            else:
+                publisher_usage.save()
 
 
 # TODO: Refactor save_item_XXXX() to minimize similar/identical code

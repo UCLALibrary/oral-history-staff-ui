@@ -20,6 +20,7 @@
     <br>
     {{ name_formset.management_form }}
     {{ subject_formset.management_form }}
+    {{ publisher_formset.management_form }}
     <table>
         {% for name_form in name_formset %}
         <tr>
@@ -35,6 +36,14 @@
             <td>{{ subject_form.usage_id }} {{ subject_form.type }}</td>
             <td>{{ subject_form.subject }}</td>
             <td>Delete? {{ subject_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for publisher_form in publisher_formset %}
+        <tr>
+            <td>{% if forloop.first %}Publisher(s):{% endif %}</td>
+            <td>{{ publisher_form.usage_id }} {{ publisher_form.type }}</td>
+            <td>{{ publisher_form.publisher }}</td>
+            <td>Delete? {{ publisher_form.DELETE }}</td>
         </tr>
         {% endfor %}
     </table>

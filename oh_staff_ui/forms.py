@@ -4,6 +4,8 @@ from oh_staff_ui.models import (
     ItemType,
     Name,
     NameType,
+    Publisher,
+    PublisherType,
     Subject,
     SubjectType,
     get_default_status,
@@ -62,4 +64,16 @@ class SubjectUsageForm(forms.Form):
     subject = forms.ModelChoiceField(
         queryset=Subject.objects.all().order_by("value"),
         empty_label="Please select a subject:",
+    )
+
+
+class PublisherUsageForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    type = forms.ModelChoiceField(
+        queryset=PublisherType.objects.all().order_by("type"),
+        empty_label="Please select a qualifier:",
+    )
+    publisher = forms.ModelChoiceField(
+        queryset=Publisher.objects.all().order_by("value"),
+        empty_label="Please select a publisher:",
     )
