@@ -8,12 +8,14 @@ from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
 from oh_staff_ui.forms import (
     ProjectItemForm,
+    CopyrightUsageForm,
     NameUsageForm,
     PublisherUsageForm,
     SubjectUsageForm,
 )
 from oh_staff_ui.models import (
     ProjectItem,
+    ItemCopyrightUsage,
     ItemNameUsage,
     ItemPublisherUsage,
     ItemSubjectUsage,
@@ -75,13 +77,37 @@ def get_edit_item_context(item_id: int) -> dict:
     name_formset = get_name_formset(item_id)
     subject_formset = get_subject_formset(item_id)
     publisher_formset = get_publisher_formset(item_id)
+    copyright_formset = get_copyright_formset(item_id)
     return {
         "item": item,
         "item_form": item_form,
+        "copyright_formset": copyright_formset,
         "name_formset": name_formset,
         "publisher_formset": publisher_formset,
         "subject_formset": subject_formset,
     }
+
+
+def get_copyright_formset(item_id: int) -> BaseFormSet:
+    CopyrightUsageFormset = formset_factory(
+        CopyrightUsageForm, extra=1, can_delete=True
+    )
+    # Build list of dictionaries of initial values.
+    copyrights = ItemCopyrightUsage.objects.filter(item=item_id).order_by("id")
+    copyright_list = []
+    for copyright in copyrights:
+        copyright_list.append(
+            {
+                "usage_id": copyright.id,
+                "type": copyright.type,
+                "copyright": copyright.copyright,
+            }
+        )
+    # copyright_formset is "unbound" with this initial data
+    copyright_formset = CopyrightUsageFormset(
+        initial=copyright_list, prefix="copyrights"
+    )
+    return copyright_formset
 
 
 def get_name_formset(item_id: int) -> BaseFormSet:
@@ -143,21 +169,34 @@ def get_subject_formset(item_id: int) -> BaseFormSet:
 
 
 def save_all_item_data(item_id: int, request: HttpRequest) -> None:
+    CopyrightUsageFormset = formset_factory(
+        CopyrightUsageForm, extra=1, can_delete=True
+    )
     NameUsageFormset = formset_factory(NameUsageForm, extra=1, can_delete=True)
     PublisherUsageFormset = formset_factory(
         PublisherUsageForm, extra=1, can_delete=True
     )
     SubjectUsageFormset = formset_factory(SubjectUsageForm, extra=1, can_delete=True)
     item_form = ProjectItemForm(request.POST)
+    copyright_formset = CopyrightUsageFormset(request.POST, prefix="copyrights")
     name_formset = NameUsageFormset(request.POST, prefix="names")
     publisher_formset = PublisherUsageFormset(request.POST, prefix="publishers")
     subject_formset = SubjectUsageFormset(request.POST, prefix="subjects")
 
-    if item_form.is_valid() & name_formset.is_valid() & subject_formset.is_valid():
+    # TODO: Better way to check validity of all forms, without unpacking request twice.
+    if (
+        item_form.is_valid()
+        & copyright_formset.is_valid()
+        & name_formset.is_valid()
+        & publisher_formset.is_valid()
+        & subject_formset.is_valid()
+    ):
         logger.info(f"Saving data for item {item_id}")
         logger.info(f"ITEM: {item_form.cleaned_data}")
         logger.info(f"NAMES: {name_formset.cleaned_data}")
         logger.info(f"SUBJECTS: {subject_formset.cleaned_data}")
+        logger.info(f"PUBLISHERS: {publisher_formset.cleaned_data}")
+        logger.info(f"COPYRIGHTS: {copyright_formset.cleaned_data}")
         # Item data
         item = ProjectItem.objects.get(pk=item_id)
         item.coverage = item_form.cleaned_data["coverage"]
@@ -169,6 +208,7 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         item.last_modified_by = request.user
         item.save()
         # Other, optional, metadata types
+        save_item_copyrights(item, copyright_formset.cleaned_data)
         save_item_names(item, name_formset.cleaned_data)
         save_item_publishers(item, publisher_formset.cleaned_data)
         save_item_subjects(item, subject_formset.cleaned_data)
@@ -186,6 +226,28 @@ def valid_metadata_usage(usage_data: dict) -> bool:
 
     # Made it to here, form data is OK
     return True
+
+
+# TODO: Refactor save_item_XXXX() to minimize similar/identical code
+def save_item_copyrights(item: ProjectItem, copyright_formset_data: list) -> None:
+    # List of dictionaries, some/all of which can be empty
+    for copyright_usage_data in copyright_formset_data:
+        if valid_metadata_usage(copyright_usage_data):
+            # Populate object
+            copyright_usage = ItemCopyrightUsage(
+                copyright=copyright_usage_data["copyright"],
+                type=copyright_usage_data["type"],
+                item=item,
+            )
+            # Existing object with real id
+            if copyright_usage_data["usage_id"] > 0:
+                copyright_usage.id = copyright_usage_data["usage_id"]
+            # Only delete if record already exists; otherwise, just don't save
+            if copyright_usage_data["DELETE"]:
+                if copyright_usage.id:
+                    copyright_usage.delete()
+            else:
+                copyright_usage.save()
 
 
 # TODO: Refactor save_item_XXXX() to minimize similar/identical code

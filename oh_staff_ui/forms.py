@@ -1,5 +1,7 @@
 from django import forms
 from oh_staff_ui.models import (
+    Copyright,
+    CopyrightType,
     ItemStatus,
     ItemType,
     Name,
@@ -76,4 +78,16 @@ class PublisherUsageForm(forms.Form):
     publisher = forms.ModelChoiceField(
         queryset=Publisher.objects.all().order_by("value"),
         empty_label="Please select a publisher:",
+    )
+
+
+class CopyrightUsageForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    type = forms.ModelChoiceField(
+        queryset=CopyrightType.objects.all().order_by("type"),
+        empty_label="Please select a qualifier:",
+    )
+    copyright = forms.ModelChoiceField(
+        queryset=Copyright.objects.all().order_by("value"),
+        empty_label="Please select a copyright:",
     )
