@@ -1,0 +1,50 @@
+[
+    {
+        "model": "oh_staff_ui.Resource",
+        "pk": 1,
+        "fields": {
+            "value": "Audio",
+            "source": 3
+        }
+    },
+    {
+        "model": "oh_staff_ui.Resource",
+        "pk": 2,
+        "fields": {
+            "value": "moving image",
+            "source": 10
+        }
+    },
+    {
+        "model": "oh_staff_ui.Resource",
+        "pk": 3,
+        "fields": {
+            "value": "oral histories (document genres)",
+            "source": 1
+        }
+    },
+    {
+        "model": "oh_staff_ui.Resource",
+        "pk": 4,
+        "fields": {
+            "value": "sound recording",
+            "source": 10
+        }
+    },
+    {
+        "model": "oh_staff_ui.Resource",
+        "pk": 5,
+        "fields": {
+            "value": "sound recording-nonmusical",
+            "source": 10
+        }
+    },
+    {
+        "model": "oh_staff_ui.Resource",
+        "pk": 6,
+        "fields": {
+            "value": "text",
+            "source": 10
+        }
+    }
+]

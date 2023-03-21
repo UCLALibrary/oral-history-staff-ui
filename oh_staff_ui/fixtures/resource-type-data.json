@@ -1,0 +1,16 @@
+[
+    {
+        "model": "oh_staff_ui.ResourceType",
+        "pk": 1,
+        "fields": {
+            "type": "genre"
+        }
+    },
+    {
+        "model": "oh_staff_ui.ResourceType",
+        "pk": 2,
+        "fields": {
+            "type": "typeOfResource"
+        }
+    }
+]

@@ -20,6 +20,10 @@
     <br>
     {{ name_formset.management_form }}
     {{ subject_formset.management_form }}
+    {{ publisher_formset.management_form }}
+    {{ copyright_formset.management_form }}
+    {{ resource_formset.management_form }}
+    {{ language_formset.management_form }}
     <table>
         {% for name_form in name_formset %}
         <tr>
@@ -35,6 +39,38 @@
             <td>{{ subject_form.usage_id }} {{ subject_form.type }}</td>
             <td>{{ subject_form.subject }}</td>
             <td>Delete? {{ subject_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for publisher_form in publisher_formset %}
+        <tr>
+            <td>{% if forloop.first %}Publisher(s):{% endif %}</td>
+            <td>{{ publisher_form.usage_id }} {{ publisher_form.type }}</td>
+            <td>{{ publisher_form.publisher }}</td>
+            <td>Delete? {{ publisher_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for copyright_form in copyright_formset %}
+        <tr>
+            <td>{% if forloop.first %}Copyright(s):{% endif %}</td>
+            <td>{{ copyright_form.usage_id }} {{ copyright_form.type }}</td>
+            <td>{{ copyright_form.copyright }}</td>
+            <td>Delete? {{ copyright_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for resource_form in resource_formset %}
+        <tr>
+            <td>{% if forloop.first %}Resource(s):{% endif %}</td>
+            <td>{{ resource_form.usage_id }} {{ resource_form.type }}</td>
+            <td>{{ resource_form.resource }}</td>
+            <td>Delete? {{ resource_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for language_form in language_formset %}
+        <tr>
+            <td>{% if forloop.first %}Language(s):{% endif %}</td>
+            <td>{{ language_form.usage_id }}</td>
+            <td>{{ language_form.language }}</td>
+            <td>Delete? {{ language_form.DELETE }}</td>
         </tr>
         {% endfor %}
     </table>

@@ -296,6 +296,35 @@ class ItemCopyrightUsage(models.Model):
     )
 
 
+class ResourceType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class Resource(models.Model):
+    value = models.CharField(max_length=256, blank=False, null=False)
+    source = models.ForeignKey(
+        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
+    )
+
+    def __str__(self):
+        return self.value
+
+
+class ItemResourceUsage(models.Model):
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    resource = models.ForeignKey(
+        Resource, on_delete=models.PROTECT, blank=False, null=False
+    )
+    type = models.ForeignKey(
+        ResourceType, on_delete=models.PROTECT, blank=False, null=False
+    )
+
+
 class Format(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
