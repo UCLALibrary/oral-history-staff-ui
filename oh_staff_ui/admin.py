@@ -19,7 +19,9 @@ from .models import (
     PublisherType,
     Copyright,
     CopyrightType,
-    Format
+    Resource,
+    ResourceType,
+    Format,
 )
 
 
@@ -130,6 +132,16 @@ class Copyright(admin.ModelAdmin):
     list_display = ("value", "source")
 
 
+@admin.register(ResourceType)
+class ResourceType(admin.ModelAdmin):
+    list_display = ("type",)
+
+
+@admin.register(Resource)
+class Resource(admin.ModelAdmin):
+    list_display = ("value", "source")
+
+
 @admin.register(Format)
 class Format(admin.ModelAdmin):
-    list_display = ("item", "value",)
+    list_display = ("item", "value")

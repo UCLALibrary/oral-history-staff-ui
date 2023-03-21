@@ -9,6 +9,8 @@ from oh_staff_ui.models import (
     NameType,
     Publisher,
     PublisherType,
+    Resource,
+    ResourceType,
     Subject,
     SubjectType,
     get_default_status,
@@ -99,4 +101,16 @@ class LanguageUsageForm(forms.Form):
     language = forms.ModelChoiceField(
         queryset=Language.objects.all().order_by("language"),
         empty_label="Please select a language:",
+    )
+
+
+class ResourceUsageForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    type = forms.ModelChoiceField(
+        queryset=ResourceType.objects.all().order_by("type"),
+        empty_label="Please select a qualifier:",
+    )
+    resource = forms.ModelChoiceField(
+        queryset=Resource.objects.all().order_by("value"),
+        empty_label="Please select a resource:",
     )
