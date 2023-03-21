@@ -4,6 +4,7 @@ from oh_staff_ui.models import (
     CopyrightType,
     ItemStatus,
     ItemType,
+    Language,
     Name,
     NameType,
     Publisher,
@@ -90,4 +91,12 @@ class CopyrightUsageForm(forms.Form):
     copyright = forms.ModelChoiceField(
         queryset=Copyright.objects.all().order_by("value"),
         empty_label="Please select a copyright:",
+    )
+
+
+class LanguageUsageForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    language = forms.ModelChoiceField(
+        queryset=Language.objects.all().order_by("language"),
+        empty_label="Please select a language:",
     )
