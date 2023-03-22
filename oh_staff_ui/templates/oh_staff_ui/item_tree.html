@@ -1,0 +1,50 @@
+{% for parent, children in relatives.items %}
+    {# if this is topmost parent or immediate parent of page we're on, open the details #}
+    {% if item in children or parent == top_parent %}
+        {% if children %}
+            <li>
+                <details open> 
+                    {# if this is the page we're on, don't link #}
+                    {% if parent == item %}
+                    <summary>{{parent}}</summary>
+                    {% else %}
+                    <summary><a href="{% url 'edit_item' parent.id %}">{{parent}} </a></summary>
+                    {% endif %}
+                    <ul>
+                        {% include "oh_staff_ui/item_tree.html" with relatives=children %}
+                    </ul>
+                </details>
+            </li>
+        {% else %}
+            {# if this is the page we're on, don't link #}
+            {% if parent == item %}
+                <li>{{parent}}</li>
+            {% else %}
+                <li><a href="{% url 'edit_item' parent.id %}">{{parent}}</a></li>
+            {% endif %}
+        {% endif %}
+    {% else %}
+        {% if children %}
+            <li>
+                <details> 
+                    {# if this is the page we're on, don't link #}
+                    {% if parent == item %}
+                    <summary>{{parent}}</summary>
+                    {% else %}
+                    <summary><a href="{% url 'edit_item' parent.id %}">{{parent}} </a></summary>
+                    {% endif %}
+                    <ul>
+                        {% include "oh_staff_ui/item_tree.html" with relatives=children %}
+                    </ul>
+                </details>
+            </li>
+        {% else %}
+            {# if this is the page we're on, don't link #}
+            {% if parent == item %}
+                <li>{{parent}}</li>
+            {% else %}
+                <li><a href="{% url 'edit_item' parent.id %}">{{parent}}</a></li>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
