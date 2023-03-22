@@ -3,7 +3,7 @@ import pandas as pd
 import api_keys
 
 query = """
-select 
+select DISTINCT
 pi.item_ark as ark,
 dt.term_label as term,
 v_qual.qual_text as type,
@@ -11,7 +11,7 @@ CASE WHEN dv.desc_cvid_fk IS NOT NULL THEN ctrl_values.ctrl_val_text
     ELSE dv.desc_value
   END as value,
 ctrl_values.source as source
-from
+FROM
 project_items pi,
 desc_values dv,
 desc_terms dt,
@@ -26,7 +26,7 @@ from
 core_desc_control_values cdcv,
 desc_control_values dcv
 where cdcv.core_desc_cvid_pk = dcv.core_desc_cvid_fk) ctrl_values 
-where
+WHERE
 dv.projectid_fk = 80 AND
 dv.divid_fk = pi.divid_pk AND
 dv.desc_termid_fk=dt.desc_termid_pk AND
@@ -47,4 +47,4 @@ con.close()
 df_ora = df_ora.replace({r'\r\n': ''}, regex=True)
 
 for i, g in df_ora.groupby('TERM'):
-	g.drop('TERM', axis=1).to_csv('{}.csv'.format(i.replace(" ", "_").split('/')[0]), index=False, sep='\t')
+	g.drop('TERM', axis=1).to_csv('{}.tsv'.format(i.replace(" ", "_").split('/')[0]), index=False, sep='\t')
