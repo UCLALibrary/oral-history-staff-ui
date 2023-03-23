@@ -1,25 +1,38 @@
-{% for parent, children in relatives.items %}
-    {# if this is topmost parent or immediate parent of page we're on, open the details #}
-    {% if children %}
-        <li>
-            <details {% if item in children or parent == top_parent %}open{% endif %}> 
-                {# if this is the page we're on, don't link #}
-                {% if parent == item %}
-                <summary>{{parent}}</summary>
-                {% else %}
-                <summary><a href="{% url 'edit_item' parent.id %}">{{parent}} </a></summary>
-                {% endif %}
-                <ul>
-                    {% include "oh_staff_ui/item_tree.html" with relatives=children %}
-                </ul>
-            </details>
-        </li>
-    {% else %}
-        {# if this is the page we're on, don't link #}
-        {% if parent == item %}
-            <li>{{parent}}</li>
-        {% else %}
-            <li><a href="{% url 'edit_item' parent.id %}">{{parent}}</a></li>
-        {% endif %}
-    {% endif %}
+{% for series, interviews in relatives.items %}
+    <li>
+        <details open>
+            {% if series == item %}
+            <summary class="current-item">{{series}}</summary>
+            {% else %}
+            <summary><a href="{% url 'edit_item' series.id %}">{{series}}</a></summary>
+            {% endif %}
+            <ul>
+                {% for interview, files in interviews.items %}
+                <li>
+                    <details
+                        {% if interview == item or item in files %}
+                            open>
+                        {% else %}
+                            >
+                        {% endif %}
+                        {% if interview == item %}
+                            <summary class="current-item">{{interview}}</summary>
+                        {% else %}
+                            <summary><a href="{% url 'edit_item' interview.id %}">{{interview}}</a></summary>
+                        {% endif %}
+                        <ul>
+                            {% for file in files %}
+                                {% if file == item %}
+                                    <li class="current-item">{{file}}</li>
+                                {% else %}
+                                    <li><a href="{% url 'edit_item' file.id %}">{{file}}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </details>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+    </li>
 {% endfor %}
