@@ -84,9 +84,7 @@ def get_edit_item_context(item_id: int) -> dict:
     copyright_formset = get_copyright_formset(item_id)
     language_formset = get_language_formset(item_id)
     resource_formset = get_resource_formset(item_id)
-    top_parent = get_top_parent(item)
-    partial_relatives = get_descendants(top_parent)
-    relatives = {top_parent: partial_relatives}
+    relatives = get_relatives(item)
     return {
         "item": item,
         "item_form": item_form,
@@ -97,7 +95,6 @@ def get_edit_item_context(item_id: int) -> dict:
         "resource_formset": resource_formset,
         "subject_formset": subject_formset,
         "relatives": relatives,
-        "top_parent": top_parent,
     }
 
 
@@ -433,3 +430,10 @@ def get_descendants(item: ProjectItem) -> dict:
         for child in children:
             descendants[child] = get_descendants(child)
     return descendants
+
+
+def get_relatives(item: ProjectItem) -> dict:
+    top_parent = get_top_parent(item)
+    partial_relatives = get_descendants(top_parent)
+    relatives = {top_parent: partial_relatives}
+    return relatives
