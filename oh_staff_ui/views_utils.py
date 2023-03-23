@@ -423,7 +423,7 @@ def get_top_parent(item: ProjectItem) -> ProjectItem:
 
 def get_descendants(item: ProjectItem) -> dict:
     descendants = {}
-    children = ProjectItem.objects.filter(parent=item).order_by("title")
+    children = ProjectItem.objects.filter(parent=item).order_by("sequence", "title")
     if not children:
         descendants = None
     else:
