@@ -54,6 +54,7 @@ class ProjectItem(models.Model):
         related_name="+",
     )
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
+    relation = models.CharField(max_length=256, blank=True, null=True)
     sequence = models.IntegerField(blank=False, null=False, default=0)
     status = models.ForeignKey(
         ItemStatus,
@@ -162,24 +163,12 @@ class AltTitleType(models.Model):
 
 class AltTitle(models.Model):
     value = models.CharField(max_length=512, blank=False, null=False)
-    source = models.ForeignKey(
-        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
-
-
-class ItemAltTitleUsage(models.Model):
-    item = models.ForeignKey(
-        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
-    )
-    alt_title = models.ForeignKey(
-        AltTitle, on_delete=models.PROTECT, blank=False, null=False
-    )
-    type = models.ForeignKey(
-        AltTitleType, on_delete=models.PROTECT, blank=False, null=False
-    )
 
 
 class AltIdType(models.Model):
@@ -191,22 +180,12 @@ class AltIdType(models.Model):
 
 class AltId(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
-    source = models.ForeignKey(
-        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
-
-
-class ItemAltIdUsage(models.Model):
-    item = models.ForeignKey(
-        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
-    )
-    alt_id = models.ForeignKey(AltId, on_delete=models.PROTECT, blank=False, null=False)
-    type = models.ForeignKey(
-        AltIdType, on_delete=models.PROTECT, blank=False, null=False
-    )
 
 
 class DescriptionType(models.Model):
@@ -218,24 +197,12 @@ class DescriptionType(models.Model):
 
 class Description(models.Model):
     value = models.CharField(max_length=1024, blank=False, null=False)
-    source = models.ForeignKey(
-        AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
         return self.value
-
-
-class ItemDescriptionUsage(models.Model):
-    item = models.ForeignKey(
-        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
-    )
-    description = models.ForeignKey(
-        Description, on_delete=models.PROTECT, blank=False, null=False
-    )
-    type = models.ForeignKey(
-        DescriptionType, on_delete=models.PROTECT, blank=False, null=False
-    )
 
 
 class PublisherType(models.Model):
@@ -330,6 +297,23 @@ class Format(models.Model):
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
     value = models.CharField(max_length=1024, blank=False, null=False)
+
+    def __str__(self):
+        return self.value
+
+
+class DateType(models.Model):
+    type = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.type
+
+
+class Date(models.Model):
+    value = models.CharField(max_length=256, blank=False, null=False)
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
 
     def __str__(self):
         return self.value

@@ -1,0 +1,30 @@
+[
+    {
+        "model": "oh_staff_ui.DateType",
+        "pk": 1,
+        "fields": {
+            "type": "creation"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DateType",
+        "pk": 2,
+        "fields": {
+            "type": "digitized"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DateType",
+        "pk": 3,
+        "fields": {
+            "type": "normalized"
+        }
+    },
+    {
+        "model": "oh_staff_ui.DateType",
+        "pk": 4,
+        "fields": {
+            "type": "publication"
+        }
+    }
+]
