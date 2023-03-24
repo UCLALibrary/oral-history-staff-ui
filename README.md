@@ -96,6 +96,25 @@ The container runs via `docker_scripts/entrypoint.sh`, which
 
    ```$ docker-compose down```
 
+### Resetting the local database
+
+The local docker-based development database can be reset as needed.  This is helpful when switching between branches which involve migrations, or when testing data loading and transformation.
+
+To do this, run:
+`docker_scripts/nuke_dev_db.sh`
+
+It does the following:
+* Shuts down the application
+* Drops the docker volume for the database
+* Starts the application
+* Reloads data files via management commands.
+  * This currently is just `ProjectItem` and `Name` files; others will be added as loaders are finished.
+
+The script warns users, and requires them to confirm their decision.
+
+Developers can opt out of reloading data by adding a specific parameter:
+`docker_scripts/nuke_dev_db.sh NOLOAD`
+
 ### Logging
 
 Basic logging is available, with logs captured in `logs/application.log`.  At present, logs from both the custom application code and Django itself are captured.
