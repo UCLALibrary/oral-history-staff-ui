@@ -2,18 +2,14 @@ from django.contrib import admin
 from .models import (
     ItemStatus,
     ItemType,
-    ProjectItem,
     AuthoritySource,
     Language,
     Name,
     NameType,
     Subject,
     SubjectType,
-    AltId,
     AltIdType,
-    AltTitle,
     AltTitleType,
-    Description,
     DescriptionType,
     Publisher,
     PublisherType,
@@ -21,7 +17,7 @@ from .models import (
     CopyrightType,
     Resource,
     ResourceType,
-    Format,
+    DateType,
 )
 
 
@@ -33,23 +29,6 @@ class ItemStatus(admin.ModelAdmin):
 @admin.register(ItemType)
 class ItemType(admin.ModelAdmin):
     list_display = ("type", "parent")
-
-
-@admin.register(ProjectItem)
-class ProjectItem(admin.ModelAdmin):
-    list_display = (
-        "ark",
-        "coverage",
-        "create_date",
-        "created_by",
-        "last_modified_date",
-        "last_modified_by",
-        "parent",
-        "sequence",
-        "status",
-        "title",
-        "type",
-    )
 
 
 @admin.register(AuthoritySource)
@@ -87,29 +66,14 @@ class AltIdType(admin.ModelAdmin):
     list_display = ("type",)
 
 
-@admin.register(AltId)
-class AltId(admin.ModelAdmin):
-    list_display = ("value", "source")
-
-
 @admin.register(AltTitleType)
 class AltTitleType(admin.ModelAdmin):
     list_display = ("type",)
 
 
-@admin.register(AltTitle)
-class AltTitle(admin.ModelAdmin):
-    list_display = ("value", "source")
-
-
 @admin.register(DescriptionType)
 class DescriptionType(admin.ModelAdmin):
     list_display = ("type",)
-
-
-@admin.register(Description)
-class Description(admin.ModelAdmin):
-    list_display = ("value", "source")
 
 
 @admin.register(PublisherType)
@@ -142,6 +106,6 @@ class Resource(admin.ModelAdmin):
     list_display = ("value", "source")
 
 
-@admin.register(Format)
-class Format(admin.ModelAdmin):
-    list_display = ("item", "value")
+@admin.register(DateType)
+class DateType(admin.ModelAdmin):
+    list_display = ("type",)
