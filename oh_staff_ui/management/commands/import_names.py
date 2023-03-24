@@ -31,9 +31,9 @@ class Command(BaseCommand):
             type = self.get_or_create_nametype(row["TYPE"])
             # avoid duplicates - only add ItemNameUsages that don't exist yet
             if not ItemNameUsage.objects.filter(
-                item=item, name=name, type=type
+                item=item, value=name, type=type
             ).exists():
-                usage = ItemNameUsage(item=item, name=name, type=type)
+                usage = ItemNameUsage(item=item, value=name, type=type)
                 usage.save()
         print("Finished importing names associated with items.")
         total_names = Name.objects.filter().count()

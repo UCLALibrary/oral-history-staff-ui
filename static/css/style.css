@@ -9,3 +9,7 @@
 .current-item {
     font-weight: bold;
 }
+
+td {
+    vertical-align: top;
+}

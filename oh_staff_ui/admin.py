@@ -38,7 +38,7 @@ class AuthoritySource(admin.ModelAdmin):
 
 @admin.register(Language)
 class Language(admin.ModelAdmin):
-    list_display = ("language", "source")
+    list_display = ("value", "source")
 
 
 @admin.register(NameType)

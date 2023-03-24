@@ -80,20 +80,20 @@ class AuthoritySource(models.Model):
 
 
 class Language(models.Model):
-    language = models.CharField(max_length=256, blank=False, null=False)
+    value = models.CharField(max_length=256, blank=False, null=False)
     source = models.ForeignKey(
         AuthoritySource, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
-        return self.language
+        return self.value
 
 
 class ItemLanguageUsage(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
-    language = models.ForeignKey(
+    value = models.ForeignKey(
         Language, on_delete=models.PROTECT, blank=False, null=False
     )
 
@@ -119,7 +119,7 @@ class ItemNameUsage(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
-    name = models.ForeignKey(Name, on_delete=models.PROTECT, blank=False, null=False)
+    value = models.ForeignKey(Name, on_delete=models.PROTECT, blank=False, null=False)
     type = models.ForeignKey(
         NameType, on_delete=models.PROTECT, blank=False, null=False
     )
@@ -146,7 +146,7 @@ class ItemSubjectUsage(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
-    subject = models.ForeignKey(
+    value = models.ForeignKey(
         Subject, on_delete=models.PROTECT, blank=False, null=False
     )
     type = models.ForeignKey(
@@ -166,6 +166,9 @@ class AltTitle(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
+    type = models.ForeignKey(
+        AltTitleType, on_delete=models.PROTECT, blank=False, null=False
+    )
 
     def __str__(self):
         return self.value
@@ -183,6 +186,9 @@ class AltId(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
+    type = models.ForeignKey(
+        AltIdType, on_delete=models.PROTECT, blank=False, null=False
+    )
 
     def __str__(self):
         return self.value
@@ -199,6 +205,9 @@ class Description(models.Model):
     value = models.CharField(max_length=1024, blank=False, null=False)
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    type = models.ForeignKey(
+        DescriptionType, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
@@ -226,7 +235,7 @@ class ItemPublisherUsage(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
-    publisher = models.ForeignKey(
+    value = models.ForeignKey(
         Publisher, on_delete=models.PROTECT, blank=False, null=False
     )
     type = models.ForeignKey(
@@ -255,7 +264,7 @@ class ItemCopyrightUsage(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
-    copyright = models.ForeignKey(
+    value = models.ForeignKey(
         Copyright, on_delete=models.PROTECT, blank=False, null=False
     )
     type = models.ForeignKey(
@@ -284,7 +293,7 @@ class ItemResourceUsage(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
-    resource = models.ForeignKey(
+    value = models.ForeignKey(
         Resource, on_delete=models.PROTECT, blank=False, null=False
     )
     type = models.ForeignKey(
@@ -313,6 +322,9 @@ class Date(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
+    type = models.ForeignKey(
+        DateType, on_delete=models.PROTECT, blank=False, null=False
     )
 
     def __str__(self):
