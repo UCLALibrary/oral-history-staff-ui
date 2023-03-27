@@ -15,12 +15,7 @@
     </li>
 </ul>
 <ul class="tree">
-    <li>
-        <details>
-            <summary>Hierarchy Context</summary>
-                <ul>{% include "oh_staff_ui/item_tree.html" %}</ul>
-        </details>
-    </li>
+    {% include "oh_staff_ui/item_tree.html" %}
 </ul>
 <form name="edit_item" id="edit_item" method="POST">
     {% csrf_token %}
