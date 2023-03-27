@@ -84,6 +84,7 @@ def get_edit_item_context(item_id: int) -> dict:
     copyright_formset = get_copyright_formset(item_id)
     language_formset = get_language_formset(item_id)
     resource_formset = get_resource_formset(item_id)
+    relatives = get_relatives(item)
     return {
         "item": item,
         "item_form": item_form,
@@ -93,6 +94,7 @@ def get_edit_item_context(item_id: int) -> dict:
         "publisher_formset": publisher_formset,
         "resource_formset": resource_formset,
         "subject_formset": subject_formset,
+        "relatives": relatives,
     }
 
 
@@ -410,3 +412,28 @@ def save_item_subjects(item: ProjectItem, subject_formset_data: list) -> None:
                     subject_usage.delete()
             else:
                 subject_usage.save()
+
+
+def get_top_parent(item: ProjectItem) -> ProjectItem:
+    current_parent = item
+    while current_parent.parent:
+        current_parent = current_parent.parent
+    return current_parent
+
+
+def get_descendants(item: ProjectItem) -> dict:
+    descendants = {}
+    children = ProjectItem.objects.filter(parent=item).order_by("sequence", "title")
+    if not children:
+        descendants = None
+    else:
+        for child in children:
+            descendants[child] = get_descendants(child)
+    return descendants
+
+
+def get_relatives(item: ProjectItem) -> dict:
+    top_parent = get_top_parent(item)
+    partial_relatives = get_descendants(top_parent)
+    relatives = {top_parent: partial_relatives}
+    return relatives

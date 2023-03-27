@@ -1,0 +1,54 @@
+{% for series, interviews in relatives.items %}
+    {% if interviews %}
+    <li>
+        <details>
+            {% if series == item %}
+            <summary class="current-item">{{series}}</summary>
+            {% else %}
+            <summary><a href="{% url 'edit_item' series.id %}">{{series}}</a></summary>
+            {% endif %}
+            <ul>
+                {% for interview, files in interviews.items %}
+                {% if files %}
+                    <li>
+                        <details
+                            {% if interview == item or item in files %}
+                                open>
+                            {% else %}
+                                >
+                            {% endif %}
+                            {% if interview == item %}
+                                <summary class="current-item">{{interview}}</summary>
+                            {% else %}
+                                <summary><a href="{% url 'edit_item' interview.id %}">{{interview}}</a></summary>
+                            {% endif %}
+                            <ul>
+                                {% for file in files %}
+                                    {% if file == item %}
+                                        <li class="current-item">{{file}}</li>
+                                    {% else %}
+                                        <li><a href="{% url 'edit_item' file.id %}">{{file}}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </details>
+                    </li>
+                    {% else %}
+                        {% if interview == item %}
+                            <li class="current-item">{{interview}}</li>
+                        {% else %}
+                            <li><a href="{% url 'edit_item' interview.id %}">{{interview}}</a></li>
+                        {% endif %}
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </details>
+    </li>
+    {% else %}
+        {% if series == item %}
+            <li class="current-item">{{series}}</li>
+        {% else %}
+            <li><a href="{% url 'edit_item' series.id %}">{{series}}</a></li>
+        {% endif %}
+    {% endif %}
+{% endfor %}

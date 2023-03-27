@@ -5,3 +5,7 @@
 .search-results td {
     border: 1px solid;
 }
+
+.current-item {
+    font-weight: bold;
+}
