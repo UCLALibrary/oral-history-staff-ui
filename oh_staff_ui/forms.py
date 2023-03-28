@@ -1,7 +1,11 @@
 from django import forms
 from oh_staff_ui.models import (
+    AltIdType,
+    AltTitleType,
     Copyright,
     CopyrightType,
+    DateType,
+    DescriptionType,
     ItemStatus,
     ItemType,
     Language,
@@ -33,6 +37,9 @@ class ProjectItemForm(forms.Form):
     coverage = forms.CharField(
         required=False, max_length=256, widget=forms.TextInput(attrs={"size": 80})
     )
+    relation = forms.CharField(
+        required=False, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+    )
     status = forms.ModelChoiceField(
         required=True,
         queryset=ItemStatus.objects.all().order_by("status"),
@@ -54,7 +61,7 @@ class NameUsageForm(forms.Form):
         queryset=NameType.objects.all().order_by("type"),
         empty_label="Please select a qualifier:",
     )
-    name = forms.ModelChoiceField(
+    value = forms.ModelChoiceField(
         queryset=Name.objects.all().order_by("value"),
         empty_label="Please select a name:",
     )
@@ -66,7 +73,7 @@ class SubjectUsageForm(forms.Form):
         queryset=SubjectType.objects.all().order_by("type"),
         empty_label="Please select a qualifier:",
     )
-    subject = forms.ModelChoiceField(
+    value = forms.ModelChoiceField(
         queryset=Subject.objects.all().order_by("value"),
         empty_label="Please select a subject:",
     )
@@ -78,7 +85,7 @@ class PublisherUsageForm(forms.Form):
         queryset=PublisherType.objects.all().order_by("type"),
         empty_label="Please select a qualifier:",
     )
-    publisher = forms.ModelChoiceField(
+    value = forms.ModelChoiceField(
         queryset=Publisher.objects.all().order_by("value"),
         empty_label="Please select a publisher:",
     )
@@ -90,7 +97,7 @@ class CopyrightUsageForm(forms.Form):
         queryset=CopyrightType.objects.all().order_by("type"),
         empty_label="Please select a qualifier:",
     )
-    copyright = forms.ModelChoiceField(
+    value = forms.ModelChoiceField(
         queryset=Copyright.objects.all().order_by("value"),
         empty_label="Please select a copyright:",
     )
@@ -98,8 +105,8 @@ class CopyrightUsageForm(forms.Form):
 
 class LanguageUsageForm(forms.Form):
     usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
-    language = forms.ModelChoiceField(
-        queryset=Language.objects.all().order_by("language"),
+    value = forms.ModelChoiceField(
+        queryset=Language.objects.all().order_by("value"),
         empty_label="Please select a language:",
     )
 
@@ -110,7 +117,60 @@ class ResourceUsageForm(forms.Form):
         queryset=ResourceType.objects.all().order_by("type"),
         empty_label="Please select a qualifier:",
     )
-    resource = forms.ModelChoiceField(
+    value = forms.ModelChoiceField(
         queryset=Resource.objects.all().order_by("value"),
         empty_label="Please select a resource:",
+    )
+
+
+class AltTitleForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    type = forms.ModelChoiceField(
+        queryset=AltTitleType.objects.all().order_by("type"),
+        empty_label="Please select a qualifier:",
+    )
+    value = forms.CharField(
+        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+    )
+
+
+class AltIdForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    type = forms.ModelChoiceField(
+        queryset=AltIdType.objects.all().order_by("type"),
+        empty_label="Please select a qualifier:",
+    )
+    value = forms.CharField(
+        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+    )
+
+
+class DescriptionForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    type = forms.ModelChoiceField(
+        queryset=DescriptionType.objects.all().order_by("type"),
+        empty_label="Please select a qualifier:",
+    )
+    value = forms.CharField(
+        required=True,
+        max_length=1024,
+        widget=forms.Textarea(attrs={"cols": 70, "rows": 3}),
+    )
+
+
+class DateForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    type = forms.ModelChoiceField(
+        queryset=DateType.objects.all().order_by("type"),
+        empty_label="Please select a qualifier:",
+    )
+    value = forms.CharField(
+        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+    )
+
+
+class FormatForm(forms.Form):
+    usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
+    value = forms.CharField(
+        required=True, max_length=1024, widget=forms.TextInput(attrs={"size": 80})
     )

@@ -27,12 +27,17 @@
     {{ copyright_formset.management_form }}
     {{ resource_formset.management_form }}
     {{ language_formset.management_form }}
+    {{ alt_title_formset.management_form }}
+    {{ alt_id_formset.management_form }}
+    {{ description_formset.management_form }}
+    {{ date_formset.management_form }}
+    {{ format_formset.management_form }}
     <table>
         {% for name_form in name_formset %}
         <tr>
             <td>{% if forloop.first %}Name(s):{% endif %}</td>
             <td>{{ name_form.usage_id }} {{ name_form.type }}</td>
-            <td>{{ name_form.name }}</td>
+            <td>{{ name_form.value }}</td>
             <td>Delete? {{ name_form.DELETE }}</td>
         </tr>
         {% endfor %}
@@ -40,7 +45,7 @@
         <tr>
             <td>{% if forloop.first %}Subject(s):{% endif %}</td>
             <td>{{ subject_form.usage_id }} {{ subject_form.type }}</td>
-            <td>{{ subject_form.subject }}</td>
+            <td>{{ subject_form.value }}</td>
             <td>Delete? {{ subject_form.DELETE }}</td>
         </tr>
         {% endfor %}
@@ -48,7 +53,7 @@
         <tr>
             <td>{% if forloop.first %}Publisher(s):{% endif %}</td>
             <td>{{ publisher_form.usage_id }} {{ publisher_form.type }}</td>
-            <td>{{ publisher_form.publisher }}</td>
+            <td>{{ publisher_form.value }}</td>
             <td>Delete? {{ publisher_form.DELETE }}</td>
         </tr>
         {% endfor %}
@@ -56,7 +61,7 @@
         <tr>
             <td>{% if forloop.first %}Copyright(s):{% endif %}</td>
             <td>{{ copyright_form.usage_id }} {{ copyright_form.type }}</td>
-            <td>{{ copyright_form.copyright }}</td>
+            <td>{{ copyright_form.value }}</td>
             <td>Delete? {{ copyright_form.DELETE }}</td>
         </tr>
         {% endfor %}
@@ -64,16 +69,56 @@
         <tr>
             <td>{% if forloop.first %}Resource(s):{% endif %}</td>
             <td>{{ resource_form.usage_id }} {{ resource_form.type }}</td>
-            <td>{{ resource_form.resource }}</td>
+            <td>{{ resource_form.value }}</td>
             <td>Delete? {{ resource_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for alt_title_form in alt_title_formset %}
+        <tr>
+            <td>{% if forloop.first %}Alt Title(s):{% endif %}</td>
+            <td>{{ alt_title_form.usage_id }} {{ alt_title_form.type }}</td>
+            <td>{{ alt_title_form.value }}</td>
+            <td>Delete? {{ alt_title_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for alt_id_form in alt_id_formset %}
+        <tr>
+            <td>{% if forloop.first %}Alt ID(s):{% endif %}</td>
+            <td>{{ alt_id_form.usage_id }} {{ alt_id_form.type }}</td>
+            <td>{{ alt_id_form.value }}</td>
+            <td>Delete? {{ alt_id_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for description_form in description_formset %}
+        <tr>
+            <td>{% if forloop.first %}Description(s):{% endif %}</td>
+            <td>{{ description_form.usage_id }} {{ description_form.type }}</td>
+            <td>{{ description_form.value }}</td>
+            <td>Delete? {{ description_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for date_form in date_formset %}
+        <tr>
+            <td>{% if forloop.first %}Date(s):{% endif %}</td>
+            <td>{{ date_form.usage_id }} {{ date_form.type }}</td>
+            <td>{{ date_form.value }}</td>
+            <td>Delete? {{ date_form.DELETE }}</td>
         </tr>
         {% endfor %}
         {% for language_form in language_formset %}
         <tr>
             <td>{% if forloop.first %}Language(s):{% endif %}</td>
             <td>{{ language_form.usage_id }}</td>
-            <td>{{ language_form.language }}</td>
+            <td>{{ language_form.value }}</td>
             <td>Delete? {{ language_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        {% for format_form in format_formset %}
+        <tr>
+            <td>{% if forloop.first %}Format(s):{% endif %}</td>
+            <td>{{ format_form.usage_id }}</td>
+            <td>{{ format_form.value }}</td>
+            <td>Delete? {{ format_form.DELETE }}</td>
         </tr>
         {% endfor %}
     </table>

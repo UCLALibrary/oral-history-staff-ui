@@ -3,7 +3,7 @@
         "model": "oh_staff_ui.Language",
         "pk": 1,
         "fields": {
-            "language": "eng",
+            "value": "eng",
             "source": 4
         }
     },
@@ -11,7 +11,7 @@
         "model": "oh_staff_ui.Language",
         "pk": 2,
         "fields": {
-            "language": "spa",
+            "value": "spa",
             "source": 4
         }
     }

@@ -2,11 +2,16 @@ import logging
 import requests
 import uuid
 from django.conf import settings
-from django.db.models import Q
-from django.forms import BaseFormSet, formset_factory
+from django.db.models import Q, Model
+from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
 from oh_staff_ui.forms import (
+    AltIdForm,
+    AltTitleForm,
+    DateForm,
+    DescriptionForm,
+    FormatForm,
     ProjectItemForm,
     CopyrightUsageForm,
     LanguageUsageForm,
@@ -16,6 +21,11 @@ from oh_staff_ui.forms import (
     SubjectUsageForm,
 )
 from oh_staff_ui.models import (
+    AltId,
+    AltTitle,
+    Date,
+    Description,
+    Format,
     ProjectItem,
     ItemCopyrightUsage,
     ItemLanguageUsage,
@@ -75,20 +85,45 @@ def get_edit_item_context(item_id: int) -> dict:
             "type": item.type,
             "sequence": item.sequence,
             "coverage": item.coverage,
+            "relation": item.relation,
             "status": item.status,
         }
     )
-    name_formset = get_name_formset(item_id)
-    subject_formset = get_subject_formset(item_id)
-    publisher_formset = get_publisher_formset(item_id)
-    copyright_formset = get_copyright_formset(item_id)
-    language_formset = get_language_formset(item_id)
-    resource_formset = get_resource_formset(item_id)
+    alt_id_formset = get_metadata_formset(item_id, AltIdForm, AltId, "alt_ids")
+    alt_title_formset = get_metadata_formset(
+        item_id, AltTitleForm, AltTitle, "alt_titles"
+    )
+    copyright_formset = get_metadata_formset(
+        item_id, CopyrightUsageForm, ItemCopyrightUsage, "copyrights"
+    )
+    date_formset = get_metadata_formset(item_id, DateForm, Date, "dates")
+    description_formset = get_metadata_formset(
+        item_id, DescriptionForm, Description, "descriptions"
+    )
+    format_formset = get_metadata_formset(item_id, FormatForm, Format, "formats")
+    language_formset = get_metadata_formset(
+        item_id, LanguageUsageForm, ItemLanguageUsage, "languages"
+    )
+    name_formset = get_metadata_formset(item_id, NameUsageForm, ItemNameUsage, "names")
+    publisher_formset = get_metadata_formset(
+        item_id, PublisherUsageForm, ItemPublisherUsage, "publishers"
+    )
+    resource_formset = get_metadata_formset(
+        item_id, ResourceUsageForm, ItemResourceUsage, "resources"
+    )
+    subject_formset = get_metadata_formset(
+        item_id, SubjectUsageForm, ItemSubjectUsage, "subjects"
+    )
     relatives = get_relatives(item)
     return {
         "item": item,
         "item_form": item_form,
+        "alt_id_formset": alt_id_formset,
+        "alt_title_formset": alt_title_formset,
         "copyright_formset": copyright_formset,
+        "date_formset": date_formset,
+        "description_formset": description_formset,
+        "format_formset": format_formset,
         "language_formset": language_formset,
         "name_formset": name_formset,
         "publisher_formset": publisher_formset,
@@ -98,125 +133,39 @@ def get_edit_item_context(item_id: int) -> dict:
     }
 
 
-def get_copyright_formset(item_id: int) -> BaseFormSet:
-    CopyrightUsageFormset = formset_factory(
-        CopyrightUsageForm, extra=1, can_delete=True
-    )
+def get_metadata_formset(
+    item_id: int, form: Form, model: Model, prefix: str
+) -> BaseFormSet:
+    """Return formset for given item and model, with initial data from database."""
+    factory = formset_factory(form, extra=1, can_delete=True)
     # Build list of dictionaries of initial values.
-    copyrights = ItemCopyrightUsage.objects.filter(item=item_id).order_by("id")
-    copyright_list = []
-    for copyright in copyrights:
-        copyright_list.append(
-            {
-                "usage_id": copyright.id,
-                "type": copyright.type,
-                "copyright": copyright.copyright,
-            }
-        )
-    # copyright_formset is "unbound" with this initial data
-    copyright_formset = CopyrightUsageFormset(
-        initial=copyright_list, prefix="copyrights"
-    )
-    return copyright_formset
-
-
-def get_language_formset(item_id: int) -> BaseFormSet:
-    LanguageUsageFormset = formset_factory(LanguageUsageForm, extra=1, can_delete=True)
-    # Build list of dictionaries of initial values.
-    languages = ItemLanguageUsage.objects.filter(item=item_id).order_by("id")
-    language_list = []
-    for language in languages:
-        language_list.append(
-            {
-                "usage_id": language.id,
-                "language": language.language,
-            }
-        )
-    # language_formset is "unbound" with this initial data
-    language_formset = LanguageUsageFormset(initial=language_list, prefix="languages")
-    return language_formset
-
-
-def get_name_formset(item_id: int) -> BaseFormSet:
-    NameUsageFormset = formset_factory(NameUsageForm, extra=1, can_delete=True)
-    # Build list of dictionaries of initial values.
-    names = ItemNameUsage.objects.filter(item=item_id).order_by("id")
-    name_list = []
-    for name in names:
-        name_list.append(
-            {
-                "usage_id": name.id,
-                "type": name.type,
-                "name": name.name,
-            }
-        )
-    # name_formset is "unbound" with this initial data
-    name_formset = NameUsageFormset(initial=name_list, prefix="names")
-    return name_formset
-
-
-def get_publisher_formset(item_id: int) -> BaseFormSet:
-    PublisherUsageFormset = formset_factory(
-        PublisherUsageForm, extra=1, can_delete=True
-    )
-    # Build list of dictionaries of initial values.
-    publishers = ItemPublisherUsage.objects.filter(item=item_id).order_by("id")
-    publisher_list = []
-    for publisher in publishers:
-        publisher_list.append(
-            {
-                "usage_id": publisher.id,
-                "type": publisher.type,
-                "publisher": publisher.publisher,
-            }
-        )
-    # publisher_formset is "unbound" with this initial data
-    publisher_formset = PublisherUsageFormset(
-        initial=publisher_list, prefix="publishers"
-    )
-    return publisher_formset
-
-
-def get_resource_formset(item_id: int) -> BaseFormSet:
-    ResourceUsageFormset = formset_factory(ResourceUsageForm, extra=1, can_delete=True)
-    # Build list of dictionaries of initial values.
-    resources = ItemResourceUsage.objects.filter(item=item_id).order_by("id")
-    resource_list = []
-    for resource in resources:
-        resource_list.append(
-            {
-                "usage_id": resource.id,
-                "type": resource.type,
-                "resource": resource.resource,
-            }
-        )
-    # resource_formset is "unbound" with this initial data
-    resource_formset = ResourceUsageFormset(initial=resource_list, prefix="resources")
-    return resource_formset
-
-
-def get_subject_formset(item_id: int) -> BaseFormSet:
-    SubjectUsageFormset = formset_factory(SubjectUsageForm, extra=1, can_delete=True)
-    # Build list of dictionaries of initial values.
-    subjects = ItemSubjectUsage.objects.filter(item=item_id).order_by("id")
-    subject_list = []
-    for subject in subjects:
-        subject_list.append(
-            {
-                "usage_id": subject.id,
-                "type": subject.type,
-                "subject": subject.subject,
-            }
-        )
-    # subject_formset is "unbound" with this initial data
-    subject_formset = SubjectUsageFormset(initial=subject_list, prefix="subjects")
-    return subject_formset
+    objs = model.objects.filter(item=item_id).order_by("id")
+    obj_list = []
+    for obj in objs:
+        # All models used here have id and value
+        data_dict = {
+            "usage_id": obj.id,
+            "value": obj.value,
+        }
+        # Type is only in some of these models
+        if hasattr(obj, "type"):
+            data_dict["type"] = obj.type
+        obj_list.append(data_dict)
+    # formset is "unbound" with this initial data
+    formset = factory(initial=obj_list, prefix=prefix)
+    return formset
 
 
 def save_all_item_data(item_id: int, request: HttpRequest) -> None:
+    """Parse data from request and update database as appropriate."""
+    AltIdFormset = formset_factory(AltIdForm, extra=1, can_delete=True)
+    AltTitleFormset = formset_factory(AltTitleForm, extra=1, can_delete=True)
     CopyrightUsageFormset = formset_factory(
         CopyrightUsageForm, extra=1, can_delete=True
     )
+    DateFormset = formset_factory(DateForm, extra=1, can_delete=True)
+    DescriptionFormset = formset_factory(DescriptionForm, extra=1, can_delete=True)
+    FormatFormset = formset_factory(FormatForm, extra=1, can_delete=True)
     LanguageUsageFormset = formset_factory(LanguageUsageForm, extra=1, can_delete=True)
     NameUsageFormset = formset_factory(NameUsageForm, extra=1, can_delete=True)
     PublisherUsageFormset = formset_factory(
@@ -225,7 +174,12 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     ResourceUsageFormset = formset_factory(ResourceUsageForm, extra=1, can_delete=True)
     SubjectUsageFormset = formset_factory(SubjectUsageForm, extra=1, can_delete=True)
     item_form = ProjectItemForm(request.POST)
+    alt_id_formset = AltIdFormset(request.POST, prefix="alt_ids")
+    alt_title_formset = AltTitleFormset(request.POST, prefix="alt_titles")
     copyright_formset = CopyrightUsageFormset(request.POST, prefix="copyrights")
+    date_formset = DateFormset(request.POST, prefix="dates")
+    description_formset = DescriptionFormset(request.POST, prefix="descriptions")
+    format_formset = FormatFormset(request.POST, prefix="formats")
     language_formset = LanguageUsageFormset(request.POST, prefix="languages")
     name_formset = NameUsageFormset(request.POST, prefix="names")
     publisher_formset = PublisherUsageFormset(request.POST, prefix="publishers")
@@ -233,9 +187,15 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     subject_formset = SubjectUsageFormset(request.POST, prefix="subjects")
 
     # TODO: Better way to check validity of all forms, without unpacking request twice.
+    logger.info(f"REQUEST.POST: {request.POST}")
     if (
         item_form.is_valid()
+        & alt_id_formset.is_valid()
+        & alt_title_formset.is_valid()
         & copyright_formset.is_valid()
+        & date_formset.is_valid()
+        & description_formset.is_valid()
+        & format_formset.is_valid()
         & language_formset.is_valid()
         & name_formset.is_valid()
         & publisher_formset.is_valid()
@@ -250,9 +210,15 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         logger.info(f"COPYRIGHTS: {copyright_formset.cleaned_data}")
         logger.info(f"LANGUAGES: {language_formset.cleaned_data}")
         logger.info(f"RESOURCES: {resource_formset.cleaned_data}")
+        logger.info(f"ALT IDS: {alt_id_formset.cleaned_data}")
+        logger.info(f"ALT TITLES: {alt_title_formset.cleaned_data}")
+        logger.info(f"DESCRIPTIONS: {description_formset.cleaned_data}")
+        logger.info(f"DATES: {date_formset.cleaned_data}")
+        logger.info(f"FORMATS: {format_formset.cleaned_data}")
         # Item data
         item = ProjectItem.objects.get(pk=item_id)
         item.coverage = item_form.cleaned_data["coverage"]
+        item.relation = item_form.cleaned_data["relation"]
         item.sequence = item_form.cleaned_data["sequence"]
         item.status = item_form.cleaned_data["status"]
         item.title = item_form.cleaned_data["title"]
@@ -261,12 +227,17 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         item.last_modified_by = request.user
         item.save()
         # Other, optional, metadata types
-        save_item_copyrights(item, copyright_formset.cleaned_data)
-        save_item_languages(item, language_formset.cleaned_data)
-        save_item_names(item, name_formset.cleaned_data)
-        save_item_publishers(item, publisher_formset.cleaned_data)
-        save_item_resources(item, resource_formset.cleaned_data)
-        save_item_subjects(item, subject_formset.cleaned_data)
+        save_item_formset_data(item, AltId, alt_id_formset.cleaned_data)
+        save_item_formset_data(item, AltTitle, alt_title_formset.cleaned_data)
+        save_item_formset_data(item, Date, date_formset.cleaned_data)
+        save_item_formset_data(item, Format, format_formset.cleaned_data)
+        save_item_formset_data(item, Description, description_formset.cleaned_data)
+        save_item_formset_data(item, ItemCopyrightUsage, copyright_formset.cleaned_data)
+        save_item_formset_data(item, ItemLanguageUsage, language_formset.cleaned_data)
+        save_item_formset_data(item, ItemNameUsage, name_formset.cleaned_data)
+        save_item_formset_data(item, ItemPublisherUsage, publisher_formset.cleaned_data)
+        save_item_formset_data(item, ItemResourceUsage, resource_formset.cleaned_data)
+        save_item_formset_data(item, ItemSubjectUsage, subject_formset.cleaned_data)
 
 
 def valid_metadata_usage(usage_data: dict) -> bool:
@@ -283,135 +254,26 @@ def valid_metadata_usage(usage_data: dict) -> bool:
     return True
 
 
-# TODO: Refactor save_item_XXXX() to minimize similar/identical code
-def save_item_copyrights(item: ProjectItem, copyright_formset_data: list) -> None:
+def save_item_formset_data(item: ProjectItem, model: Model, formset_data: list) -> None:
+    """Save metadata (if any) for given item and model, from given formset_data."""
     # List of dictionaries, some/all of which can be empty
-    for copyright_usage_data in copyright_formset_data:
-        if valid_metadata_usage(copyright_usage_data):
-            # Populate object
-            copyright_usage = ItemCopyrightUsage(
-                copyright=copyright_usage_data["copyright"],
-                type=copyright_usage_data["type"],
-                item=item,
-            )
-            # Existing object with real id
-            if copyright_usage_data["usage_id"] > 0:
-                copyright_usage.id = copyright_usage_data["usage_id"]
+    for data in formset_data:
+        if valid_metadata_usage(data):
+            # model = eval(model_name)
+            # Populate object - all have value & item
+            obj = model(value=data["value"], item=item)
+            # Type is only in some of these models
+            if data.get("type"):
+                obj.type = data["type"]
+            # Exising object with real id
+            if data["usage_id"] > 0:
+                obj.id = data["usage_id"]
             # Only delete if record already exists; otherwise, just don't save
-            if copyright_usage_data["DELETE"]:
-                if copyright_usage.id:
-                    copyright_usage.delete()
+            if data["DELETE"]:
+                if obj.id:
+                    obj.delete()
             else:
-                copyright_usage.save()
-
-
-# TODO: Refactor save_item_XXXX() to minimize similar/identical code
-def save_item_languages(item: ProjectItem, language_formset_data: list) -> None:
-    # List of dictionaries, some/all of which can be empty
-    for language_usage_data in language_formset_data:
-        if valid_metadata_usage(language_usage_data):
-            # Populate object
-            language_usage = ItemLanguageUsage(
-                language=language_usage_data["language"],
-                item=item,
-            )
-            # Existing object with real id
-            if language_usage_data["usage_id"] > 0:
-                language_usage.id = language_usage_data["usage_id"]
-            # Only delete if record already exists; otherwise, just don't save
-            if language_usage_data["DELETE"]:
-                if language_usage.id:
-                    language_usage.delete()
-            else:
-                language_usage.save()
-
-
-# TODO: Refactor save_item_XXXX() to minimize similar/identical code
-def save_item_names(item: ProjectItem, name_formset_data: list) -> None:
-    # List of dictionaries, some/all of which can be empty
-    for name_usage_data in name_formset_data:
-        if valid_metadata_usage(name_usage_data):
-            # Populate object
-            name_usage = ItemNameUsage(
-                name=name_usage_data["name"],
-                type=name_usage_data["type"],
-                item=item,
-            )
-            # Existing object with real id
-            if name_usage_data["usage_id"] > 0:
-                name_usage.id = name_usage_data["usage_id"]
-            # Only delete if record already exists; otherwise, just don't save
-            if name_usage_data["DELETE"]:
-                if name_usage.id:
-                    name_usage.delete()
-            else:
-                name_usage.save()
-
-
-# TODO: Refactor save_item_XXXX() to minimize similar/identical code
-def save_item_publishers(item: ProjectItem, publisher_formset_data: list) -> None:
-    # List of dictionaries, some/all of which can be empty
-    for publisher_usage_data in publisher_formset_data:
-        if valid_metadata_usage(publisher_usage_data):
-            # Populate object
-            publisher_usage = ItemPublisherUsage(
-                publisher=publisher_usage_data["publisher"],
-                type=publisher_usage_data["type"],
-                item=item,
-            )
-            # Existing object with real id
-            if publisher_usage_data["usage_id"] > 0:
-                publisher_usage.id = publisher_usage_data["usage_id"]
-            # Only delete if record already exists; otherwise, just don't save
-            if publisher_usage_data["DELETE"]:
-                if publisher_usage.id:
-                    publisher_usage.delete()
-            else:
-                publisher_usage.save()
-
-
-# TODO: Refactor save_item_XXXX() to minimize similar/identical code
-def save_item_resources(item: ProjectItem, resource_formset_data: list) -> None:
-    # List of dictionaries, some/all of which can be empty
-    for resource_usage_data in resource_formset_data:
-        if valid_metadata_usage(resource_usage_data):
-            # Populate object
-            resource_usage = ItemResourceUsage(
-                resource=resource_usage_data["resource"],
-                type=resource_usage_data["type"],
-                item=item,
-            )
-            # Existing object with real id
-            if resource_usage_data["usage_id"] > 0:
-                resource_usage.id = resource_usage_data["usage_id"]
-            # Only delete if record already exists; otherwise, just don't save
-            if resource_usage_data["DELETE"]:
-                if resource_usage.id:
-                    resource_usage.delete()
-            else:
-                resource_usage.save()
-
-
-# TODO: Refactor save_item_XXXX() to minimize similar/identical code
-def save_item_subjects(item: ProjectItem, subject_formset_data: list) -> None:
-    # List of dictionaries, some/all of which can be empty
-    for subject_usage_data in subject_formset_data:
-        if valid_metadata_usage(subject_usage_data):
-            # Populate object
-            subject_usage = ItemSubjectUsage(
-                subject=subject_usage_data["subject"],
-                type=subject_usage_data["type"],
-                item=item,
-            )
-            # Existing object with real id
-            if subject_usage_data["usage_id"] > 0:
-                subject_usage.id = subject_usage_data["usage_id"]
-            # Only delete if record already exists; otherwise, just don't save
-            if subject_usage_data["DELETE"]:
-                if subject_usage.id:
-                    subject_usage.delete()
-            else:
-                subject_usage.save()
+                obj.save()
 
 
 def get_top_parent(item: ProjectItem) -> ProjectItem:
