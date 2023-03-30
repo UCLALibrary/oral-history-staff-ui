@@ -1,0 +1,5 @@
+apiVersion: v2
+appVersion: "0.1"
+description: Chart for Oral History Staff UI
+name: oh-staff
+version: 0.0.1

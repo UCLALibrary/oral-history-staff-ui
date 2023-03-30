@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "oh-staff.fullname" . }}
+  namespace: oh-staff{{ .Values.django.env.run_env }}
+  labels:
+    {{- include "oh-staff.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "oh-staff.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "oh-staff.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "oh-staff.fullname" . }}-configmap
+            - secretRef:
+                name: {{ include "oh-staff.fullname" . }}-secrets
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /upload_file
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: {{ range .Values.django.env.allowed_hosts }}{{ . }}{{ end }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /upload_file
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: {{ range .Values.django.env.allowed_hosts }}{{ . }}{{ end }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        {{- include "oh-staff.volumes" . | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

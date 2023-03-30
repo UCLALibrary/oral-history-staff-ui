@@ -1,0 +1,116 @@
+# Values for oh-staff.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: uclalibrary/oral-history-staff-ui
+  tag: v0.0.1
+  pullPolicy: Always
+
+nameOverride: ""
+
+fullnameOverride: ""
+
+service:
+  type: NodePort
+  port: 80
+
+ingress:
+  enabled: "true"
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    cert-manager.io/cluster-issuer: sectigo-acme-clusterissuer
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: 'oh-staff.library.ucla.edu'
+      paths:
+        - "/"
+  tls:
+  - secretName: oh-staff-tls
+    hosts:
+      - oh-staff.library.ucla.edu
+
+django:
+  env:
+    run_env: "prod"
+    debug: "false"
+    # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    log_level: "INFO"
+    allowed_hosts:
+      - oh-staff.library.ucla.edu
+    csrf_trusted_origins:
+      - https://oh-staff.library.ucla.edu
+    ark_minter: "http://noid.library.ucla.edu/noidu_zz8+?mint+1"
+    # Now pointing to production db
+    db_backend: "django.db.backends.postgresql_psycopg2"
+    db_host: "p-d-postgres.library.ucla.edu"
+    db_port: 5432
+    db_name: "oral_history_staff"
+    db_user: "oral_history_staff"
+    # Specific directory used for source files
+    oh_file_source: "/media/oh_source/upload"
+    oh_libpartners: "/media/oh_source"
+    oh_masterslz: "/media/oh_lz"
+    oh_static: "/media/oh_static"
+    oh_wowza: "/media/oh_wowza"
+    # "Yes" or "No"
+    use_test_dirs: "No"
+
+  externalSecrets:
+    enabled: "true"
+    env:
+      # Application database used by django
+      db_password: "/systems/prodsoftwaredev/oh-staff/db_password"
+      django_secret_key: "/systems/prodsoftwaredev/oh-staff/django_secret_key"
+
+# PersistentVolume and PersistentVolumeClaim parameters
+persistentVolumes:
+  ohsource:
+    storage: "5.5Ti"
+    access: "ReadOnlyMany"
+    server: "lib-partners.in.library.ucla.edu"
+    path: "/OralHistory"
+  ohmasters:
+    storage: "1.1Ti"
+    access: "ReadWriteMany"
+    server: "dlp.in.library.ucla.edu"
+    path: "/oralhistory_LZ"
+  ohwowza:
+    storage: "5Ti"
+    access: "ReadWriteMany"
+    server: "wowza.in.library.ucla.edu"
+    path: "/dlp/oralhistory"
+  ohstatic:
+    storage: "300Gi"
+    access: "ReadWriteMany"
+    server: "dlp.in.library.ucla.edu"
+    path: "/oralhistory"
+
+# Volume mount specification for the container
+volumeMounts:
+  - name: "ohsource"
+    mountPath: "/media/oh_source"
+  - name: "ohmasters"
+    mountPath: "/media/oh_lz"
+  - name: "ohwowza"
+    mountPath: "/media/oh_wowza/"
+  - name: "ohstatic"
+    mountPath: "/media/oh_static"
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+  requests:
+    cpu: 250m
+    memory: 100Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
