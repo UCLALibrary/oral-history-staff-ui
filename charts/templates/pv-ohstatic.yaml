@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "oh-staff.fullname" . }}-pv-ohstatic
+spec:
+  capacity:
+    storage: {{ .Values.persistentVolumes.ohstatic.storage | quote }}
+  accessModes:
+    - {{ .Values.persistentVolumes.ohstatic.access }}
+  nfs:
+    server: {{ .Values.persistentVolumes.ohstatic.server | quote }}
+    path: {{ .Values.persistentVolumes.ohstatic.path | quote }}
+  mountOptions:
+    - nfsvers=3

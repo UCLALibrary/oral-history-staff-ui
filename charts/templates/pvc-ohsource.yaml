@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "oh-staff.fullname" . }}-pvc-ohsource
+  namespace: oh-staff{{ .Values.django.env.run_env }}
+spec:
+  accessModes:
+    - {{ .Values.persistentVolumes.ohsource.access }}
+  storageClassName: ""
+  resources:
+    requests:
+      storage: {{ .Values.persistentVolumes.ohsource.storage }}
+  volumeName: {{ include "oh-staff.fullname" . }}-pv-ohsource

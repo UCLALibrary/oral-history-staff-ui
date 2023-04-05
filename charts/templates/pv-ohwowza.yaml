@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "oh-staff.fullname" . }}-pv-ohwowza
+spec:
+  capacity:
+    storage: {{ .Values.persistentVolumes.ohwowza.storage | quote }}
+  accessModes:
+    - {{ .Values.persistentVolumes.ohwowza.access }}
+  nfs:
+    server: {{ .Values.persistentVolumes.ohwowza.server | quote }}
+    path: {{ .Values.persistentVolumes.ohwowza.path | quote }}
+  mountOptions:
+    - nfsvers=3
