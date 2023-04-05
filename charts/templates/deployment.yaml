@@ -32,7 +32,7 @@ spec:
             {{- toYaml .Values.volumeMounts | nindent 12 }}
           livenessProbe:
             httpGet:
-              path: /upload_file
+              path: /item_search/
               port: http
               httpHeaders:
                 - name: Host
@@ -41,7 +41,7 @@ spec:
             timeoutSeconds: 10
           readinessProbe:
             httpGet:
-              path: /upload_file
+              path: /item_search/
               port: http
               httpHeaders:
                 - name: Host
