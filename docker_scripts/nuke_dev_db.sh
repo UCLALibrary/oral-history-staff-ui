@@ -38,7 +38,8 @@ docker volume rm oral-history-staff-ui_pg_data
 
 echo "Starting local docker-compose system in background..."
 docker-compose up -d
-sleep 5
+# Make sure system is fully available and all fixtures have loaded.
+sleep 15
 
 # Currently, only support reloading all data; may be more specific later.
 if [ "${RELOAD}" = "Y" ]; then

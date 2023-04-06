@@ -12,6 +12,9 @@ class ItemStatus(models.Model):
 
     class Meta:
         verbose_name_plural = "Item statuses"
+        indexes = [
+            models.Index(fields=["status"]),
+        ]
 
 
 def get_default_status():
@@ -26,6 +29,11 @@ class ItemType(models.Model):
 
     def __str__(self):
         return self.type
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
 
 
 def get_default_type():
@@ -71,12 +79,23 @@ class ProjectItem(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["ark"]),
+            models.Index(fields=["title"]),
+        ]
+
 
 class AuthoritySource(models.Model):
     source = models.CharField(max_length=256, blank=False, null=False)
 
     def __str__(self):
         return self.source
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["source"]),
+        ]
 
 
 class Language(models.Model):
@@ -104,6 +123,11 @@ class NameType(models.Model):
     def __str__(self):
         return self.type
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
+
 
 class Name(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
@@ -113,6 +137,11 @@ class Name(models.Model):
 
     def __str__(self):
         return f"{self.value} ({self.source})"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]
 
 
 class ItemNameUsage(models.Model):
@@ -131,6 +160,11 @@ class SubjectType(models.Model):
     def __str__(self):
         return self.type
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
+
 
 class Subject(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
@@ -140,6 +174,11 @@ class Subject(models.Model):
 
     def __str__(self):
         return self.value
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]
 
 
 class ItemSubjectUsage(models.Model):
@@ -160,6 +199,11 @@ class AltTitleType(models.Model):
     def __str__(self):
         return self.type
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
+
 
 class AltTitle(models.Model):
     value = models.CharField(max_length=512, blank=False, null=False)
@@ -173,12 +217,22 @@ class AltTitle(models.Model):
     def __str__(self):
         return self.value
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]
+
 
 class AltIdType(models.Model):
     type = models.CharField(max_length=256, blank=False, null=False)
 
     def __str__(self):
         return self.type
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
 
 
 class AltId(models.Model):
@@ -193,12 +247,22 @@ class AltId(models.Model):
     def __str__(self):
         return self.value
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]
+
 
 class DescriptionType(models.Model):
     type = models.CharField(max_length=256, blank=False, null=False)
 
     def __str__(self):
         return self.type
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
 
 
 class Description(models.Model):
@@ -220,6 +284,11 @@ class PublisherType(models.Model):
     def __str__(self):
         return self.type
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
+
 
 class Publisher(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
@@ -229,6 +298,11 @@ class Publisher(models.Model):
 
     def __str__(self):
         return self.value
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]
 
 
 class ItemPublisherUsage(models.Model):
@@ -249,6 +323,11 @@ class CopyrightType(models.Model):
     def __str__(self):
         return self.type
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
+
 
 class Copyright(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
@@ -258,6 +337,11 @@ class Copyright(models.Model):
 
     def __str__(self):
         return self.value
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]
 
 
 class ItemCopyrightUsage(models.Model):
@@ -278,6 +362,11 @@ class ResourceType(models.Model):
     def __str__(self):
         return self.type
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
+
 
 class Resource(models.Model):
     value = models.CharField(max_length=256, blank=False, null=False)
@@ -287,6 +376,11 @@ class Resource(models.Model):
 
     def __str__(self):
         return self.value
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]
 
 
 class ItemResourceUsage(models.Model):
@@ -310,12 +404,22 @@ class Format(models.Model):
     def __str__(self):
         return self.value
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]
+
 
 class DateType(models.Model):
     type = models.CharField(max_length=256, blank=False, null=False)
 
     def __str__(self):
         return self.type
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["type"]),
+        ]
 
 
 class Date(models.Model):
@@ -329,3 +433,8 @@ class Date(models.Model):
 
     def __str__(self):
         return self.value
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["value"]),
+        ]

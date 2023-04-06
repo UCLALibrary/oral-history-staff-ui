@@ -11,7 +11,7 @@ fi
 
 # Check when database is ready for connections
 echo "Checking database connectivity..."
-until python -c 'import os, psycopg2 ; conn = psycopg2.connect(host=os.environ.get("DJANGO_DB_HOST"),user=os.environ.get("DJANGO_DB_USER"),password=os.environ.get("DJANGO_DB_PASSWORD"),dbname=os.environ.get("DJANGO_DB_NAME"))' ; do
+until python -c 'import os, psycopg2 ; conn = psycopg2.connect(host=os.environ.get("DJANGO_DB_HOST"),port=os.environ.get("DJANGO_DB_PORT"),user=os.environ.get("DJANGO_DB_USER"),password=os.environ.get("DJANGO_DB_PASSWORD"),dbname=os.environ.get("DJANGO_DB_NAME"))' ; do
   echo "Database connection not ready - waiting"
   sleep 5
 done
@@ -26,16 +26,19 @@ if [ "$DJANGO_RUN_ENV" = "dev" ]; then
 
   # Make sure necessary lookup tables have at least sample data.
   # seed-data has ItemType, ItemStatus, and 3 sample ProjectItem records.
-  python manage.py loaddata seed-data
-  python manage.py loaddata authority-source-data language-data
-  python manage.py loaddata name-type-data name-data
-  python manage.py loaddata subject-type-data subject-data
-  python manage.py loaddata altid-type-data alttitle-type-data
-  python manage.py loaddata description-type-data
-  python manage.py loaddata publisher-type-data publisher-data
-  python manage.py loaddata copyright-type-data copyright-data
-  python manage.py loaddata resource-type-data resource-data
+  # Loading sequence matters.
+  python manage.py loaddata authority-source-data
+  python manage.py loaddata altid-type-data
+  python manage.py loaddata alttitle-type-data
+  python manage.py loaddata copyright-type-data
   python manage.py loaddata date-type-data
+  python manage.py loaddata description-type-data
+  python manage.py loaddata item-status-data
+  python manage.py loaddata item-type-data
+  python manage.py loaddata name-type-data
+  python manage.py loaddata publisher-type-data
+  python manage.py loaddata resource-type-data
+  python manage.py loaddata subject-type-data
 fi
 
 if [ "$DJANGO_RUN_ENV" = "dev" ]; then
