@@ -1,0 +1,42 @@
+[
+    {
+        "model": "oh_staff_ui.ItemType",
+        "pk": 1,
+        "fields": {
+            "type": "Collection",
+            "parent": null
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemType",
+        "pk": 2,
+        "fields": {
+            "type": "Series",
+            "parent": 1
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemType",
+        "pk": 3,
+        "fields": {
+            "type": "Interview",
+            "parent": 2
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemType",
+        "pk": 4,
+        "fields": {
+            "type": "Audio",
+            "parent": 3
+        }
+    },
+    {
+        "model": "oh_staff_ui.ItemType",
+        "pk": 5,
+        "fields": {
+            "type": "Video",
+            "parent": 3
+        }
+    }
+]
