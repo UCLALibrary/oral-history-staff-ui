@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand
 from oh_staff_ui.models import ProjectItem, ItemStatus, ItemType
 from django.contrib.auth.models import User
 from csv import DictReader
-import os
 import datetime
 
 
@@ -10,16 +9,15 @@ class Command(BaseCommand):
     help = "Deletes all existing ProjectItem data, then imports from a CSV file"
 
     def add_arguments(self, parser):
-        parser.add_argument("filename", type=str)
+        parser.add_argument("filepath", type=str)
 
     def handle(self, *args, **options):
         # to avoid duplication, start by deleting all existing ProjectItems
         print("Deleting all existing ProjectItems.")
         ProjectItem.objects.all().delete()
 
-        # open and read input CSV - assuming it's in the fixtures folder
-        filepath = os.path.join("oh_staff_ui/fixtures", options["filename"])
-        with open(filepath, mode="r") as f:
+        # open and read input CSV
+        with open(options["filepath"], mode="r") as f:
             dict_reader = DictReader(f)
             projectitem_dicts = list(dict_reader)
 

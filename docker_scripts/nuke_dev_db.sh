@@ -44,8 +44,22 @@ sleep 5
 if [ "${RELOAD}" = "Y" ]; then
   echo "=================================="
   echo "Reloading all data, please wait..."
-  docker-compose exec django python manage.py import_projectitems oh-projectitems-export-3.csv
-  docker-compose exec django python manage.py import_names name-md-export.csv
+  # Special case: CSV file, in fixtures directory
+  docker-compose exec django python manage.py import_projectitems oh_staff_ui/fixtures/oh-projectitems-export-3.csv
+  # Other files are TSV, in export_scripts directory
+  docker-compose exec django python manage.py import_altids export_scripts/Alt_ID.tsv
+  docker-compose exec django python manage.py import_alttitles export_scripts/AltTitle.tsv
+  docker-compose exec django python manage.py import_copyrights export_scripts/Copyright.tsv
+  docker-compose exec django python manage.py import_coverages export_scripts/Chronological_period_covered.tsv
+  docker-compose exec django python manage.py import_dates export_scripts/Date.tsv
+  docker-compose exec django python manage.py import_descriptions export_scripts/Description.tsv
+  docker-compose exec django python manage.py import_formats export_scripts/'Format_(Length,_pages).tsv'
+  docker-compose exec django python manage.py import_languages export_scripts/Language.tsv
+  docker-compose exec django python manage.py import_names export_scripts/Name.tsv
+  docker-compose exec django python manage.py import_publishers export_scripts/Publisher.tsv
+  docker-compose exec django python manage.py import_relations export_scripts/Relation.tsv
+  docker-compose exec django python manage.py import_resources export_scripts/Type_of_Resource_.tsv
+  docker-compose exec django python manage.py import_subjects export_scripts/Subject.tsv
 fi
 
 echo "All done.  Check container logs by running:"
