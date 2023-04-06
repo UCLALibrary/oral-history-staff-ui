@@ -34,6 +34,7 @@ def add_item(request: HttpRequest) -> HttpResponse:
                 user = request.user
                 new_item = ProjectItem(
                     ark=ark,
+                    parent=form.cleaned_data["parent"],
                     sequence=form.cleaned_data["sequence"],
                     title=form.cleaned_data["title"],
                     type=form.cleaned_data["type"],

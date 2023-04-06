@@ -11,6 +11,7 @@ from oh_staff_ui.models import (
     Language,
     Name,
     NameType,
+    ProjectItem,
     Publisher,
     PublisherType,
     Resource,
@@ -22,7 +23,19 @@ from oh_staff_ui.models import (
 )
 
 
+class ProjectItemChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, item):
+        return f"{item.title} ({item.ark})"
+
+
 class ProjectItemForm(forms.Form):
+    parent = ProjectItemChoiceField(
+        required=False,
+        queryset=(
+            ProjectItem.objects.filter(type__type="Series")
+            | ProjectItem.objects.filter(type__type="Interview")
+        ).order_by("title"),
+    )
     title = forms.CharField(
         required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
     )

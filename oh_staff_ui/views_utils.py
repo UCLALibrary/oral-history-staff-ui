@@ -81,6 +81,7 @@ def get_edit_item_context(item_id: int) -> dict:
     # item_form is "bound" with this data
     item_form = ProjectItemForm(
         data={
+            "parent": item.parent,
             "title": item.title,
             "type": item.type,
             "sequence": item.sequence,
