@@ -219,6 +219,7 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         # Item data
         item = ProjectItem.objects.get(pk=item_id)
         item.coverage = item_form.cleaned_data["coverage"]
+        item.parent = item_form.cleaned_data["parent"]
         item.relation = item_form.cleaned_data["relation"]
         item.sequence = item_form.cleaned_data["sequence"]
         item.status = item_form.cleaned_data["status"]

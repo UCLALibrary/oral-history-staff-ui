@@ -32,8 +32,7 @@ class ProjectItemForm(forms.Form):
     parent = ProjectItemChoiceField(
         required=False,
         queryset=(
-            ProjectItem.objects.filter(type__type="Series")
-            | ProjectItem.objects.filter(type__type="Interview")
+            ProjectItem.objects.filter(type__type__in=["Series", "Interview"])
         ).order_by("title"),
     )
     title = forms.CharField(
