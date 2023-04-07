@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def add_item(request: HttpRequest) -> HttpResponse:
+def add_item(request: HttpRequest, parent_id=None) -> HttpResponse:
     if request.method == "POST":
         form = ProjectItemForm(request.POST)
         if form.is_valid():
@@ -55,7 +55,11 @@ def add_item(request: HttpRequest) -> HttpResponse:
                     {"form": form, "custom_errors": custom_errors},
                 )
     else:
-        form = ProjectItemForm()
+        if parent_id:
+            parent = ProjectItem.objects.get(id=parent_id)
+            form = ProjectItemForm(initial={"parent": parent})
+        else:
+            form = ProjectItemForm()
         return render(request, "oh_staff_ui/add_item.html", {"form": form})
 
 

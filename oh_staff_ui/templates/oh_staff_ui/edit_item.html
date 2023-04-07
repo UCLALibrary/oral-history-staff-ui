@@ -13,6 +13,9 @@
         {{ item.parent }}
         {% endif %}
     </li>
+    {% if item.type.type == "Series" or item.type.type == "Interview" %}
+    <li><a href="{% url 'add_item_from_parent' item.id %}">Add a child item</a></li>
+    {% endif %}
 </ul>
 <ul class="tree">
     {% include "oh_staff_ui/item_tree.html" %}
