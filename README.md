@@ -137,6 +137,19 @@ This will not normally need to be done during development, but may be needed for
 
 6. When finished, shut down your local application as usual.  Switch to your other terminal window and `CTRL-C` or `CMD-C` to stop the tunnel.
 
+### Resetting the production database
+
+For data migration, it's necessary to clear out existing data from the production database before doing the final load.  Doing this via a tunneled connection is possible, but very slow (8+ hours for a full load), so it's better to do this while connected directly to the production container, which only DevSupport staff can currently do.
+
+Once connected (either directly, or via tunnel as documented above), run either:
+```
+# If connected directly
+$ docker_scripts/reset_prod_db.sh
+
+# If connected from local system via tunnel
+$ docker-compose exec django docker_scripts/reset_prod_db.sh
+```
+
 ### Logging
 
 Basic logging is available, with logs captured in `logs/application.log`.  At present, logs from both the custom application code and Django itself are captured.
