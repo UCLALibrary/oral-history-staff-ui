@@ -13,3 +13,7 @@
 td {
     vertical-align: top;
 }
+
+.empty_form {
+    display: none;
+}
