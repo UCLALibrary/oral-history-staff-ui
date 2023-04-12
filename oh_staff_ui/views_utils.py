@@ -137,8 +137,7 @@ def get_edit_item_context(item_id: int) -> dict:
 def get_metadata_formset(
     item_id: int, form: Form, model: Model, prefix: str
 ) -> BaseFormSet:
-    """Return formset for given item and model, with initial data from database."""
-    factory = formset_factory(form, extra=1, can_delete=True)
+    """Return formset for given item and model, with initial data (if any) from database."""
     # Build list of dictionaries of initial values.
     objs = model.objects.filter(item=item_id).order_by("id")
     obj_list = []
@@ -152,6 +151,10 @@ def get_metadata_formset(
         if hasattr(obj, "type"):
             data_dict["type"] = obj.type
         obj_list.append(data_dict)
+    # Show empty form by default only when there's no real data already (extra=1).
+    # Otherwise, show only real data (extra=0).
+    extra_forms = 0 if len(obj_list) else 1
+    factory = formset_factory(form, extra=extra_forms, can_delete=True)
     # formset is "unbound" with this initial data
     formset = factory(initial=obj_list, prefix=prefix)
     return formset
