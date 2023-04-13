@@ -20,7 +20,7 @@
 <ul class="tree">
     {% include "oh_staff_ui/item_tree.html" %}
 </ul>
-<form name="edit_item" id="edit_item" method="POST">
+<form name="edit_item" onsubmit="return validateEditItemForm()" id="edit_item" method="POST">
     {% csrf_token %}
     {{ item_form.as_div }}
     <br>
