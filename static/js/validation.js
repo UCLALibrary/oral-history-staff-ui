@@ -1,4 +1,4 @@
-function validateForm(){
+function validateEditItemForm(){
     // all "optional" metadata other than Language and Format, which don't have types
     const valuesToCheck = ["alt_id","alt_title","copyright","date","description","name","publisher","resource","subject"]
     // more human-readable names, in the same order, for display
@@ -13,9 +13,9 @@ function validateForm(){
 
         // for each type, check existence of type and value
         // if exactly one exists, alert user of the problem and do not submit form
-        for (let j=0; j<types.length; j++) {
-            if ((types[j].value && !values[j].value) || (values[j].value && !types[j].value)){
-                alert(`Please enter both a qualifier and value for ${formattedNames[i]}.`)
+        for (let j = 0; j < types.length; j++) {
+            if ((types[j].value && !values[j].value) || (values[j].value && !types[j].value)) {
+                alert(`Please enter both a qualifier and a value for ${formattedNames[i]}.`)
                 return false
             }
         }
