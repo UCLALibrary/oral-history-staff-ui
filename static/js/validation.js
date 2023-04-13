@@ -15,7 +15,7 @@ function validateForm(){
         // if exactly one exists, alert user of the problem and do not submit form
         for (let j=0; j<types.length; j++) {
             if ((types[j].value && !values[j].value) || (values[j].value && !types[j].value)){
-                alert(`Please enter both a type and value for ${formattedNames[i]}.`)
+                alert(`Please enter both a qualifier and value for ${formattedNames[i]}.`)
                 return false
             }
         }
