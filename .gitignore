@@ -139,3 +139,6 @@ dmypy.json
 
 # Local static files collected when testing gunicorn and whitenoise
 staticfiles/
+
+# OS specific files
+.DS_Store

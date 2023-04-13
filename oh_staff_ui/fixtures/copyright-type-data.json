@@ -12,5 +12,12 @@
         "fields": {
             "type": "copyrightStatus"
         }
+    },
+    {
+        "model": "oh_staff_ui.CopyrightType",
+        "pk": 3,
+        "fields": {
+            "type": "permission"
+        }
     }
 ]
