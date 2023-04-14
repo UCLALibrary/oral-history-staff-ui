@@ -82,7 +82,7 @@ The container runs via `docker_scripts/entrypoint.sh`, which
    # Load full set of item data
    $ docker-compose exec django python manage.py import_projectitems oh-projectitems-export-3.csv
    # Load full set of name data
-   $ docker-compose exec django python manage.py import_names name-md-export.csv
+   $ docker-compose exec django python manage.py import_names export_scripts/Name.tsv
    ```
 7. Connect to the running application via browser
 
@@ -187,3 +187,8 @@ The current log format includes:
 * Module: somewhat redundant with logger name
 * Message: The main thing being logged
 
+### Testing
+
+Tests focus on code which has significant side effects, like creating & changing files.  Run tests in the container:
+
+```$ docker-compose exec django python manage.py test```

@@ -18,6 +18,7 @@ from .models import (
     Resource,
     ResourceType,
     DateType,
+    MediaFileType,
 )
 
 
@@ -109,3 +110,8 @@ class Resource(admin.ModelAdmin):
 @admin.register(DateType)
 class DateType(admin.ModelAdmin):
     list_display = ("type",)
+
+
+@admin.register(MediaFileType)
+class MediaFileType(admin.ModelAdmin):
+    list_display = ("file_type", "file_type_description")

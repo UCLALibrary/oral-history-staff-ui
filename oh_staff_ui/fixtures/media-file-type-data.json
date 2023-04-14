@@ -1,0 +1,122 @@
+[
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 1,
+        "fields": {
+            "file_type": "SubMasterImage1",
+            "file_type_description": "UCLA Center for Oral History Research Interview Collection Submaster Image"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 2,
+        "fields": {
+            "file_type": "ThumbnailImage1",
+            "file_type_description": "UCLA Center for Oral History Research Interview Collection Thumbnail Image"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 3,
+        "fields": {
+            "file_type": "MasterAudio1",
+            "file_type_description": "UCLA Center for Oral History Research Interview Collection Master Audio"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 4,
+        "fields": {
+            "file_type": "SubMasterAudio1",
+            "file_type_description": "UCLA Center for Oral History Research Interview Collection Submaster Audio"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 5,
+        "fields": {
+            "file_type": "PDF",
+            "file_type_description": "UCLA Center for Oral History Research Interview Collection PDF"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 6,
+        "fields": {
+            "file_type": "Text Transcript",
+            "file_type_description": "Oral History Text - Transcript"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 7,
+        "fields": {
+            "file_type": "Text Index",
+            "file_type_description": "Oral History Text - Index"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 8,
+        "fields": {
+            "file_type": "MasterImage1",
+            "file_type_description": "Oral History Image - Master Image"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 9,
+        "fields": {
+            "file_type": "Text Introduction",
+            "file_type_description": "Oral History Text - Introduction"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 10,
+        "fields": {
+            "file_type": "Text Biography",
+            "file_type_description": "Oral History Text - Biography"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 11,
+        "fields": {
+            "file_type": "Text Interview History",
+            "file_type_description": "Oral History Text - Interview History"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 12,
+        "fields": {
+            "file_type": "Text Appendix",
+            "file_type_description": "Oral History Text - Appendix"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 13,
+        "fields": {
+            "file_type": "PDF Appendix to Interview",
+            "file_type_description": "Appendix to Interview PDF"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 14,
+        "fields": {
+            "file_type": "PDF Résumé",
+            "file_type_description": "Narrator’s Résumé PDF"
+        }
+    },
+    {
+        "model": "oh_staff_ui.MediaFileType",
+        "pk": 15,
+        "fields": {
+            "file_type": "PDF Legal Agreement",
+            "file_type_description": "Legal Agreement"
+        }
+    }
+]

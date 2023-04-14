@@ -24,21 +24,11 @@ if [ "$DJANGO_RUN_ENV" = "dev" ]; then
   # Logs will show error if this exists, which is OK.
   python manage.py createsuperuser --no-input
 
-  # Make sure necessary lookup tables have at least sample data.
-  # seed-data has ItemType, ItemStatus, and 3 sample ProjectItem records.
-  # Loading sequence matters.
-  python manage.py loaddata authority-source-data
-  python manage.py loaddata altid-type-data
-  python manage.py loaddata alttitle-type-data
-  python manage.py loaddata copyright-type-data
-  python manage.py loaddata date-type-data
-  python manage.py loaddata description-type-data
-  python manage.py loaddata item-status-data
-  python manage.py loaddata item-type-data
-  python manage.py loaddata name-type-data
-  python manage.py loaddata publisher-type-data
-  python manage.py loaddata resource-type-data
-  python manage.py loaddata subject-type-data
+  # Make sure necessary lookup tables have data.
+  for FIXTURE in oh_staff_ui/fixtures/*data.json; do
+    # Full path to fixture is OK
+    python manage.py loaddata ${FIXTURE}
+  done
 fi
 
 if [ "$DJANGO_RUN_ENV" = "dev" ]; then
