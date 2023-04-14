@@ -438,3 +438,45 @@ class Date(models.Model):
         indexes = [
             models.Index(fields=["value"]),
         ]
+
+
+class MediaFileType(models.Model):
+    file_type = models.CharField(max_length=40, blank=False, null=False)
+    file_type_description = models.CharField(max_length=256, blank=False, null=False)
+
+    def __str__(self):
+        return self.file_type
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["file_type"]),
+        ]
+        ordering = ["file_type"]
+
+
+def get_file_directory(instance, filename):
+    # Eventually this will determine where a MediaFile.file should be stored.
+    # For now, use constant samples subdirectory
+    # and ignore instance parameter passed in by FileField.
+    return f"samples/managed/{filename}"
+
+
+class MediaFile(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        blank=False,
+        null=False,
+        related_name="+",
+    )
+    create_date = models.DateField(blank=False, null=False, default=timezone.now)
+    # TODO: Correct value for upload_to, relative to MEDIA_ROOT
+    file = models.FileField(upload_to=get_file_directory)
+    file_type = models.ForeignKey(
+        MediaFileType, on_delete=models.PROTECT, blank=False, null=False
+    )
+    sequence = models.IntegerField(blank=False, null=False, default=0)
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )
