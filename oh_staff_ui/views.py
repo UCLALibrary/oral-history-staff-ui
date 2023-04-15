@@ -97,3 +97,18 @@ def search_results(request: HttpRequest, search_type: str, query: str) -> HttpRe
             ProjectItem.objects.filter(ark__icontains=query).order_by("ark").values()
         )
     return render(request, "oh_staff_ui/search_results.html", {"results": results})
+
+
+@login_required
+def show_log(request, line_count: int = 200) -> HttpResponse:
+    log_file = "logs/application.log"
+    try:
+        with open(log_file, "r") as f:
+            # Get just the last line_count lines in the log.
+            lines = f.readlines()[-line_count:]
+            # Template prints these as a single block, so join lines into one chunk.
+            log_data = "".join(lines)
+    except FileNotFoundError:
+        log_data = f"Log file {log_file} not found"
+
+    return render(request, "oh_staff_ui/log.html", {"log_data": log_data})
