@@ -187,6 +187,13 @@ The current log format includes:
 * Module: somewhat redundant with logger name
 * Message: The main thing being logged
 
+#### Viewing the log
+Local development environment: `view logs/application.log`.
+
+In deployed container:
+* `/logs/`: see latest 200 lines of the log
+* `/logs/nnn`: see latest `nnn` lines of the log
+
 ### Testing
 
 Tests focus on code which has significant side effects, like creating & changing files.  Run tests in the container:
