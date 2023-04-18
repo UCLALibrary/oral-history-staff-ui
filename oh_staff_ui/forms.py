@@ -1,4 +1,6 @@
+import os
 from django import forms
+from django.core.cache import cache
 from oh_staff_ui.models import (
     AltIdType,
     AltTitleType,
@@ -9,6 +11,7 @@ from oh_staff_ui.models import (
     ItemStatus,
     ItemType,
     Language,
+    MediaFileType,
     Name,
     NameType,
     ProjectItem,
@@ -186,3 +189,41 @@ class FormatForm(forms.Form):
     value = forms.CharField(
         required=True, max_length=1024, widget=forms.TextInput(attrs={"size": 80})
     )
+
+
+# Used by FileUploadForm
+OH_FILE_SOURCE = os.getenv("DJANGO_OH_FILE_SOURCE")
+# Get list of tuples of Oral History Project file groups, using primary key as form value
+FILE_GROUPS = [
+    (f.pk, f.file_type) for f in MediaFileType.objects.all().order_by("file_type")
+]
+
+
+class FileUploadForm(forms.Form):
+    file_group = forms.ChoiceField(
+        choices=FILE_GROUPS,
+        required=True,
+    )
+    # FilePathField (at least) path gets cached automatically by Django at application startup.
+    # There's no direct way to make it see changes to the filesystem; workaround from
+    # https://stackoverflow.com/questions/30656653/suffering-stale-choices-for-filepathfield
+
+    _file_name_kw = dict(
+        path=OH_FILE_SOURCE, recursive=True, allow_files=True, allow_folders=False
+    )
+    file_name = forms.FilePathField(**_file_name_kw)
+
+    # __init__ is called every time the form is needed.
+    # Cache values for 5 seconds (arbitrary); use cache if populated,
+    # otherwise start fresh.
+    def __init__(self, *args, **kwargs):
+        seconds_to_cache = 5
+        key = "file_name-cache-key"
+        choices = cache.get(key)
+        if not choices:
+            field = forms.FilePathField(**self._file_name_kw)
+            choices = field.choices
+            cache.set(key, choices, seconds_to_cache)
+
+        super().__init__(*args, **kwargs)
+        self.base_fields["file_name"].choices = choices

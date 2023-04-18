@@ -1,14 +1,17 @@
 import logging
+from pathlib import Path
 from requests.exceptions import HTTPError
+from django.core.files import File
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest  # for code completion
 from django.http.response import HttpResponse  # for code completion
 from oh_staff_ui.forms import (
+    FileUploadForm,
     ProjectItemForm,
     ItemSearchForm,
 )
-from oh_staff_ui.models import ProjectItem
+from oh_staff_ui.models import MediaFile, ProjectItem
 from oh_staff_ui.views_utils import (
     construct_keyword_query,
     get_ark,
@@ -112,3 +115,29 @@ def show_log(request, line_count: int = 200) -> HttpResponse:
         log_data = f"Log file {log_file} not found"
 
     return render(request, "oh_staff_ui/log.html", {"log_data": log_data})
+
+
+@login_required
+def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
+    item = ProjectItem.objects.get(pk=item_id)
+    files = MediaFile.objects.filter(item=item)
+    if request.method == "POST":
+        form = FileUploadForm(request.POST)
+        if form.is_valid():
+            file_group = form.cleaned_data["file_group"]
+            file_name = form.cleaned_data["file_name"]
+            logger.info(f"FILE INFO: {file_group=} *** {file_name=}")
+            # TODO: Processing, based on file_group
+            new_file = MediaFile(
+                created_by=request.user, item=item, file_type_id=file_group
+            )
+            path = Path(file_name)
+            # TODO: Proper name creation
+            new_name = f"{item.ark.replace('/', '-')}_{path.name}"
+            with path.open(mode="rb") as f:
+                new_file.file = File(f, name=new_name)
+                new_file.save()
+    else:
+        form = FileUploadForm()
+    context = {"item": item, "files": files, "form": form}
+    return render(request, "oh_staff_ui/upload_file.html", context)
