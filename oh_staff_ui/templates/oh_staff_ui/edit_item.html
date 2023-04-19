@@ -1,6 +1,7 @@
 {% extends 'oh_staff_ui/base.html' %}
 
 {% block content %}
+<a href="{% url 'upload_file' item.id %}">View files</a>
 <ul>
     <li>id: {{ item.id }}</li>
     <li>ARK: {{ item.ark }}</li>

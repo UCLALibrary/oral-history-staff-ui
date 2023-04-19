@@ -38,3 +38,11 @@ function showEmptyForm(event) {
     // E.g., if there are now 2 name forms, value will change from 1 -> 2.
     total.value = Number(total.value) + 1;
 }
+
+// Disable file upload submit button once clicked.
+// The button is restored to normal once Django completes processing and re-renders the form.
+function disable_upload_button(form) {
+	btn = form.elements.upload_button;
+	btn.textContent = "Please wait...";
+	btn.disabled = true;
+}
