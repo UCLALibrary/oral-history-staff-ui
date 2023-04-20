@@ -119,11 +119,7 @@ class ItemLanguageUsage(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=[
-                    "item",
-                    "value",
-                ],
-                name="language_value_unique",
+                fields=["item", "value"], name="language_value_unique"
             )
         ]
 
