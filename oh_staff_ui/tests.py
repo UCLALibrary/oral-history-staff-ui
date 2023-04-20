@@ -1,8 +1,25 @@
 from pathlib import Path
 from django.core.files import File
+from django.db import IntegrityError
 from django.test import TestCase
 from django.contrib.auth.models import User
-from oh_staff_ui.models import MediaFile, MediaFileType, ProjectItem
+from oh_staff_ui.models import (
+    Copyright,
+    ItemCopyrightUsage,
+    ItemLanguageUsage,
+    ItemNameUsage,
+    ItemPublisherUsage,
+    ItemResourceUsage,
+    ItemSubjectUsage,
+    Language,
+    MediaFile,
+    MediaFileType,
+    Name,
+    ProjectItem,
+    Publisher,
+    Resource,
+    Subject,
+)
 
 
 class MediaFileTestCase(TestCase):
@@ -82,3 +99,66 @@ class MediaFileTestCase(TestCase):
         # Deleting the MediaFile object does *not* automatically delete the file itself.
         for mf in MediaFile.objects.all():
             mf.file.delete()
+
+
+class MetadataUniquenessTestCase(TestCase):
+    # Load the lookup tables needed for these tests.
+    fixtures = [
+        "authority-source-data.json",
+        "item-status-data.json",
+        "item-type-data.json",
+        "name-type-data.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        # Use QAD data for fake user and fake item.
+        cls.user = User.objects.create_user("tester")
+        cls.item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=cls.user,
+            last_modified_by=cls.user,
+            title="Fake title",
+            type_id=1,
+        )
+
+    def test_name_usage_is_unique(self):
+        # Add the same name/type combination to an item twice
+        name = Name.objects.create(value="fake name", source_id=1)
+        ItemNameUsage.objects.create(item=self.item, value=name, type_id=1)
+        with self.assertRaises(IntegrityError):
+            ItemNameUsage.objects.create(item=self.item, value=name, type_id=1)
+
+    def test_subject_usage_is_unique(self):
+        subject = Subject.objects.create(value="fake subject", source_id=1)
+        ItemSubjectUsage.objects.create(item=self.item, value=subject, type_id=1)
+        with self.assertRaises(IntegrityError):
+            ItemSubjectUsage.objects.create(item=self.item, value=subject, type_id=1)
+
+    def test_publisher_usage_is_unique(self):
+        publisher = Publisher.objects.create(value="fake publisher", source_id=1)
+        ItemPublisherUsage.objects.create(item=self.item, value=publisher, type_id=1)
+        with self.assertRaises(IntegrityError):
+            ItemPublisherUsage.objects.create(
+                item=self.item, value=publisher, type_id=1
+            )
+
+    def test_copyright_usage_is_unique(self):
+        copyright = Copyright.objects.create(value="fake copyright", source_id=1)
+        ItemCopyrightUsage.objects.create(item=self.item, value=copyright, type_id=1)
+        with self.assertRaises(IntegrityError):
+            ItemCopyrightUsage.objects.create(
+                item=self.item, value=copyright, type_id=1
+            )
+
+    def test_resource_usage_is_unique(self):
+        resource = Resource.objects.create(value="fake resource", source_id=1)
+        ItemResourceUsage.objects.create(item=self.item, value=resource, type_id=1)
+        with self.assertRaises(IntegrityError):
+            ItemResourceUsage.objects.create(item=self.item, value=resource, type_id=1)
+
+    def test_language_usage_is_unique(self):
+        language = Language.objects.create(value="fake language", source_id=1)
+        ItemLanguageUsage.objects.create(item=self.item, value=language)
+        with self.assertRaises(IntegrityError):
+            ItemLanguageUsage.objects.create(item=self.item, value=language)

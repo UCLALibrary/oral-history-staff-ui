@@ -116,6 +116,13 @@ class ItemLanguageUsage(models.Model):
         Language, on_delete=models.PROTECT, blank=False, null=False
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["item", "value"], name="language_value_unique"
+            )
+        ]
+
 
 class NameType(models.Model):
     type = models.CharField(max_length=256, blank=False, null=False)
@@ -152,6 +159,13 @@ class ItemNameUsage(models.Model):
     type = models.ForeignKey(
         NameType, on_delete=models.PROTECT, blank=False, null=False
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["item", "value", "type"], name="name_value_type_unique"
+            )
+        ]
 
 
 class SubjectType(models.Model):
@@ -191,6 +205,13 @@ class ItemSubjectUsage(models.Model):
     type = models.ForeignKey(
         SubjectType, on_delete=models.PROTECT, blank=False, null=False
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["item", "value", "type"], name="subject_value_type_unique"
+            )
+        ]
 
 
 class AltTitleType(models.Model):
@@ -316,6 +337,13 @@ class ItemPublisherUsage(models.Model):
         PublisherType, on_delete=models.PROTECT, blank=False, null=False
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["item", "value", "type"], name="publisher_value_type_unique"
+            )
+        ]
+
 
 class CopyrightType(models.Model):
     type = models.CharField(max_length=256, blank=False, null=False)
@@ -355,6 +383,13 @@ class ItemCopyrightUsage(models.Model):
         CopyrightType, on_delete=models.PROTECT, blank=False, null=False
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["item", "value", "type"], name="copyright_value_type_unique"
+            )
+        ]
+
 
 class ResourceType(models.Model):
     type = models.CharField(max_length=256, blank=False, null=False)
@@ -393,6 +428,13 @@ class ItemResourceUsage(models.Model):
     type = models.ForeignKey(
         ResourceType, on_delete=models.PROTECT, blank=False, null=False
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["item", "value", "type"], name="resource_value_type_unique"
+            )
+        ]
 
 
 class Format(models.Model):
