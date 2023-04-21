@@ -43,10 +43,10 @@ done
 # Load main data files.
 echo "=================================="
 echo "Reloading all data, please wait..."
-# Special case: CSV file, currently in fixtures directory.
-python manage.py import_projectitems ${FIXTURE_DIR}/oh-projectitems-export-3.csv
-# Other files are TSV, in export_scripts directory.
+
+# Files are TSV, in export_scripts directory.
 DATA_DIR=${PROJECT_ROOT}/export_scripts
+python manage.py import_projectitems ${DATA_DIR}/project-items-export.tsv
 python manage.py import_altids ${DATA_DIR}/Alt_ID.tsv
 python manage.py import_alttitles ${DATA_DIR}/AltTitle.tsv
 python manage.py import_copyrights ${DATA_DIR}/Copyright.tsv

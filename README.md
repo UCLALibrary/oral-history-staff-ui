@@ -80,7 +80,7 @@ The container runs via `docker_scripts/entrypoint.sh`, which
    $ docker-compose exec django python manage.py loaddata --app oh_staff_ui seed-data
    #
    # Load full set of item data
-   $ docker-compose exec django python manage.py import_projectitems oh-projectitems-export-3.csv
+   $ docker-compose exec django python manage.py import_projectitems project-items-export.tsv
    # Load full set of name data
    $ docker-compose exec django python manage.py import_names export_scripts/Name.tsv
    ```

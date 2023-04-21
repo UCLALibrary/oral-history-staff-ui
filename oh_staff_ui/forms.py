@@ -193,16 +193,12 @@ class FormatForm(forms.Form):
 
 # Used by FileUploadForm
 OH_FILE_SOURCE = os.getenv("DJANGO_OH_FILE_SOURCE")
-# Get list of tuples of Oral History Project file groups, using primary key as form value
-FILE_GROUPS = [
-    (f.pk, f.file_type) for f in MediaFileType.objects.all().order_by("file_type")
-]
 
 
 class FileUploadForm(forms.Form):
-    file_group = forms.ChoiceField(
-        choices=FILE_GROUPS,
-        required=True,
+    file_group = forms.ModelChoiceField(
+        queryset=MediaFileType.objects.all().order_by("file_type"),
+        empty_label="File type?",
     )
     # FilePathField (at least) path gets cached automatically by Django at application startup.
     # There's no direct way to make it see changes to the filesystem; workaround from

@@ -45,9 +45,9 @@ sleep 15
 if [ "${RELOAD}" = "Y" ]; then
   echo "=================================="
   echo "Reloading all data, please wait..."
-  # Special case: CSV file, in fixtures directory
-  docker-compose exec django python manage.py import_projectitems oh_staff_ui/fixtures/oh-projectitems-export-3.csv
-  # Other files are TSV, in export_scripts directory
+  
+  # Files are TSV, in export_scripts directory
+  docker-compose exec django python manage.py import_projectitems export_scripts/project-items-export.tsv
   docker-compose exec django python manage.py import_altids export_scripts/Alt_ID.tsv
   docker-compose exec django python manage.py import_alttitles export_scripts/AltTitle.tsv
   docker-compose exec django python manage.py import_copyrights export_scripts/Copyright.tsv

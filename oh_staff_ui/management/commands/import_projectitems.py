@@ -6,7 +6,7 @@ import datetime
 
 
 class Command(BaseCommand):
-    help = "Deletes all existing ProjectItem data, then imports from a CSV file"
+    help = "Deletes all existing ProjectItem data, then imports from a TSV file"
 
     def add_arguments(self, parser):
         parser.add_argument("filepath", type=str)
@@ -16,9 +16,9 @@ class Command(BaseCommand):
         print("Deleting all existing ProjectItems.")
         ProjectItem.objects.all().delete()
 
-        # open and read input CSV
+        # open and read input TSV
         with open(options["filepath"], mode="r") as f:
-            dict_reader = DictReader(f)
+            dict_reader = DictReader(f, delimiter="\t")
             projectitem_dicts = list(dict_reader)
 
         # start with known top-level ProjectItem to be deleted
@@ -68,10 +68,12 @@ class Command(BaseCommand):
     def add_projectitem(self, pi_dict: dict, has_parent=True) -> list:
         p = ProjectItem(
             ark=pi_dict["ARK"],
+            coverage=pi_dict["COVERAGE"],
             create_date=self.format_date(pi_dict["CREATE_DATE"]),
             created_by=self.get_or_create_user(pi_dict["CREATED_BY"]),
             last_modified_date=self.format_date(pi_dict["LAST_MODIFIED_DATE"]),
             last_modified_by=self.get_or_create_user(pi_dict["LAST_MODIFIED_BY"]),
+            relation=pi_dict["RELATION"],
             sequence=self.format_sequence(pi_dict["SEQUENCE"]),
             status=ItemStatus.objects.get(status=pi_dict["STATUS"]),
             title=pi_dict["TITLE"],
@@ -82,7 +84,8 @@ class Command(BaseCommand):
         p.save()
 
     def format_date(self, date: str) -> str:
-        return datetime.datetime.strptime(date, "%d-%b-%y").strftime("%Y-%m-%d")
+        print(date)
+        return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
 
     def format_sequence(self, seq) -> int:
         if seq == "":
