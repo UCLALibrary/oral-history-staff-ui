@@ -162,3 +162,14 @@ class MetadataUniquenessTestCase(TestCase):
         ItemLanguageUsage.objects.create(item=self.item, value=language)
         with self.assertRaises(IntegrityError):
             ItemLanguageUsage.objects.create(item=self.item, value=language)
+    
+    def test_item_id_is_unique(self):
+        with self.assertRaises(IntegrityError):
+            item = ProjectItem.objects.create(
+                pk=self.item.pk,
+                ark=self.item.ark,
+                created_by=self.user,
+                last_modified_by=self.user,
+                title="Fake title",
+                type_id=1
+            )
