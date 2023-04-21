@@ -84,13 +84,12 @@ class Command(BaseCommand):
         p.save()
 
     def format_date(self, date: str) -> str:
-        print(date)
         return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
 
     def format_sequence(self, seq) -> int:
         if seq == "":
             seq = 0
-        return seq
+        return int(float(seq))
 
     def get_or_create_user(self, email: str) -> User:
         username = email.split("@")[0]
