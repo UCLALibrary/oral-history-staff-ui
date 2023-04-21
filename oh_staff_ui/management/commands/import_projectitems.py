@@ -2,7 +2,8 @@ from django.core.management.base import BaseCommand
 from oh_staff_ui.models import ProjectItem, ItemStatus, ItemType
 from django.contrib.auth.models import User
 from csv import DictReader
-import datetime
+from datetime import datetime
+from django.utils import timezone
 
 
 class Command(BaseCommand):
@@ -84,7 +85,10 @@ class Command(BaseCommand):
         p.save()
 
     def format_date(self, date: str) -> str:
-        return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
+        converted_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        tz = timezone.get_current_timezone()
+        date_with_tz = timezone.make_aware(converted_date, tz, True)
+        return date_with_tz
 
     def format_sequence(self, seq) -> int:
         if seq == "":

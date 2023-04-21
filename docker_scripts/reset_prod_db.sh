@@ -50,13 +50,11 @@ python manage.py import_projectitems ${DATA_DIR}/project-items-export.tsv
 python manage.py import_altids ${DATA_DIR}/Alt_ID.tsv
 python manage.py import_alttitles ${DATA_DIR}/AltTitle.tsv
 python manage.py import_copyrights ${DATA_DIR}/Copyright.tsv
-python manage.py import_coverages ${DATA_DIR}/Chronological_period_covered.tsv
 python manage.py import_dates ${DATA_DIR}/Date.tsv
 python manage.py import_descriptions ${DATA_DIR}/Description.tsv
 python manage.py import_formats ${DATA_DIR}/'Format_(Length,_pages).tsv'
 python manage.py import_languages ${DATA_DIR}/Language.tsv
 python manage.py import_names ${DATA_DIR}/Name.tsv
 python manage.py import_publishers ${DATA_DIR}/Publisher.tsv
-python manage.py import_relations ${DATA_DIR}/Relation.tsv
 python manage.py import_resources ${DATA_DIR}/Type_of_Resource_.tsv
 python manage.py import_subjects ${DATA_DIR}/Subject.tsv

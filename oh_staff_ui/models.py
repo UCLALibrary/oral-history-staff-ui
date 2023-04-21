@@ -44,8 +44,8 @@ def get_default_type():
 
 class ProjectItem(models.Model):
     ark = models.CharField(max_length=40, blank=False, null=False)
-    coverage = models.CharField(max_length=256, blank=True, null=True)
-    create_date = models.DateField(blank=False, null=False, default=timezone.now)
+    coverage = models.CharField(max_length=256, blank=True, null=False, default='')
+    create_date = models.DateTimeField(blank=False, null=False, default=timezone.now)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -53,7 +53,7 @@ class ProjectItem(models.Model):
         null=False,
         related_name="+",
     )
-    last_modified_date = models.DateField(blank=False, null=False, default=timezone.now)
+    last_modified_date = models.DateTimeField(blank=False, null=False, default=timezone.now)
     last_modified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -62,7 +62,7 @@ class ProjectItem(models.Model):
         related_name="+",
     )
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
-    relation = models.CharField(max_length=256, blank=True, null=True)
+    relation = models.CharField(max_length=256, blank=True, null=False, default='')
     sequence = models.IntegerField(blank=False, null=False, default=0)
     status = models.ForeignKey(
         ItemStatus,
