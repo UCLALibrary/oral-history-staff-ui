@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from requests.exceptions import HTTPError
+from django.contrib import messages
 from django.core.files import File
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
@@ -129,14 +130,18 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
             logger.info(f"FILE INFO: {file_group=} *** {file_name=}")
             # TODO: Processing, based on file_group
             new_file = MediaFile(
-                created_by=request.user, item=item, file_type_id=file_group
+                created_by=request.user, item=item, file_type=file_group
             )
             path = Path(file_name)
             # TODO: Proper name creation
             new_name = f"{item.ark.replace('/', '-')}_{path.name}"
-            with path.open(mode="rb") as f:
-                new_file.file = File(f, name=new_name)
-                new_file.save()
+            try:
+                with path.open(mode="rb") as f:
+                    new_file.file = File(f, name=new_name)
+                    new_file.save()
+            except FileExistsError as ex:
+                logger.exception(ex)
+                messages.error(request, ex)
     else:
         form = FileUploadForm()
     context = {"item": item, "files": files, "form": form}

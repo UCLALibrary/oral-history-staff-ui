@@ -198,14 +198,19 @@ OH_FILE_SOURCE = os.getenv("DJANGO_OH_FILE_SOURCE")
 class FileUploadForm(forms.Form):
     file_group = forms.ModelChoiceField(
         queryset=MediaFileType.objects.all().order_by("file_type"),
-        empty_label="File type?",
+        empty_label="Please select a file type:",
+        label="File type:",
     )
     # FilePathField (at least) path gets cached automatically by Django at application startup.
     # There's no direct way to make it see changes to the filesystem; workaround from
     # https://stackoverflow.com/questions/30656653/suffering-stale-choices-for-filepathfield
 
     _file_name_kw = dict(
-        path=OH_FILE_SOURCE, recursive=True, allow_files=True, allow_folders=False
+        path=OH_FILE_SOURCE,
+        recursive=True,
+        allow_files=True,
+        allow_folders=False,
+        label="File:",
     )
     file_name = forms.FilePathField(**_file_name_kw)
 
