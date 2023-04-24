@@ -94,6 +94,11 @@ class MediaFileTestCase(TestCase):
         # Confirm master is parent of submaster.
         self.assertEqual(master, submaster.parent)
 
+    def test_duplicate_files_not_allowed(self):
+        self.create_master_audio_file()
+        with self.assertRaises(FileExistsError):
+            self.create_master_audio_file()
+
     def tearDown(self):
         # If new files aren't deleted, Django will create next file with random-ish name.
         # Deleting the MediaFile object does *not* automatically delete the file itself.
@@ -104,10 +109,8 @@ class MediaFileTestCase(TestCase):
 class MetadataUniquenessTestCase(TestCase):
     # Load the lookup tables needed for these tests.
     fixtures = [
-        "authority-source-data.json",
         "item-status-data.json",
         "item-type-data.json",
-        "name-type-data.json",
     ]
 
     @classmethod
@@ -162,14 +165,17 @@ class MetadataUniquenessTestCase(TestCase):
         ItemLanguageUsage.objects.create(item=self.item, value=language)
         with self.assertRaises(IntegrityError):
             ItemLanguageUsage.objects.create(item=self.item, value=language)
-    
+
     def test_item_id_is_unique(self):
         with self.assertRaises(IntegrityError):
-            item = ProjectItem.objects.create(
+            ProjectItem.objects.create(
                 pk=self.item.pk,
                 ark=self.item.ark,
                 created_by=self.user,
                 last_modified_by=self.user,
                 title="Fake title",
-                type_id=1
+                type_id=1,
             )
+
+    def test_item_count(self):
+        self.assertEqual(ProjectItem.objects.count(), 1)

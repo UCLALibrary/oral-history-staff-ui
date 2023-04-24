@@ -1,3 +1,4 @@
+from pathlib import Path
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -44,7 +45,7 @@ def get_default_type():
 
 class ProjectItem(models.Model):
     ark = models.CharField(max_length=40, blank=False, null=False)
-    coverage = models.CharField(max_length=256, blank=True, null=False, default='')
+    coverage = models.CharField(max_length=256, blank=True, null=False, default="")
     create_date = models.DateTimeField(blank=False, null=False, default=timezone.now)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -53,7 +54,9 @@ class ProjectItem(models.Model):
         null=False,
         related_name="+",
     )
-    last_modified_date = models.DateTimeField(blank=False, null=False, default=timezone.now)
+    last_modified_date = models.DateTimeField(
+        blank=False, null=False, default=timezone.now
+    )
     last_modified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -62,7 +65,7 @@ class ProjectItem(models.Model):
         related_name="+",
     )
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
-    relation = models.CharField(max_length=256, blank=True, null=False, default='')
+    relation = models.CharField(max_length=256, blank=True, null=False, default="")
     sequence = models.IntegerField(blank=False, null=False, default=0)
     status = models.ForeignKey(
         ItemStatus,
@@ -522,3 +525,12 @@ class MediaFile(models.Model):
     item = models.ForeignKey(
         ProjectItem, on_delete=models.PROTECT, blank=False, null=False
     )
+
+    def save(self, *args, **kwargs):
+        new_name = get_file_directory(self, self.file.name)
+        # Throw an exception if file itself exists, or if there's an object for it already.
+        # Check both, since masters could be moved out of local filesystem after a while.
+        if Path(new_name).exists() or MediaFile.objects.filter(file=new_name):
+            raise FileExistsError(f"File already exists: {new_name}")
+        else:
+            super().save(*args, **kwargs)
