@@ -6,8 +6,9 @@ RUN apt-get update
 # Set correct timezone
 RUN ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 
-# Install dependencies needed to build psycopg2 python module
-RUN apt-get install -y gcc python3-dev libpq-dev
+# Install dependencies needed to build psycopg2 python module,
+# along with ffmpeg
+RUN apt-get install -y gcc python3-dev libpq-dev ffmpeg
 
 # Create django user and switch context to that user
 RUN useradd -c "django app user" -d /home/django -s /bin/bash -m django
