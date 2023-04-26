@@ -60,3 +60,10 @@ ul.tree {
 caption {
     font-weight: bold;
 }
+
+form select,
+form input,
+form textarea {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 13.333px;
+}
