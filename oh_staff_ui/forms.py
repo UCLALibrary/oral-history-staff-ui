@@ -39,7 +39,7 @@ class ProjectItemForm(forms.Form):
         ).order_by("title"),
     )
     title = forms.CharField(
-        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 140})
     )
     type = forms.ModelChoiceField(
         required=True,
@@ -50,10 +50,10 @@ class ProjectItemForm(forms.Form):
         required=True, max_length=3, widget=forms.TextInput(attrs={"size": 3})
     )
     coverage = forms.CharField(
-        required=False, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+        required=False, max_length=256, widget=forms.TextInput(attrs={"size": 140})
     )
     relation = forms.CharField(
-        required=False, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+        required=False, max_length=256, widget=forms.TextInput(attrs={"size": 140})
     )
     status = forms.ModelChoiceField(
         required=True,
@@ -145,7 +145,7 @@ class AltTitleForm(forms.Form):
         empty_label="Please select a qualifier:",
     )
     value = forms.CharField(
-        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 100})
     )
 
 
@@ -156,7 +156,7 @@ class AltIdForm(forms.Form):
         empty_label="Please select a qualifier:",
     )
     value = forms.CharField(
-        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 100})
     )
 
 
@@ -169,7 +169,7 @@ class DescriptionForm(forms.Form):
     value = forms.CharField(
         required=True,
         max_length=1024,
-        widget=forms.Textarea(attrs={"cols": 70, "rows": 3}),
+        widget=forms.Textarea(attrs={"cols": 98, "rows": 3}),
     )
 
 
@@ -180,14 +180,14 @@ class DateForm(forms.Form):
         empty_label="Please select a qualifier:",
     )
     value = forms.CharField(
-        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 100})
     )
 
 
 class FormatForm(forms.Form):
     usage_id = forms.IntegerField(initial=0, widget=forms.HiddenInput())
     value = forms.CharField(
-        required=True, max_length=1024, widget=forms.TextInput(attrs={"size": 80})
+        required=True, max_length=1024, widget=forms.TextInput(attrs={"size": 100})
     )
 
 

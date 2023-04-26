@@ -1,29 +1,55 @@
 {% extends 'oh_staff_ui/base.html' %}
 
 {% block content %}
-<a href="{% url 'upload_file' item.id %}">View files</a>
-<ul>
-    <li>id: {{ item.id }}</li>
-    <li>ARK: {{ item.ark }}</li>
-    <li>created: {{ item.create_date }} by {{ item.created_by }}</li>
-    <li>updated: {{ item.last_modified_date }} by {{ item.last_modified_by }}</li>
-    <li>Parent:
-        {% if item.parent %}
-        <a href="{% url 'edit_item' item.parent.id %}">{{ item.parent }}</a>
-        {% else %}
-        {{ item.parent }}
-        {% endif %}
-    </li>
-    {% if item.type.type == "Series" or item.type.type == "Interview" %}
-    <li><a href="{% url 'add_item_from_parent' item.id %}">Add a child item</a></li>
-    {% endif %}
-</ul>
-<ul class="tree">
-    {% include "oh_staff_ui/item_tree.html" %}
-</ul>
+
+<table class="header-metadata">
+    <caption>Item Information</caption>
+    <tr>
+        <td>Title</td>
+        <td>{{ item.title }}</td>
+    </tr>
+    <tr>
+        <td>ARK</td>
+        <td>{{ item.ark }}</td>
+    </tr>
+    <tr>
+        <td>Parent</td>
+        <td>{% if item.parent %}
+            <a href="{% url 'edit_item' item.parent.id %}">{{ item.parent }}</a>
+            {% else %}
+            {{ item.parent }}
+            {% endif %}</td>
+    </tr>
+    <tr>
+        <td>Created</td>
+        <td>{{ item.create_date }} by {{ item.created_by }}</td>
+    </tr>
+    <tr>
+        <td>Updated</td>
+        <td>{{ item.last_modified_date }} by {{ item.last_modified_by }}</td>
+    </tr>
+    <tr>
+        <td>Item Actions</td>
+        <td>
+            {% if item.type.type == "Series" or item.type.type == "Interview" %}
+            <a href="{% url 'add_item_from_parent' item.id %}">Add a child item</a>   |   
+            {% endif %}
+            <a href="{% url 'upload_file' item.id %}">View files</a>
+        </td>
+    </tr>
+</table>
+<div>
+    <p>Item Hierarchy Context (use arrow to expand)</p>
+    <ul class="tree">
+        {% include "oh_staff_ui/item_tree.html" %}
+    </ul>
+</div>
+<hr>
 <form name="edit_item" onsubmit="return validateEditItemForm()" id="edit_item" method="POST">
     {% csrf_token %}
+    <div class="basic_metadata">
     {{ item_form.as_div }}
+    </div>
     <br>
     {{ name_formset.management_form }}
     {{ subject_formset.management_form }}
@@ -190,23 +216,6 @@
             <td>{{ date_formset.empty_form.value }}</td>
             <td>Delete? {{ date_formset.empty_form.DELETE }}</td>
         </tr>
-        {% for language_form in language_formset %}
-        <tr>
-            <td>{% if forloop.first %}
-                <button id="language_add" class="add_formset">+</button>&nbsp;Language(s):
-                {% endif %}
-            </td>
-            <td>{{ language_form.usage_id }}</td>
-            <td>{{ language_form.value }}</td>
-            <td>Delete? {{ language_form.DELETE }}</td>
-        </tr>
-        {% endfor %}
-        <tr id="language_empty_form" class="empty_form">
-            <td></td>
-            <td>{{ language_formset.empty_form.usage_id }}</td>
-            <td>{{ language_formset.empty_form.value }}</td>
-            <td>Delete? {{ language_formset.empty_form.DELETE }}</td>
-        </tr>
         {% for format_form in format_formset %}
         <tr>
             <td>{% if forloop.first %}
@@ -223,6 +232,23 @@
             <td>{{ format_formset.empty_form.usage_id }}</td>
             <td>{{ format_formset.empty_form.value }}</td>
             <td>Delete? {{ format_formset.empty_form.DELETE }}</td>
+        </tr>
+        {% for language_form in language_formset %}
+        <tr>
+            <td>{% if forloop.first %}
+                <button id="language_add" class="add_formset">+</button>&nbsp;Language(s):
+                {% endif %}
+            </td>
+            <td>{{ language_form.usage_id }}</td>
+            <td>{{ language_form.value }}</td>
+            <td>Delete? {{ language_form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        <tr id="language_empty_form" class="empty_form">
+            <td></td>
+            <td>{{ language_formset.empty_form.usage_id }}</td>
+            <td>{{ language_formset.empty_form.value }}</td>
+            <td>Delete? {{ language_formset.empty_form.DELETE }}</td>
         </tr>
     </table>
     <br>
