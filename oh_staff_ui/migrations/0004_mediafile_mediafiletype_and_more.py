@@ -8,55 +8,90 @@ import oh_staff_ui.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('oh_staff_ui', '0003_altid_oh_staff_ui_value_674bc1_idx_and_more'),
+        ("oh_staff_ui", "0003_altid_oh_staff_ui_value_674bc1_idx_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MediaFile',
+            name="MediaFile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('create_date', models.DateField(default=django.utils.timezone.now)),
-                ('file', models.FileField(upload_to=oh_staff_ui.models.get_file_directory)),
-                ('sequence', models.IntegerField(default=0)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("create_date", models.DateField(default=django.utils.timezone.now)),
+                (
+                    "file",
+                    models.FileField(upload_to=oh_staff_ui.models.get_target_path),
+                ),
+                ("sequence", models.IntegerField(default=0)),
             ],
         ),
         migrations.CreateModel(
-            name='MediaFileType',
+            name="MediaFileType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file_type', models.CharField(max_length=40)),
-                ('file_type_description', models.CharField(max_length=256)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("file_type", models.CharField(max_length=40)),
+                ("file_type_description", models.CharField(max_length=256)),
             ],
             options={
-                'ordering': ['file_type'],
+                "ordering": ["file_type"],
             },
         ),
         migrations.AddIndex(
-            model_name='mediafiletype',
-            index=models.Index(fields=['file_type'], name='oh_staff_ui_file_ty_2526fb_idx'),
+            model_name="mediafiletype",
+            index=models.Index(
+                fields=["file_type"], name="oh_staff_ui_file_ty_2526fb_idx"
+            ),
         ),
         migrations.AddField(
-            model_name='mediafile',
-            name='created_by',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="mediafile",
+            name="created_by",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='mediafile',
-            name='file_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='oh_staff_ui.mediafiletype'),
+            model_name="mediafile",
+            name="file_type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to="oh_staff_ui.mediafiletype",
+            ),
         ),
         migrations.AddField(
-            model_name='mediafile',
-            name='item',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='oh_staff_ui.projectitem'),
+            model_name="mediafile",
+            name="item",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to="oh_staff_ui.projectitem",
+            ),
         ),
         migrations.AddField(
-            model_name='mediafile',
-            name='parent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='oh_staff_ui.mediafile'),
+            model_name="mediafile",
+            name="parent",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="oh_staff_ui.mediafile",
+            ),
         ),
     ]

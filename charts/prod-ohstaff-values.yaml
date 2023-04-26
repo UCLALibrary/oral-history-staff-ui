@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: uclalibrary/oral-history-staff-ui
-  tag: v0.6.0
+  tag: v0.7.0
   pullPolicy: Always
 
 nameOverride: ""
@@ -97,7 +97,7 @@ volumeMounts:
   - name: "ohmasters"
     mountPath: "/media/oh_lz"
   - name: "ohwowza"
-    mountPath: "/media/oh_wowza/"
+    mountPath: "/media/oh_wowza"
   - name: "ohstatic"
     mountPath: "/media/oh_static"
 

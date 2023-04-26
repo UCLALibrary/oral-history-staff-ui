@@ -20,7 +20,9 @@
   {% for file in files %}
   <tr>
     <td>{{ file.file_type }}</td>
+    <td>Added: {{ file.create_date }} by {{ file.created_by }}</td>
     <td>{{ file.file.name }}</td>
+    <td>Sequence: {{ file.sequence }}</td>
   </tr>
   {% endfor %}
 </table>
@@ -29,7 +31,7 @@
 {% if messages %}
 <div class="box">
 {% for message in messages %}
-  {{ message }}
+  <div>{{ message }}</div>
 {% endfor %}
 </div>
 {% endif %}
@@ -38,11 +40,11 @@
     {% csrf_token %}
     <table>
       <tr>
-        <td>{{ form.file_group.label }}</td>
+        <td>{{ form.file_type.label }}</td>
         <td>{{ form.file_name.label }}</td>
       </tr>
       <tr>
-        <td>{{ form.file_group }}</td>
+        <td>{{ form.file_type }}</td>
         <td>{{ form.file_name }}</td>
       </tr>
     </table>
