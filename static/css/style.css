@@ -23,3 +23,40 @@ td {
     padding: 10px;
     border: 1px solid black;
 }
+
+ form[name="edit_item"] div {
+     display: table-row;
+ }
+ 
+ form[name="edit_item"] label {
+     display: table-cell;
+ }
+
+ form[name="edit_item"] select,
+ form[name="edit_item"] input,
+ form[name="edit_item"] textarea {
+    margin-left: 10px;
+    margin-right: 5px;
+ }
+
+ form[name="edit_item"] .basic_metadata select,
+ form[name="edit_item"] .basic_metadata input,
+ form[name="edit_item"] .basic_metadata textarea {
+    margin-bottom: 3px;
+ }
+
+.header-metadata{
+    border-collapse: collapse;
+ }
+.header-metadata td{
+    padding: 4px;
+    border: 1px solid;
+}
+
+ul.tree {
+    margin-top: -10px;
+}
+
+caption {
+    font-weight: bold;
+}
