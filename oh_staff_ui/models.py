@@ -505,9 +505,8 @@ class MediaFileType(models.Model):
 
 def get_target_path(instance, filename):
     # Determines where a MediaFile.file will be stored.
-    # For now, use constant samples subdirectory
-    # and ignore instance parameter passed in by FileField.
-    logger.info(f"*** In get_target_path() : {filename = }")
+    # For now, ignore instance parameter passed in by FileField.
+    # Currently, file_utils.
     return filename
 
 
@@ -532,13 +531,9 @@ class MediaFile(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        logger.info("*** Starting save()")
-        logger.info(f"*** {self.file.name = }")
-        logger.info("HELP")
         # When files are deleted, self.file.name is already None at this point.
         if self.file.name is not None:
             new_name = get_target_path(self, self.file.name)
-            logger.info(f"*** {new_name = }")
             # Throw an exception if file itself exists, or if there's an object for it already.
             # Check both, since masters could be moved out of local filesystem after a while.
             if Path(new_name).exists() or MediaFile.objects.filter(file=new_name):
