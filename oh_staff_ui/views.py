@@ -1,8 +1,8 @@
 import logging
-from pathlib import Path
 from requests.exceptions import HTTPError
 from django.contrib import messages
-from django.core.files import File
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest  # for code completion
@@ -125,23 +125,25 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
     if request.method == "POST":
         form = FileUploadForm(request.POST)
         if form.is_valid():
-            file_group = form.cleaned_data["file_group"]
+            file_type = form.cleaned_data["file_type"]
             file_name = form.cleaned_data["file_name"]
-            logger.info(f"FILE INFO: {file_group=} *** {file_name=}")
-            # TODO: Processing, based on file_group
-            new_file = MediaFile(
-                created_by=request.user, item=item, file_type=file_group
-            )
-            path = Path(file_name)
-            # TODO: Proper name creation
-            new_name = f"{item.ark.replace('/', '-')}_{path.name}"
             try:
-                with path.open(mode="rb") as f:
-                    new_file.file = File(f, name=new_name)
-                    new_file.save()
-            except FileExistsError as ex:
-                logger.exception(ex)
-                messages.error(request, ex)
+                call_command(
+                    "process_file",
+                    item_id=item_id,
+                    file_name=file_name,
+                    file_type=file_type,
+                    request=request,
+                )
+                messages.success(request, f"{file_name} was successfully processed")
+
+            # Errors from process_file, called above
+            # TODO: Are there more specific errors to be caught?
+            except (CommandError, FileExistsError, ValueError) as e:
+                messages.error(request, str(e))
+            except Exception as e:
+                logger.exception(e)
+                messages.error(request, "General error: " + str(e))
     else:
         form = FileUploadForm()
     context = {"item": item, "files": files, "form": form}

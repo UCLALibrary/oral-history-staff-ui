@@ -3,6 +3,10 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class ItemStatus(models.Model):
     status = models.CharField(max_length=40)
@@ -499,11 +503,11 @@ class MediaFileType(models.Model):
         ordering = ["file_type"]
 
 
-def get_file_directory(instance, filename):
-    # Eventually this will determine where a MediaFile.file should be stored.
-    # For now, use constant samples subdirectory
-    # and ignore instance parameter passed in by FileField.
-    return f"samples/managed/{filename}"
+def get_target_path(instance, filename):
+    # Determines where a MediaFile.file will be stored.
+    # For now, ignore instance parameter passed in by FileField.
+    # Currently, file_utils.
+    return filename
 
 
 class MediaFile(models.Model):
@@ -515,11 +519,11 @@ class MediaFile(models.Model):
         related_name="+",
     )
     create_date = models.DateField(blank=False, null=False, default=timezone.now)
-    # TODO: Correct value for upload_to, relative to MEDIA_ROOT
-    file = models.FileField(upload_to=get_file_directory)
+    file = models.FileField(upload_to=get_target_path)
     file_type = models.ForeignKey(
         MediaFileType, on_delete=models.PROTECT, blank=False, null=False
     )
+    # TODO: Change this: remove blank, change default to 1?
     sequence = models.IntegerField(blank=False, null=False, default=0)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
     item = models.ForeignKey(
@@ -527,10 +531,11 @@ class MediaFile(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        new_name = get_file_directory(self, self.file.name)
-        # Throw an exception if file itself exists, or if there's an object for it already.
-        # Check both, since masters could be moved out of local filesystem after a while.
-        if Path(new_name).exists() or MediaFile.objects.filter(file=new_name):
-            raise FileExistsError(f"File already exists: {new_name}")
-        else:
-            super().save(*args, **kwargs)
+        # When files are deleted, self.file.name is already None at this point.
+        if self.file.name is not None:
+            new_name = get_target_path(self, self.file.name)
+            # Throw an exception if file itself exists, or if there's an object for it already.
+            # Check both, since masters could be moved out of local filesystem after a while.
+            if Path(new_name).exists() or MediaFile.objects.filter(file=new_name):
+                raise FileExistsError(f"File already exists: {new_name}")
+        super().save(*args, **kwargs)

@@ -199,3 +199,62 @@ In deployed container:
 Tests focus on code which has significant side effects, like creating & changing files.  Run tests in the container:
 
 ```$ docker-compose exec django python manage.py test```
+
+### File management
+
+In the local development environment, samples files for testing are in the `samples` directory.  This directory and its files are under version control, so only add small files, and be sure any real files have no copyright restrictions.
+
+As files are processed locally, they go into subdirectories of `media_dev`.  The top-level subdirectories are defined via environment variables:
+* `DJANGO_OH_MASTERSLZ`
+* `DJANGO_OH_WOWZA`
+* `DJANGO_OH_STATIC`
+
+These directories are under version control, but not any files or subdirectories below the top-level ones.
+```
+media_dev/
+├── oh_lz
+├── oh_static
+└── oh_wowza
+```
+
+Processed files go into various subdirectories below these top-level ones, depending on file use (master, submaster, thumbnail) and content type (audio, image, pdf, text).  Subdirectories are created automatically by Django as needed.
+
+Example, after uploading 1 of each type of master:
+```
+media_dev/
+├── oh_lz
+│   ├── audio
+│   │   └── masters
+│   │       └── 21198-zz000905ms-1-master.wav
+│   ├── masters
+│   │   └── 21198-zz000905ms-2-master.tiff
+│   ├── pdf
+│   │   └── masters
+│   │       └── 21198-zz000905ms-3-master.pdf
+│   └── text
+│       └── masters
+│           └── 21198-zz000905ms-4-master.xml
+├── oh_static
+└── oh_wowza
+```
+TODO: This will be updated once derivative processing is in place.
+
+#### File deletion
+
+Currently, there is no support in the application for deleting files - a feature to be added later, once specs are agreed on.
+
+To delete files locally, use the Django shell:
+```
+$ docker-exec exec django python manage.py shell
+
+>>> from oh_staff_ui.models import MediaFile
+>>> for mf in MediaFile.objects.all():
+...   mf.file.delete()
+...   mf.delete()
+...
+(1, {'oh_staff_ui.MediaFile': 1})
+(1, {'oh_staff_ui.MediaFile': 1})
+(1, {'oh_staff_ui.MediaFile': 1})
+(1, {'oh_staff_ui.MediaFile': 1})
+```
+Deleting a `MediaFile` object does _*not*_ currently delete any `FileField` object associated with it, so it's necessary to do a `file.delete()` first.

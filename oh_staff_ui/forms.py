@@ -196,7 +196,7 @@ OH_FILE_SOURCE = os.getenv("DJANGO_OH_FILE_SOURCE")
 
 
 class FileUploadForm(forms.Form):
-    file_group = forms.ModelChoiceField(
+    file_type = forms.ModelChoiceField(
         queryset=MediaFileType.objects.all().order_by("file_type"),
         empty_label="Please select a file type:",
         label="File type:",

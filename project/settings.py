@@ -188,3 +188,18 @@ LOGIN_REDIRECT_URL = "/"
 
 # ARK minter
 ARK_MINTER = os.getenv("DJANGO_ARK_MINTER")
+
+# Directories for uploaded files and their derivatives.
+# We're not using MEDIA_ROOT, but specifying directories
+# via environment variables.
+# Users select files to upload from here
+OH_FILE_SOURCE = os.getenv("DJANGO_OH_FILE_SOURCE")
+# This was added for DLCS phase 1 but not used;
+# TODO: Remove from chart?
+# OH_LIBPARTNERS = os.getenv("DJANGO_OH_LIBPARTNERS")
+# Masters "shadow landing zone"
+OH_MASTERSLZ = os.getenv("DJANGO_OH_MASTERSLZ")
+# Wowza
+OH_WOWZA = os.getenv("DJANGO_OH_WOWZA")
+# Static files
+OH_STATIC = os.getenv("DJANGO_OH_STATIC")
