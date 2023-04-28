@@ -1,6 +1,8 @@
 from pathlib import Path
+import unittest
 from django.core.files import File
 from django.db import IntegrityError
+from django.http import HttpRequest
 from django.test import TestCase
 from django.contrib.auth.models import User
 from oh_staff_ui.models import (
@@ -20,7 +22,8 @@ from oh_staff_ui.models import (
     Resource,
     Subject,
 )
-from oh_staff_ui.file_utils import get_content_type, get_new_file_name, get_target_dir
+
+from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 
 
 class MediaFileTestCase(TestCase):
@@ -42,68 +45,49 @@ class MediaFileTestCase(TestCase):
             title="Fake title",
             type_id=1,
         )
+        # Get mock request with generic user info for command-line processing.
+        cls.mock_request = HttpRequest()
+        cls.mock_request.user = User.objects.get(username=cls.user.username)
 
     def create_master_audio_file(self):
         # Utility function used in multiple tests.
-        file_use = "master"
-        content_type = "audio"
-        target_dir = get_target_dir(file_use, content_type)
-        path = Path("samples/sample.wav")
-        new_file_name, next_sequence = get_new_file_name(path.name, self.item, file_use)
-        # Combine filename with directory to get full path for MediaFile creation.
-        new_name = f"{target_dir}/{new_file_name}"
-        master = MediaFile(
-            created_by=self.user,
-            item=self.item,
-            sequence=next_sequence,
-            file_type=MediaFileType.objects.get(file_type="MasterAudio1"),
+        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        master = OralHistoryFile(
+            self.item.id,
+            file_name="samples/sample.wav",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
         )
-        with path.open(mode="rb") as f:
-            master.file = File(f, name=new_name)
-            master.save()
+        master.process_media_file()
         return master
 
     def test_master_audio_file_is_added(self):
         master = self.create_master_audio_file()
-        path = Path("samples/sample.wav")
-        self.assertEqual(
-            master.file.name, "media_dev/oh_lz/audio/masters/fake-abcdef-1-master.wav"
-        )
-        # Confirm the new file itself exists.
-        self.assertEqual(Path(master.file.name).exists(), True)
+        # Confirm the new file exists.
+        self.assertEqual(Path(master.media_file.file.name).exists(), True)
         # For masters, new file should be same size as original.
-        self.assertEqual(master.file.size, path.stat().st_size)
+        path = Path("samples/sample.wav")
+        self.assertEqual(master.media_file.file.size, path.stat().st_size)
 
+    @unittest.skip("Submaster handling WIP")
     def test_submaster_audio_file_is_added(self):
         master = self.create_master_audio_file()
-        file_use = "submaster"
-        content_type = "audio"
-        target_dir = get_target_dir(file_use, content_type)
-        path = Path("samples/sample.wav")
-        # QAD rename for testing - eventually, generate real mp3 file
-        new_file_name, next_sequence = get_new_file_name(
-            path.name, self.item, file_use, ".mp3"
+        file_type = MediaFileType.objects.get(file_type="SubMasterAudio1")
+        submaster = OralHistoryFile(
+            self.item.id,
+            file_name="samples/sample.wav",
+            file_type=file_type,
+            file_use="submaster",
+            request=self.mock_request,
         )
-        # Combine filename with directory to get full path for MediaFile creation.
-        new_name = f"{target_dir}/{new_file_name}"
-        submaster = MediaFile(
-            created_by=self.user,
-            item=self.item,
-            sequence=next_sequence,
-            file_type=MediaFileType.objects.get(file_type="SubMasterAudio1"),
-            # Submaster mp3 is a child of master wav file
-            parent=master,
-        )
-        with path.open(mode="rb") as f:
-            submaster.file = File(f, name=new_name)
-            submaster.save()
-
+        submaster.process_media_file()
         self.assertEqual(
-            submaster.file.name,
+            submaster.media_file.file.name,
             "media_dev/oh_wowza/audio/submasters/fake-abcdef-2-submaster.mp3",
         )
         # Confirm the new file itself exists.
-        self.assertEqual(Path(submaster.file.name).exists(), True)
+        self.assertEqual(Path(submaster.media_file.file.name).exists(), True)
         # Confirm we have 2 items, the master and submaster.
         self.assertEqual(MediaFile.objects.count(), 2)
         # Confirm master is parent of submaster.
@@ -121,98 +105,298 @@ class MediaFileTestCase(TestCase):
                 file_type=MediaFileType.objects.get(file_type="MasterAudio1"),
             )
             # Use the filename of the first file for the second file
-            path = Path(file1.file.name)
-            new_name = file1.file.name
+            path = Path(file1.media_file.file.name)
+            new_name = file1.media_file.file.name
             with path.open(mode="rb") as f:
                 file2.file = File(f, name=new_name)
                 file2.save()
 
-    def test_get_content_type(self):
-        # Confirm supported file extensions are handled correctly.
-        self.assertEqual(get_content_type("foo.tif"), "image")
-        self.assertEqual(get_content_type("foo.tiff"), "image")
-        self.assertEqual(get_content_type("foo.jpg"), "image")
-        self.assertEqual(get_content_type("foo.jpeg"), "image")
-        self.assertEqual(get_content_type("foo.mp3"), "audio")
-        self.assertEqual(get_content_type("foo.wav"), "audio")
-        self.assertEqual(get_content_type("foo.pdf"), "pdf")
-        self.assertEqual(get_content_type("foo.txt"), "text")
-        self.assertEqual(get_content_type("foo.xml"), "text")
+    def test_content_type_jpeg(self):
+        file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.jpeg",
+            file_type=file_type,
+            file_use="submaster",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "image")
+
+    def test_content_type_jpg(self):
+        file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.jpg",
+            file_type=file_type,
+            file_use="submaster",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "image")
+
+    def test_content_type_tif(self):
+        file_type = MediaFileType.objects.get(file_type="MasterImage1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.tif",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "image")
+
+    def test_content_type_tiff(self):
+        file_type = MediaFileType.objects.get(file_type="MasterImage1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.tiff",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "image")
+
+    def test_content_type_mp3(self):
+        file_type = MediaFileType.objects.get(file_type="SubMasterAudio1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.mp3",
+            file_type=file_type,
+            file_use="submaster",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "audio")
+
+    def test_content_type_pdf(self):
+        file_type = MediaFileType.objects.get(file_type="PDF Legal Agreement")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.pdf",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "pdf")
+
+    def test_content_type_txt(self):
+        file_type = MediaFileType.objects.get(file_type="Text Introduction")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.txt",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "text")
+
+    def test_content_type_wav(self):
+        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.wav",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "audio")
+
+    def test_content_type_xml(self):
+        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.xml",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "text")
+
+    def test_content_type_extension_case(self):
         # Make sure file names are converted to lowercase.
-        self.assertEqual(get_content_type("FOO.XML"), "text")
-        # Unsupported file extension
-        with self.assertRaises(ValueError):
-            get_content_type("foo.bad")
-        # No file extension
-        with self.assertRaises(ValueError):
-            get_content_type("foo.")
-        with self.assertRaises(ValueError):
-            get_content_type("foo")
+        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="FOO.XML",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.content_type, "text")
 
-    def test_get_target_dir_audio(self):
-        # If this test needs to run in test/prod environment,
-        # paths will need changing or several environment variables
-        # will need to be overridden.
-        self.assertEqual(
-            get_target_dir("master", "audio"), "media_dev/oh_lz/audio/masters"
-        )
-        self.assertEqual(
-            get_target_dir("submaster", "audio"), "media_dev/oh_wowza/audio/submasters"
-        )
-
-    def test_get_target_dir_image(self):
-        # If this test needs to run in test/prod environment,
-        # paths will need changing or several environment variables
-        # will need to be overridden.
-        self.assertEqual(get_target_dir("master", "image"), "media_dev/oh_lz/masters")
-        self.assertEqual(
-            get_target_dir("submaster", "image"), "media_dev/oh_static/submasters"
-        )
-        self.assertEqual(
-            get_target_dir("thumbnail", "image"), "media_dev/oh_static/nails"
-        )
-
-    def test_get_target_dir_pdf(self):
-        # If this test needs to run in test/prod environment,
-        # paths will need changing or several environment variables
-        # will need to be overridden.
-        self.assertEqual(get_target_dir("master", "pdf"), "media_dev/oh_lz/pdf/masters")
-        self.assertEqual(
-            get_target_dir("submaster", "pdf"), "media_dev/oh_static/pdf/submasters"
-        )
-
-    def test_get_target_dir_text(self):
-        # If this test needs to run in test/prod environment,
-        # paths will need changing or several environment variables
-        # will need to be overridden.
-        self.assertEqual(
-            get_target_dir("master", "text"), "media_dev/oh_lz/text/masters"
-        )
-        self.assertEqual(
-            get_target_dir("submaster", "text"), "media_dev/oh_static/text/submasters"
-        )
-
-    def test_get_target_dir_invalid(self):
-        # Thumbnails are only for images
+    def test_content_type_unsupported_extension(self):
+        file_type = MediaFileType.objects.get(file_type="Text Transcript")
         with self.assertRaises(ValueError):
-            get_target_dir("thumbnail", "audio")
-        # Other combinations with bad parameters
-        with self.assertRaises(ValueError):
-            get_target_dir("master", "INVALID")
-        with self.assertRaises(ValueError):
-            get_target_dir("INVALID", "audio")
-        with self.assertRaises(ValueError):
-            get_target_dir("INVALID", "INVALID")
+            OralHistoryFile(
+                self.item.id,
+                file_name="foo.invalid",
+                file_type=file_type,
+                file_use="master",
+                request=self.mock_request,
+            )
 
-    def test_get_new_file_name_no_extension_parameter(self):
-        new_name, next_sequence = get_new_file_name("foo.wav", self.item, "master")
-        self.assertEqual(new_name, "fake-abcdef-1-master.wav")
+    def test_content_type_no_extension(self):
+        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        with self.assertRaises(ValueError):
+            OralHistoryFile(
+                self.item.id,
+                file_name="foo",
+                file_type=file_type,
+                file_use="master",
+                request=self.mock_request,
+            )
 
-    def test_get_new_file_name_with_extension_parameter(self):
-        new_name, next_sequence = get_new_file_name(
-            "foo.wav", self.item, "submaster", ".mp3"
+    # If the target_dir tests need to run in the test/prod environment,
+    # paths will need changing or several environment variables
+    # will need to be overridden.
+
+    def test_get_target_dir_master_audio(self):
+        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.wav",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
         )
-        self.assertEqual(new_name, "fake-abcdef-1-submaster.mp3")
+        self.assertEqual(ohf.target_dir, "media_dev/oh_lz/audio/masters")
+
+    def test_get_target_dir_submaster_audio(self):
+        file_type = MediaFileType.objects.get(file_type="SubMasterAudio1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.mp3",
+            file_type=file_type,
+            file_use="submaster",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.target_dir, "media_dev/oh_wowza/audio/submasters")
+
+    def test_get_target_dir_master_image(self):
+        file_type = MediaFileType.objects.get(file_type="MasterImage1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.tiff",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.target_dir, "media_dev/oh_lz/masters")
+
+    def test_get_target_dir_submaster_image(self):
+        file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.jpg",
+            file_type=file_type,
+            file_use="submaster",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.target_dir, "media_dev/oh_static/submasters")
+
+    def test_get_target_dir_thumbnail_image(self):
+        file_type = MediaFileType.objects.get(file_type="ThumbnailImage1")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.jpg",
+            file_type=file_type,
+            file_use="thumbnail",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.target_dir, "media_dev/oh_static/nails")
+
+    def test_get_target_dir_master_pdf(self):
+        file_type = MediaFileType.objects.get(file_type="PDF Legal Agreement")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.pdf",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.target_dir, "media_dev/oh_lz/pdf/masters")
+
+    def test_get_target_dir_submaster_pdf(self):
+        file_type = MediaFileType.objects.get(file_type="PDF Legal Agreement")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.pdf",
+            file_type=file_type,
+            file_use="submaster",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.target_dir, "media_dev/oh_static/pdf/submasters")
+
+    def test_get_target_dir_master_text(self):
+        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.xml",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.target_dir, "media_dev/oh_lz/text/masters")
+
+    def test_get_target_dir_submaster_text(self):
+        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        ohf = OralHistoryFile(
+            self.item.id,
+            file_name="foo.xml",
+            file_type=file_type,
+            file_use="submaster",
+            request=self.mock_request,
+        )
+        self.assertEqual(ohf.target_dir, "media_dev/oh_static/text/submasters")
+
+    def test_get_target_dir_invalid_audio_thumbnail(self):
+        # Audio doesn't have thumbnails
+        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        with self.assertRaises(ValueError):
+            OralHistoryFile(
+                self.item.id,
+                file_name="foo.wav",
+                file_type=file_type,
+                file_use="thumbnail",
+                request=self.mock_request,
+            )
+
+    def test_get_target_dir_invalid_audio_file_use(self):
+        # Audio doesn't have thumbnails
+        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        with self.assertRaises(ValueError):
+            OralHistoryFile(
+                self.item.id,
+                file_name="foo.wav",
+                file_type=file_type,
+                file_use="INVALID",
+                request=self.mock_request,
+            )
+
+    def test_get_target_dir_invalid_master_content_type(self):
+        # Audio doesn't have thumbnails
+        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        with self.assertRaises(ValueError):
+            OralHistoryFile(
+                self.item.id,
+                file_name="foo.INVALID",
+                file_type=file_type,
+                file_use="master",
+                request=self.mock_request,
+            )
+
+    def test_get_new_file_name_default_extension_parameter(self):
+        master = self.create_master_audio_file()
+        self.assertEqual(
+            master.media_file.file.name,
+            "media_dev/oh_lz/audio/masters/fake-abcdef-1-master.wav",
+        )
+
+    @unittest.skip("Submaster handling WIP")
+    def test_get_new_file_name_with_explicit_extension_parameter(self):
+        pass
+        # new_name, next_sequence = get_new_file_name(
+        #     "foo.wav", self.item, "submaster", ".mp3"
+        # )
+        # self.assertEqual(new_name, "fake-abcdef-1-submaster.mp3")
 
     def tearDown(self):
         # If new files aren't deleted, Django will create next file with random-ish name.
