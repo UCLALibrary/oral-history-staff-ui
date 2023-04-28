@@ -129,6 +129,8 @@ class MediaFileTestCase(TestCase):
 
     def test_get_content_type(self):
         # Confirm supported file extensions are handled correctly.
+        self.assertEqual(get_content_type("foo.tif"), "image")
+        self.assertEqual(get_content_type("foo.tiff"), "image")
         self.assertEqual(get_content_type("foo.jpg"), "image")
         self.assertEqual(get_content_type("foo.jpeg"), "image")
         self.assertEqual(get_content_type("foo.mp3"), "audio")
