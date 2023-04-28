@@ -3,8 +3,8 @@ import logging
 # from django.contrib import messages
 from django.core.management.base import BaseCommand
 from django.http import HttpRequest
+from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.models import MediaFileType
-from oh_staff_ui.file_utils import process_media_file
 
 # For handling command-line processing
 from django.contrib.auth.models import User
@@ -14,15 +14,28 @@ logger = logging.getLogger(__name__)
 
 
 def process_file(
-    item_id: int, file_name: str, file_type: str, request: HttpRequest
+    item_id: int, file_name: str, file_type: MediaFileType, request: HttpRequest
 ) -> None:
-    """Do the actual work, via routines in file_utils.
+    """Do the actual work.
 
     This will be extended to handle submasters and thumbnails.
     """
-    # TODO: More than masters
+    # This script only processes user-uploaded files, which are always masters.
+
+    # TODO: Implement type-based processing; comments below just my notes.
+    # Create master OHF from params
+    # OHF knows what content_type it is
+    # Pass OHF to a handler factory, which creates handler based on OHF.content_type?
+    # Or just have a simple if..elif.. here, creating appropriate handler based on OHF.ct?
+
     file_use = "master"
-    process_media_file(item_id, file_name, file_type, file_use, request)
+    try:
+        ohf = OralHistoryFile(item_id, file_name, file_type, file_use, request)
+        ohf.process_media_file()
+    except ValueError as ex:
+        logger.error(ex)
+        # Pass the exception up to the caller.
+        raise
 
 
 def get_mock_request() -> HttpRequest:
