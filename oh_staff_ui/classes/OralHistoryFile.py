@@ -19,37 +19,70 @@ class OralHistoryFile:
         file_use: str,
         request: HttpRequest,
     ):
-        self.item_id = item_id
-        self.file_name = file_name
-        self.file_type = file_type
-        self.file_use = file_use
-        self.request = request
-        # Expose several elements for testing and other use.
-        self.item = ProjectItem.objects.get(pk=self.item_id)
-        self.content_type = self.get_content_type(self.file_name)
-        self.target_dir = self.get_target_dir(self.file_use, self.content_type)
-        self.next_sequence = self._get_next_sequence(self.item_id)
-        self.new_file_name = self.get_new_file_name(
-            self.file_name, self.item, self.file_use
-        )
+        # Parameters are intended as read-only by callers.
+        self._item_id = item_id
+        self._original_file_name = file_name
+        self._file_type = file_type
+        self._file_use = file_use
+        self._request = request
+        # Calculate several elements for later use, also read-only.
+        self._item = ProjectItem.objects.get(pk=self._item_id)
+        self._content_type = self.get_content_type(self._original_file_name)
+        self._target_dir = self.get_target_dir(self._file_use, self._content_type)
 
-    def process_media_file(self) -> None:
+    @property
+    def content_type(self) -> str:
+        return self._content_type
+
+    @property
+    def file_name(self) -> str:
+        return self._original_file_name
+
+    @property
+    def file_use(self) -> str:
+        return self._file_use
+
+    @property
+    def file_type(self) -> str:
+        return self._file_type
+
+    @property
+    def item(self) -> ProjectItem:
+        return self._item
+
+    @property
+    def media_file(self) -> MediaFile:
+        return self._media_file
+
+    @property
+    def request(self) -> HttpRequest:
+        return self._request
+
+    @property
+    def target_dir(self) -> str:
+        return self._target_dir
+
+    def process_media_file(self, parent_id: int | None = None) -> None:
+        next_sequence = self._get_next_sequence(self._item_id)
+        new_file_name = self.get_new_file_name(next_sequence)
         # Combine filename with directory to get full path for MediaFile creation.
-        new_name = f"{self.target_dir}/{self.new_file_name}"
+        new_name = f"{self._target_dir}/{new_file_name}"
         logger.info(f"{new_name = }")
 
-        # TODO: Processing, based on file_type
         new_file = MediaFile(
-            created_by=self.request.user,
-            item=self.item,
-            file_type=self.file_type,
-            sequence=self.next_sequence,
+            created_by=self._request.user,
+            item=self._item,
+            file_type=self._file_type,
+            original_file_name=self._get_parent_original_name(parent_id),
+            sequence=next_sequence,
+            parent_id=parent_id,
         )
         # Read the original file, copying it to new_name and saving the MediaFile.
-        with Path(self.file_name).open(mode="rb") as f:
+        with Path(self._original_file_name).open(mode="rb") as f:
             new_file.file = File(f, name=new_name)
             new_file.save()
-            self.media_file = new_file
+            # Also store it for read-only access by callers.
+            self._media_file = new_file
 
     def get_content_type(self, file_name: str) -> str:
         """Get broad type of content based on file extension.
@@ -74,17 +107,16 @@ class OralHistoryFile:
 
     def get_new_file_name(
         self,
-        old_name: str,
-        item: ProjectItem,
-        file_use: str,
-        file_extension: str = None,
+        next_sequence: int,
+        file_extension: str | None = None,
     ) -> str:
         """Get new item-specific file name."""
         if not file_extension:
-            file_extension = Path(old_name).suffix
-        item_ark = item.ark.replace("/", "-")
-        next_sequence = self.next_sequence
-        new_file_name = f"{item_ark}-{next_sequence}-{file_use}{file_extension}".lower()
+            file_extension = Path(self._original_file_name).suffix
+        item_ark = self._item.ark.replace("/", "-")
+        new_file_name = (
+            f"{item_ark}-{next_sequence}-{self._file_use}{file_extension}".lower()
+        )
         return new_file_name
 
     def get_target_dir(self, file_use: str, content_type: str) -> str:
@@ -151,3 +183,14 @@ class OralHistoryFile:
         else:
             next_seq = 1
         return next_seq
+
+    def _get_parent_original_name(self, parent_id: int | None = None) -> str:
+        """Get the original input file name of the parent file.
+
+        If no parent, return this object's original file name.
+        """
+        if parent_id:
+            parent = MediaFile.objects.get(pk=parent_id)
+            return parent.original_file_name
+        else:
+            return self._original_file_name

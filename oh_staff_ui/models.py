@@ -523,6 +523,7 @@ class MediaFile(models.Model):
     file_type = models.ForeignKey(
         MediaFileType, on_delete=models.PROTECT, blank=False, null=False
     )
+    original_file_name = models.CharField(max_length=256, blank=False, null=False)
     # TODO: Change this: remove blank, change default to 1?
     sequence = models.IntegerField(blank=False, null=False, default=0)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)

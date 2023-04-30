@@ -1,5 +1,4 @@
 from pathlib import Path
-import unittest
 from django.core.files import File
 from django.db import IntegrityError
 from django.http import HttpRequest
@@ -24,6 +23,7 @@ from oh_staff_ui.models import (
 )
 
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
+from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
 
 
 class MediaFileTestCase(TestCase):
@@ -59,42 +59,40 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        master.process_media_file()
+        # master.process_media_file()
         return master
 
     def test_master_audio_file_is_added(self):
         master = self.create_master_audio_file()
+        handler = AudioFileHandler(master)
+        handler.process_files()
         # Confirm the new file exists.
         self.assertEqual(Path(master.media_file.file.name).exists(), True)
         # For masters, new file should be same size as original.
         path = Path("samples/sample.wav")
         self.assertEqual(master.media_file.file.size, path.stat().st_size)
 
-    @unittest.skip("Submaster handling WIP")
     def test_submaster_audio_file_is_added(self):
         master = self.create_master_audio_file()
-        file_type = MediaFileType.objects.get(file_type="SubMasterAudio1")
-        submaster = OralHistoryFile(
-            self.item.id,
-            file_name="samples/sample.wav",
-            file_type=file_type,
-            file_use="submaster",
-            request=self.mock_request,
-        )
-        submaster.process_media_file()
+        handler = AudioFileHandler(master)
+        handler.process_files()
+        # master is OralHistoryFile; submaster is MediaFile
+        submaster = MediaFile.objects.get(parent=master.media_file)
         self.assertEqual(
-            submaster.media_file.file.name,
+            submaster.file.name,
             "media_dev/oh_wowza/audio/submasters/fake-abcdef-2-submaster.mp3",
         )
         # Confirm the new file itself exists.
-        self.assertEqual(Path(submaster.media_file.file.name).exists(), True)
+        self.assertEqual(Path(submaster.file.name).exists(), True)
         # Confirm we have 2 items, the master and submaster.
         self.assertEqual(MediaFile.objects.count(), 2)
         # Confirm master is parent of submaster.
-        self.assertEqual(master, submaster.parent)
+        self.assertEqual(master.media_file, submaster.parent)
 
     def test_duplicate_files_not_allowed(self):
         file1 = self.create_master_audio_file()
+        handler = AudioFileHandler(file1)
+        handler.process_files()
         with self.assertRaises(FileExistsError):
             # Create a file directly, without going through normal routines
             # which would prevent duplicates anyhow...
@@ -385,18 +383,12 @@ class MediaFileTestCase(TestCase):
 
     def test_get_new_file_name_default_extension_parameter(self):
         master = self.create_master_audio_file()
+        handler = AudioFileHandler(master)
+        handler.process_files()
         self.assertEqual(
             master.media_file.file.name,
             "media_dev/oh_lz/audio/masters/fake-abcdef-1-master.wav",
         )
-
-    @unittest.skip("Submaster handling WIP")
-    def test_get_new_file_name_with_explicit_extension_parameter(self):
-        pass
-        # new_name, next_sequence = get_new_file_name(
-        #     "foo.wav", self.item, "submaster", ".mp3"
-        # )
-        # self.assertEqual(new_name, "fake-abcdef-1-submaster.mp3")
 
     def tearDown(self):
         # If new files aren't deleted, Django will create next file with random-ish name.
