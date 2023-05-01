@@ -4,7 +4,7 @@ import ffmpeg  # ffmpeg-python
 from django.core.management.base import CommandError
 from oh_staff_ui.classes.BaseFileHandler import BaseFileHandler
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
-from oh_staff_ui.models import MediaFileType
+from oh_staff_ui.models import MediaFile, MediaFileType
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +68,14 @@ class AudioFileHandler(BaseFileHandler):
         # Process master and derivatives together.
         # Master gets saved, then any derivatives.
         try:
+            # Audio items can only have one master attached.
+            # Before processing, check to see if item already has files,
+            # and reject this new file if it does.
+            if self._item_has_files():
+                raise CommandError(
+                    f"Error: Cannot add {self._master_file.file_name}; this item already has files."
+                )
+
             self.master_file.process_media_file()
             # Get id of newly created MediaFile to use as parent for derivative(s).
             master_id = self._master_file.media_file.id
@@ -85,3 +93,10 @@ class AudioFileHandler(BaseFileHandler):
         except (ValueError, CommandError):
             # Re-raise back to caller
             raise
+
+    def _item_has_files(self) -> bool:
+        """See if item associated with the media_file passed to this processor
+        already has other files attached to it.
+        """
+        files = MediaFile.objects.filter(item=self._master_file.item)
+        return True if files else False

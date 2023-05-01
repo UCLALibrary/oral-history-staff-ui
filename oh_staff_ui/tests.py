@@ -1,5 +1,6 @@
 from pathlib import Path
 from django.core.files import File
+from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.http import HttpRequest
 from django.test import TestCase
@@ -80,7 +81,7 @@ class MediaFileTestCase(TestCase):
         submaster = MediaFile.objects.get(parent=master.media_file)
         self.assertEqual(
             submaster.file.name,
-            "media_dev/oh_wowza/audio/submasters/fake-abcdef-2-submaster.mp3",
+            "media_dev/oh_wowza/audio/submasters/fake-abcdef-1-submaster.mp3",
         )
         # Confirm the new file itself exists.
         self.assertEqual(Path(submaster.file.name).exists(), True)
@@ -108,6 +109,18 @@ class MediaFileTestCase(TestCase):
             with path.open(mode="rb") as f:
                 file2.file = File(f, name=new_name)
                 file2.save()
+
+    def test_multiple_audio_masters_not_allowed(self):
+        # Different from test_duplicate_files_not_allowed();
+        # specifically, multiple audio masters (from any audio files)
+        # on one item are not allowed.
+        file1 = self.create_master_audio_file()
+        handler = AudioFileHandler(file1)
+        handler.process_files()
+        file2 = self.create_master_audio_file()
+        with self.assertRaises(CommandError):
+            handler = AudioFileHandler(file2)
+            handler.process_files()
 
     def test_content_type_jpeg(self):
         file_type = MediaFileType.objects.get(file_type="SubMasterImage1")

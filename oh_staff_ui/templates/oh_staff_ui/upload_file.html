@@ -34,8 +34,11 @@
       </td>
   </tr>
 </table>
+<br>
+{% if files %}
 <hr>
-<table class="search-results">
+<table class="header-metadata">
+  <caption>File Information</caption>
   {% for file in files %}
   <tr>
     <td>{{ file.file_type }}</td>
@@ -46,9 +49,10 @@
   </tr>
   {% endfor %}
 </table>
-<br>
-
+{% endif %}
+<hr>
 {% if messages %}
+<br>
 <div class="box">
 {% for message in messages %}
   <div>{{ message }}</div>

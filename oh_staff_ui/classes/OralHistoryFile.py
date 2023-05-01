@@ -63,7 +63,7 @@ class OralHistoryFile:
         return self._target_dir
 
     def process_media_file(self, parent_id: int | None = None) -> None:
-        next_sequence = self._get_next_sequence(self._item_id)
+        next_sequence = self._get_next_sequence(parent_id)
         new_file_name = self.get_new_file_name(next_sequence)
         # Combine filename with directory to get full path for MediaFile creation.
         new_name = f"{self._target_dir}/{new_file_name}"
@@ -172,25 +172,30 @@ class OralHistoryFile:
             raise ValueError(f"Unable to determine media folder: {content_type=}")
         return media_folder
 
-    def _get_next_sequence(self, item_id: int) -> int:
+    def _get_next_sequence(self, parent_id: int | None = None) -> int:
         """Get the next (max + 1) sequence number for use in naming files.
 
+        If this is a derivative (has a parent), use the parent's sequence.
         If no records exist, return 1.
         """
-        files = MediaFile.objects.filter(item_id=item_id)
-        if files:
-            next_seq = files.aggregate(Max("sequence")).get("sequence__max") + 1
+        if parent_id:
+            next_seq = MediaFile.objects.get(pk=parent_id).sequence
         else:
-            next_seq = 1
+            files = MediaFile.objects.filter(item_id=self._item.id)
+            if files:
+                next_seq = files.aggregate(Max("sequence")).get("sequence__max") + 1
+            else:
+                next_seq = 1
         return next_seq
 
     def _get_parent_original_name(self, parent_id: int | None = None) -> str:
-        """Get the original input file name of the parent file.
+        """Get the original input file name of the parent file, without the full path.
 
         If no parent, return this object's original file name.
         """
         if parent_id:
             parent = MediaFile.objects.get(pk=parent_id)
-            return parent.original_file_name
+            original_file_name = parent.original_file_name
         else:
-            return self._original_file_name
+            original_file_name = self._original_file_name
+        return Path(original_file_name).name

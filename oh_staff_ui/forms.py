@@ -1,5 +1,5 @@
-import os
 from django import forms
+from django.conf import settings
 from django.core.cache import cache
 from oh_staff_ui.models import (
     AltIdType,
@@ -191,10 +191,6 @@ class FormatForm(forms.Form):
     )
 
 
-# Used by FileUploadForm
-OH_FILE_SOURCE = os.getenv("DJANGO_OH_FILE_SOURCE")
-
-
 class FileUploadForm(forms.Form):
     file_type = forms.ModelChoiceField(
         queryset=MediaFileType.objects.all().order_by("file_type"),
@@ -206,7 +202,7 @@ class FileUploadForm(forms.Form):
     # https://stackoverflow.com/questions/30656653/suffering-stale-choices-for-filepathfield
 
     _file_name_kw = dict(
-        path=OH_FILE_SOURCE,
+        path=settings.OH_FILE_SOURCE,
         recursive=True,
         allow_files=True,
         allow_folders=False,
