@@ -93,6 +93,10 @@ class AudioFileHandler(BaseFileHandler):
         except (ValueError, CommandError):
             # Re-raise back to caller
             raise
+        finally:
+            # Delete the temporary submaster file;
+            # don't throw FileNotFoundError if for some reason it doesn't exist.
+            Path(submaster_file_name).unlink(missing_ok=True)
 
     def _item_has_files(self) -> bool:
         """See if item associated with the media_file passed to this processor
