@@ -1,5 +1,10 @@
 {% extends "admin/base.html" %}
 
+{% load static %}
+{% block extrahead %}
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}"/>
+{% endblock %}
+
 {% block title %}Oral History Admin{% endblock %}
 
 {% block branding %}
