@@ -14,7 +14,7 @@ from oh_staff_ui.forms import (
 )
 from oh_staff_ui.models import MediaFile, ProjectItem
 from oh_staff_ui.views_utils import (
-    construct_keyword_query,
+    construct_title_keyword_query,
     get_ark,
     get_edit_item_context,
     save_all_item_data,
@@ -81,11 +81,18 @@ def item_search(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = ItemSearchForm(request.POST)
         if form.is_valid():
-            return redirect(
-                "search_results",
-                search_type=form.cleaned_data["search_type"],
-                query=form.cleaned_data["query"],
-            )
+            if form.cleaned_data["search_type"] == "status":
+                return redirect(
+                    "search_results",
+                    search_type=form.cleaned_data["search_type"],
+                    query=form.cleaned_data["status_query"],
+                )
+            else:
+                return redirect(
+                    "search_results",
+                    search_type=form.cleaned_data["search_type"],
+                    query=form.cleaned_data["char_query"],
+                )
     else:
         form = ItemSearchForm()
         return render(request, "oh_staff_ui/item_search.html", {"form": form})
@@ -94,12 +101,18 @@ def item_search(request: HttpRequest) -> HttpResponse:
 @login_required
 def search_results(request: HttpRequest, search_type: str, query: str) -> HttpResponse:
     if search_type == "title":
-        full_query = construct_keyword_query(query)
+        full_query = construct_title_keyword_query(query)
         results = ProjectItem.objects.filter(full_query).order_by("title").values()
     elif search_type == "ark":
         results = (
             ProjectItem.objects.filter(ark__icontains=query).order_by("ark").values()
         )
+    elif search_type == "status":
+        results = (
+            ProjectItem.objects.filter(status__status=query).order_by("title").values()
+        )
+    elif search_type == "keyword":
+        results = ProjectItem.objects.filter(title=query).order_by("title").values()
     return render(request, "oh_staff_ui/search_results.html", {"results": results})
 
 

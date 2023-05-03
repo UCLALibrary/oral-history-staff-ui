@@ -1,7 +1,7 @@
 {% extends 'oh_staff_ui/base.html' %}
 
 {% block content %}
-<form name="item_search" id="item_search" method="POST">
+<form name="item_search" onsubmit ="return validateSearchForm()" id="item_search" method="POST">
     {% csrf_token %}
     <table>
         {{ form.as_table }}

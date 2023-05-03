@@ -87,3 +87,18 @@ function checkDuplicateValues(){
     }
     return true
 }
+
+function validateSearchForm() {
+    if (document.getElementById("id_search_type").value == "status") {
+        if (document.getElementById("id_status_query").value == "") {
+            alert("Please select a Status value.")
+            return false
+        }
+    }
+    else {
+        if (document.getElementById("id_char_query").value.trim().length === 0 ) {
+            alert("Please enter a search query.")
+            return false
+        }
+    }
+}
