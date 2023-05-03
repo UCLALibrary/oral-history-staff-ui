@@ -24,9 +24,14 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def add_item(request: HttpRequest, parent_id=None) -> HttpResponse:
+def add_item(request: HttpRequest, parent_id: int | None = None) -> HttpResponse:
+    # Get parent_item for later use.
+    parent_item: ProjectItem = None
+    if parent_id:
+        parent_item = ProjectItem.objects.get(pk=parent_id)
+
     if request.method == "POST":
-        form = ProjectItemForm(request.POST)
+        form = ProjectItemForm(request.POST, parent_item=parent_item)
         if form.is_valid():
             # Minimal data from form;
             # most other fields set by db defaults or web service.
@@ -60,11 +65,13 @@ def add_item(request: HttpRequest, parent_id=None) -> HttpResponse:
                 )
     else:
         if parent_id:
-            parent = ProjectItem.objects.get(id=parent_id)
-            form = ProjectItemForm(initial={"parent": parent})
+            # TODO: Consider further changes to form to make "initial" unneeded here.
+            form = ProjectItemForm(
+                initial={"parent": parent_item}, parent_item=parent_item
+            )
         else:
-            form = ProjectItemForm()
-        return render(request, "oh_staff_ui/add_item.html", {"form": form})
+            form = ProjectItemForm(parent_item=parent_item)
+    return render(request, "oh_staff_ui/add_item.html", {"form": form})
 
 
 @login_required

@@ -41,12 +41,6 @@ class ItemType(models.Model):
         ]
 
 
-def get_default_type():
-    # Provides default value for new ProjectItem type field.
-    # Caution: Must be updated if this literal value changes.
-    return ItemType.objects.get(type="Audio").id
-
-
 class ProjectItem(models.Model):
     ark = models.CharField(max_length=40, blank=False, null=False)
     coverage = models.CharField(max_length=256, blank=True, null=False, default="")

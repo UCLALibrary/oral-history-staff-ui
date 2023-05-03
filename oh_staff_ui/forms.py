@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import QuerySet
 from oh_staff_ui.models import (
     AltIdType,
     AltTitleType,
@@ -22,7 +23,6 @@ from oh_staff_ui.models import (
     Subject,
     SubjectType,
     get_default_status,
-    get_default_type,
 )
 
 
@@ -43,8 +43,8 @@ class ProjectItemForm(forms.Form):
     )
     type = forms.ModelChoiceField(
         required=True,
-        queryset=ItemType.objects.all().order_by("type"),
-        initial=get_default_type,
+        # Filter this dynamically via view and override of this form's __init__().
+        queryset=ItemType.objects.all(),
     )
     sequence = forms.CharField(
         required=True, max_length=3, widget=forms.TextInput(attrs={"size": 3})
@@ -60,6 +60,40 @@ class ProjectItemForm(forms.Form):
         queryset=ItemStatus.objects.all().order_by("status"),
         initial=get_default_status,
     )
+
+    def __init__(self, *args, **kwargs) -> None:
+        # If parent_item was explicitly passed, get it.
+        # Must be pulled out (via pop()) before super()__init__() is called.
+        parent_item = kwargs.pop("parent_item", None)
+        # If it wasn't, try getting it from data {} passed to the form;
+        # this is set by view_utils.get_edit_item_context().
+        if kwargs.get("data"):
+            parent_item = kwargs["data"].get("parent")
+        # Now that we have parent_item, call super init.
+        super().__init__(*args, **kwargs)
+        # Get context-specific item types, based on parent.
+        item_types = self._get_relevant_item_types(parent_item)
+        # Set the "type" field to use these types.
+        self.fields["type"].queryset = item_types
+        # Default to the first value in the queryset, which will always have at least one value.
+        self.fields["type"].initial = item_types[0]
+
+    def _get_relevant_item_types(
+        self, parent_item: ProjectItem | None = None
+    ) -> QuerySet:
+        """Get item types which are relevant to the item context.
+
+        If no parent item, this is top-level: Series.
+        If parent item is Series, this is 2nd-level: Interview.
+        If parent item is Interview, this is 3rd-level: Audio or Video.
+        """
+        if parent_item is None:
+            item_types = ["Series"]
+        elif parent_item.type.type == "Series":
+            item_types = ["Interview"]
+        elif parent_item.type.type == "Interview":
+            item_types = ["Audio", "Video"]
+        return ItemType.objects.filter(type__in=item_types).order_by("type")
 
 
 class ItemSearchForm(forms.Form):
