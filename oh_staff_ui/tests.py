@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from django.core.files import File
 from django.core.management.base import CommandError
@@ -5,6 +6,7 @@ from django.db import IntegrityError
 from django.http import HttpRequest
 from django.test import TestCase
 from django.contrib.auth.models import User
+from oh_staff_ui.forms import ProjectItemForm
 from oh_staff_ui.models import (
     Copyright,
     ItemCopyrightUsage,
@@ -26,6 +28,8 @@ from oh_staff_ui.models import (
 
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
+
+logger = logging.getLogger(__name__)
 
 
 class MediaFileTestCase(TestCase):
@@ -63,7 +67,7 @@ class MediaFileTestCase(TestCase):
         )
         # master.process_media_file()
         return master
-    
+
     def create_bad_master_audio_file(self):
         # Purposely add a file which will fail mp3 conversion
         file_type = MediaFileType.objects.get(file_type="MasterAudio1")
@@ -134,7 +138,7 @@ class MediaFileTestCase(TestCase):
         with self.assertRaises(CommandError):
             handler = AudioFileHandler(file2)
             handler.process_files()
-    
+
     def test_bad_audio_submaster_is_bound(self):
         file1 = self.create_bad_master_audio_file()
         handler = AudioFileHandler(file1)
@@ -502,3 +506,135 @@ class MetadataUniquenessTestCase(TestCase):
 
     def test_item_count(self):
         self.assertEqual(ProjectItem.objects.count(), 1)
+
+
+class ProjectItemFormTestCase(TestCase):
+    # ProjectItemForm has some custom code for determining item type
+    # based on item position in hierarchy (series, interview, a/v file).
+
+    # Load the lookup tables needed for these tests.
+    fixtures = [
+        "item-status-data.json",
+        "item-type-data.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        # Use QAD data for fake user and fake items.
+        cls.user = User.objects.create_user("tester")
+        # Level 1: Series.
+        cls.series_item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=cls.user,
+            last_modified_by=cls.user,
+            title="Fake series",
+            type=ItemType.objects.get(type="Series"),
+        )
+        # Level 2: Interview, child of series.
+        cls.interview_item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=cls.user,
+            last_modified_by=cls.user,
+            title="Fake interview",
+            type=ItemType.objects.get(type="Interview"),
+            parent=cls.series_item,
+        )
+        # Level 3: Audio, child of interview.
+        cls.audio_item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=cls.user,
+            last_modified_by=cls.user,
+            title="Fake audio",
+            type=ItemType.objects.get(type="Audio"),
+            parent=cls.interview_item,
+        )
+
+    def test_default_form_item_type_is_series(self):
+        # Test that the form is correct for /add_item with no parent.
+        form = ProjectItemForm()
+        form_type_field = form.fields["type"]
+        selected_type = ItemType.objects.get(type="Series")
+        # Check the form field's initial value.
+        self.assertEqual(form_type_field.initial, selected_type)
+        # Check the HTML also has that value selected, just to be sure
+        self.assertInHTML('<option value="2" selected>Series</option>', str(form))
+
+    def test_series_form_item_type_is_series(self):
+        # Test that the form handles display of choices for series items.
+        item = self.series_item
+        form = ProjectItemForm(
+            data={
+                "parent": item.parent,
+                "title": item.title,
+                "type": item.type,
+                "sequence": item.sequence,
+                "coverage": item.coverage,
+                "relation": item.relation,
+                "status": item.status,
+            }
+        )
+        form_type_field = form.fields["type"]
+        selected_type = ItemType.objects.get(type="Series")
+        # Check the form field's initial value.
+        self.assertEqual(form_type_field.initial, selected_type)
+        # Check the HTML also has that value selected, just to be sure
+        self.assertInHTML('<option value="2" selected>Series</option>', str(form))
+
+    def test_interview_form_item_type_is_interview(self):
+        # Test that the form handles display of choices for interview items.
+        item = self.interview_item
+        form = ProjectItemForm(
+            data={
+                "parent": item.parent,
+                "title": item.title,
+                "type": item.type,
+                "sequence": item.sequence,
+                "coverage": item.coverage,
+                "relation": item.relation,
+                "status": item.status,
+            }
+        )
+        form_type_field = form.fields["type"]
+        selected_type = ItemType.objects.get(type="Interview")
+        # Check the form field's initial value.
+        self.assertEqual(form_type_field.initial, selected_type)
+        # Check the HTML also has that value selected, just to be sure
+        self.assertInHTML('<option value="3" selected>Interview</option>', str(form))
+
+    def test_audio_form_item_type_is_audio(self):
+        # Test that the form handles display of choices for audio items.
+        item = self.audio_item
+        form = ProjectItemForm(
+            data={
+                "parent": item.parent,
+                "title": item.title,
+                "type": item.type,
+                "sequence": item.sequence,
+                "coverage": item.coverage,
+                "relation": item.relation,
+                "status": item.status,
+            }
+        )
+        form_type_field = form.fields["type"]
+        selected_type = ItemType.objects.get(type="Audio")
+        # Check the form field's initial value.
+        self.assertEqual(form_type_field.initial, selected_type)
+        # Check the HTML also has that value selected, just to be sure
+        self.assertInHTML('<option value="4" selected>Audio</option>', str(form))
+
+    def test_post_to_item_form(self):
+        # Test that the form handles posted data correctly.
+        item = self.interview_item
+        request = HttpRequest()
+        # Send data unchanged, except for arbitrary title change.
+        request.POST = {
+            "ark": item.ark,
+            "parent": item.parent,
+            "sequence": item.sequence,
+            "status": item.status,
+            "title": "Fake new title",
+            "type": item.type,
+        }
+        form = ProjectItemForm(request.POST, parent_item=self.series_item)
+        # Check that form validation succeeded.
+        self.assertEquals({}, form.errors)
