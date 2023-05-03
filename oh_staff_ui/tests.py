@@ -13,6 +13,7 @@ from oh_staff_ui.models import (
     ItemPublisherUsage,
     ItemResourceUsage,
     ItemSubjectUsage,
+    ItemType,
     Language,
     MediaFile,
     MediaFileType,
@@ -44,7 +45,7 @@ class MediaFileTestCase(TestCase):
             created_by=cls.user,
             last_modified_by=cls.user,
             title="Fake title",
-            type_id=1,
+            type=ItemType.objects.get(type="Series"),
         )
         # Get mock request with generic user info for command-line processing.
         cls.mock_request = HttpRequest()
@@ -444,7 +445,7 @@ class MetadataUniquenessTestCase(TestCase):
             created_by=cls.user,
             last_modified_by=cls.user,
             title="Fake title",
-            type_id=1,
+            type=ItemType.objects.get(type="Series"),
         )
 
     def test_name_usage_is_unique(self):
@@ -496,7 +497,7 @@ class MetadataUniquenessTestCase(TestCase):
                 created_by=self.user,
                 last_modified_by=self.user,
                 title="Fake title",
-                type_id=1,
+                type=ItemType.objects.get(type="Series"),
             )
 
     def test_item_count(self):
