@@ -14,7 +14,7 @@ from oh_staff_ui.forms import (
 )
 from oh_staff_ui.models import MediaFile, ProjectItem
 from oh_staff_ui.views_utils import (
-    construct_title_keyword_query,
+    construct_keyword_query,
     get_ark,
     get_edit_item_context,
     save_all_item_data,
@@ -108,7 +108,7 @@ def item_search(request: HttpRequest) -> HttpResponse:
 @login_required
 def search_results(request: HttpRequest, search_type: str, query: str) -> HttpResponse:
     if search_type == "title":
-        full_query = construct_title_keyword_query(query)
+        full_query = construct_keyword_query("title", query)
         results = ProjectItem.objects.filter(full_query).order_by("title").values()
     elif search_type == "ark":
         results = (

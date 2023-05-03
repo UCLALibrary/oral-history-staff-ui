@@ -40,36 +40,33 @@ from oh_staff_ui.models import (
 logger = logging.getLogger(__name__)
 
 
-def construct_title_keyword_query(query: str) -> Q:
+def construct_keyword_query(field: str, query: str) -> Q:
     # Always include the full query, as a single substring.
-    full_q = Q(title__icontains=query)
+    full_q = Q(**{field + "__icontains": query})
     keywords = query.split()
     # If there's only one word, it's the same as the full query, nothing to do.
     # Otherwise, grab the first word, then AND each following word.
     if len(keywords) > 1:
-        words_q = Q(title__icontains=keywords[0])
+        words_q = Q(**{field + "__icontains": keywords[0]})
         # All except the first word
         for word in keywords[1:]:
-            words_q = words_q & Q(title__icontains=word)
+            words_q = words_q & Q(**{field + "__icontains": word})
         # OR the assembled set of words with the full query.
         full_q = full_q | words_q
     return full_q
 
 
-def construct_keyword_query(query: str) -> list:
-    search_models = [ProjectItem, Name, AltTitle, Description, Subject]
+def get_keyword_results(query: str) -> list:
+    search_models = [ProjectItem, Name, AltId, AltTitle, Description, Subject]
     search_results = []
     for model in search_models:
+        model_q = Q()
         fields = [x for x in model._meta.fields if isinstance(x, CharField)]
-        q_list = [Q(**{x.name + "__icontains": query}) for x in fields]
-        output_q = Q()
-        for q in q_list:
-            output_q = output_q | q
-
-        results = model.objects.filter(output_q)
-        search_results.append(results)
-        print(search_results)
-
+        for field in fields:
+            field_q = construct_keyword_query(field.name, query)
+            model_q = model_q | field_q
+        model_results = model.objects.filter(model_q)
+        search_results.append(model_results)
     return search_results
 
 
