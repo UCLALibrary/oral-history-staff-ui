@@ -1,34 +1,58 @@
 {% extends 'oh_staff_ui/base.html' %}
 
 {% block content %}
-<a href="{% url 'edit_item' item.id %}">View metadata</a>
-<ul>
-  <li>id: {{ item.id }}</li>
-  <li>ARK: {{ item.ark }}</li>
-  <li>created: {{ item.create_date }} by {{ item.created_by }}</li>
-  <li>updated: {{ item.last_modified_date }} by {{ item.last_modified_by }}</li>
-  <li>Parent:
-      {% if item.parent %}
-      <a href="{% url 'edit_item' item.parent.id %}">{{ item.parent }}</a>
-      {% else %}
-      {{ item.parent }}
-      {% endif %}
-  </li>
-</ul>
-
-<table class="search-results">
+<table class="header-metadata">
+  <caption>Item Information</caption>
+  <tr>
+      <td>Title</td>
+      <td>{{ item.title }}</td>
+  </tr>
+  <tr>
+      <td>ARK</td>
+      <td>{{ item.ark }}</td>
+  </tr>
+  <tr>
+      <td>Parent</td>
+      <td>{% if item.parent %}
+          <a href="{% url 'edit_item' item.parent.id %}">{{ item.parent }}</a>
+          {% else %}
+          {{ item.parent }}
+          {% endif %}</td>
+  </tr>
+  <tr>
+      <td>Created</td>
+      <td>{{ item.create_date }} by {{ item.created_by }}</td>
+  </tr>
+  <tr>
+      <td>Updated</td>
+      <td>{{ item.last_modified_date }} by {{ item.last_modified_by }}</td>
+  </tr>
+  <tr>
+      <td>Item Actions</td>
+      <td>
+        <a href="{% url 'edit_item' item.id %}">View metadata</a>
+      </td>
+  </tr>
+</table>
+<br>
+{% if files %}
+<hr>
+<table class="header-metadata">
+  <caption>File Information</caption>
   {% for file in files %}
   <tr>
     <td>{{ file.file_type }}</td>
     <td>Added: {{ file.create_date }} by {{ file.created_by }}</td>
+    <td>{{ file.original_file_name }}</td>
     <td>{{ file.file.name }}</td>
     <td>Sequence: {{ file.sequence }}</td>
   </tr>
   {% endfor %}
 </table>
-<br>
-
+{% endif %}
+<hr>
 {% if messages %}
+<br>
 <div class="box">
 {% for message in messages %}
   <div>{{ message }}</div>

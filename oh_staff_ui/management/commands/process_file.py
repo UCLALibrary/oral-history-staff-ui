@@ -3,6 +3,7 @@ import logging
 # from django.contrib import messages
 from django.core.management.base import BaseCommand
 from django.http import HttpRequest
+from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.models import MediaFileType
 
@@ -21,17 +22,30 @@ def process_file(
     This will be extended to handle submasters and thumbnails.
     """
     # This script only processes user-uploaded files, which are always masters.
-
-    # TODO: Implement type-based processing; comments below just my notes.
-    # Create master OHF from params
-    # OHF knows what content_type it is
-    # Pass OHF to a handler factory, which creates handler based on OHF.content_type?
-    # Or just have a simple if..elif.. here, creating appropriate handler based on OHF.ct?
-
+    # Create initial file object, determine content type, then pass it to
+    # an appropriate handler to generate derivatives and save all to database
+    # and file system.
     file_use = "master"
     try:
-        ohf = OralHistoryFile(item_id, file_name, file_type, file_use, request)
-        ohf.process_media_file()
+        master_file = OralHistoryFile(item_id, file_name, file_type, file_use, request)
+        content_type = master_file.content_type
+        handler = None  # temporary, until all handlers are implemented
+        if content_type == "audio":
+            handler = AudioFileHandler(master_file)
+        elif content_type == "image":
+            pass
+        elif content_type in ["pdf", "text"]:
+            pass
+        else:
+            # No code here; OralHistoryFile throws ValueError on unsupported content_type
+            pass
+
+        # Do whatever needs to be done
+        if handler:
+            handler.process_files()
+        else:
+            # temporary legacy code, until all handlers are implemented
+            master_file.process_media_file()
     except ValueError as ex:
         logger.error(ex)
         # Pass the exception up to the caller.
