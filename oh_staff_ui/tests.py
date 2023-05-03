@@ -62,6 +62,18 @@ class MediaFileTestCase(TestCase):
         )
         # master.process_media_file()
         return master
+    
+    def create_bad_master_audio_file(self):
+        # Purposely add a file which will fail mp3 conversion
+        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        master = OralHistoryFile(
+            self.item.id,
+            file_name="samples/fake_file_01.wav",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        return master
 
     def test_master_audio_file_is_added(self):
         master = self.create_master_audio_file()
@@ -120,6 +132,12 @@ class MediaFileTestCase(TestCase):
         file2 = self.create_master_audio_file()
         with self.assertRaises(CommandError):
             handler = AudioFileHandler(file2)
+            handler.process_files()
+    
+    def test_bad_audio_submaster_is_bound(self):
+        file1 = self.create_bad_master_audio_file()
+        handler = AudioFileHandler(file1)
+        with self.assertRaises(CommandError):
             handler.process_files()
 
     def test_content_type_jpeg(self):
