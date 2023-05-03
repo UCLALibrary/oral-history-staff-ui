@@ -2,7 +2,7 @@ import logging
 import requests
 import uuid
 from django.conf import settings
-from django.db.models import Q, Model
+from django.db.models import Q, Model, CharField
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
@@ -26,7 +26,9 @@ from oh_staff_ui.models import (
     Date,
     Description,
     Format,
+    Name,
     ProjectItem,
+    Subject,
     ItemCopyrightUsage,
     ItemLanguageUsage,
     ItemNameUsage,
@@ -38,7 +40,7 @@ from oh_staff_ui.models import (
 logger = logging.getLogger(__name__)
 
 
-def construct_keyword_query(query: str) -> Q:
+def construct_title_keyword_query(query: str) -> Q:
     # Always include the full query, as a single substring.
     full_q = Q(title__icontains=query)
     keywords = query.split()
@@ -52,6 +54,23 @@ def construct_keyword_query(query: str) -> Q:
         # OR the assembled set of words with the full query.
         full_q = full_q | words_q
     return full_q
+
+
+def construct_keyword_query(query: str) -> list:
+    search_models = [ProjectItem, Name, AltTitle, Description, Subject]
+    search_results = []
+    for model in search_models:
+        fields = [x for x in model._meta.fields if isinstance(x, CharField)]
+        q_list = [Q(**{x.name + "__icontains": query}) for x in fields]
+        output_q = Q()
+        for q in q_list:
+            output_q = output_q | q
+
+        results = model.objects.filter(output_q)
+        search_results.append(results)
+        print(search_results)
+
+    return search_results
 
 
 def get_ark() -> str:

@@ -63,10 +63,24 @@ class ProjectItemForm(forms.Form):
 
 
 class ItemSearchForm(forms.Form):
-    search_types = [("ark", "ARK"), ("title", "Title")]
-    search_type = forms.ChoiceField(choices=search_types)
-    query = forms.CharField(
-        required=True, max_length=256, widget=forms.TextInput(attrs={"size": 80})
+    search_types = [
+        ("title", "Title"),
+        ("status", "Status"),
+        ("keyword", "Keyword"),
+        ("ark", "ARK"),
+    ]
+    search_type = forms.ChoiceField(choices=search_types, initial="title")
+    char_query = forms.CharField(
+        required=False,
+        max_length=256,
+        widget=forms.TextInput(attrs={"size": 80, "class": "char-query"}),
+        label="Query",
+    )
+    status_query = forms.ModelChoiceField(
+        required=False,
+        queryset=ItemStatus.objects.all().order_by("status"),
+        label="Query",
+        widget=forms.Select(attrs={"class": "status-query", "style": "display: none"}),
     )
 
 
