@@ -57,7 +57,8 @@ def construct_keyword_query(field: str, query: str) -> Q:
 
 
 def get_keyword_results(query: str) -> list:
-    search_models = [ProjectItem, Name, AltId, AltTitle, Description, Subject]
+    # look for matches in any CharField attached to any of these models
+    search_models = [ProjectItem, AltId, AltTitle, Description, Name, Subject]
     search_results = []
     for model in search_models:
         model_q = Q()
@@ -68,6 +69,38 @@ def get_keyword_results(query: str) -> list:
         model_results = model.objects.filter(model_q)
         search_results.append(model_results)
     return search_results
+
+
+def get_result_items(queryset_list: list) -> list:
+    # convert list of querysets to list of ProjectItems for display
+    output_projectitems = []
+    # by order of search_models in get_keyword_results(),
+    # queryset_list[0] contains ProjectItems
+    # these are directly copied to output list
+    for item in queryset_list[0]:
+        output_projectitems.append(item)
+    # queryset_list[1] has AltIds
+    for altid in queryset_list[1]:
+        output_projectitems.append(altid.item)
+    # queryset_list[2] has AltTitles
+    for alttitle in queryset_list[2]:
+        output_projectitems.append(alttitle.item)
+    # queryset_list[3] has Descriptions
+    for description in queryset_list[3]:
+        output_projectitems.append(description.item)
+    # queryset_list[4] has Names
+    for name in queryset_list[4]:
+        name_usages = ItemNameUsage.objects.filter(value=name)
+        for item in name_usages:
+            output_projectitems.append(item.item)
+    # queryset_list[5] has Subjects
+    for subject in queryset_list[5]:
+        subject_usages = ItemSubjectUsage.objects.filter(value=subject)
+        for item in subject_usages:
+            output_projectitems.append(item.item)
+    # sort output list by title
+    output_projectitems.sort(key=lambda x: x.title.lower())
+    return output_projectitems
 
 
 def get_ark() -> str:

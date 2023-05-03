@@ -17,6 +17,8 @@ from oh_staff_ui.views_utils import (
     construct_keyword_query,
     get_ark,
     get_edit_item_context,
+    get_keyword_results,
+    get_result_items,
     save_all_item_data,
 )
 
@@ -119,7 +121,8 @@ def search_results(request: HttpRequest, search_type: str, query: str) -> HttpRe
             ProjectItem.objects.filter(status__status=query).order_by("title").values()
         )
     elif search_type == "keyword":
-        results = ProjectItem.objects.filter(title=query).order_by("title").values()
+        search_data = get_keyword_results(query)
+        results = get_result_items(search_data)
     return render(request, "oh_staff_ui/search_results.html", {"results": results})
 
 
