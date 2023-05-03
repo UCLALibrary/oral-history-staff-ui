@@ -65,6 +65,7 @@ def add_item(request: HttpRequest, parent_id: int | None = None) -> HttpResponse
                 )
     else:
         if parent_id:
+            # TODO: Consider further changes to form to make "initial" unneeded here.
             form = ProjectItemForm(
                 initial={"parent": parent_item}, parent_item=parent_item
             )
