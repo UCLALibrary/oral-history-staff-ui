@@ -1,18 +1,10 @@
 [
     {
         "model": "oh_staff_ui.ItemType",
-        "pk": 1,
-        "fields": {
-            "type": "Collection",
-            "parent": null
-        }
-    },
-    {
-        "model": "oh_staff_ui.ItemType",
         "pk": 2,
         "fields": {
             "type": "Series",
-            "parent": 1
+            "parent": null
         }
     },
     {

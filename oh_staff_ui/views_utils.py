@@ -2,7 +2,8 @@ import logging
 import requests
 import uuid
 from django.conf import settings
-from django.db.models import Q, Model
+from django.contrib import messages
+from django.db.models import Model, Q
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
@@ -162,6 +163,9 @@ def get_metadata_formset(
 
 def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     """Parse data from request and update database as appropriate."""
+    # Get parent item info needed for ProjectItemForm.
+    parent_item = get_parent_item(item_id)
+    # Unpack data from all of the forms & formsets.
     AltIdFormset = formset_factory(AltIdForm, extra=1, can_delete=True)
     AltTitleFormset = formset_factory(AltTitleForm, extra=1, can_delete=True)
     CopyrightUsageFormset = formset_factory(
@@ -177,7 +181,7 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     )
     ResourceUsageFormset = formset_factory(ResourceUsageForm, extra=1, can_delete=True)
     SubjectUsageFormset = formset_factory(SubjectUsageForm, extra=1, can_delete=True)
-    item_form = ProjectItemForm(request.POST)
+    item_form = ProjectItemForm(request.POST, parent_item=parent_item)
     alt_id_formset = AltIdFormset(request.POST, prefix="alt_ids")
     alt_title_formset = AltTitleFormset(request.POST, prefix="alt_titles")
     copyright_formset = CopyrightUsageFormset(request.POST, prefix="copyrights")
@@ -191,7 +195,6 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     subject_formset = SubjectUsageFormset(request.POST, prefix="subjects")
 
     # TODO: Better way to check validity of all forms, without unpacking request twice.
-    logger.info(f"REQUEST.POST: {request.POST}")
     if (
         item_form.is_valid()
         & alt_id_formset.is_valid()
@@ -243,6 +246,11 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         save_item_formset_data(item, ItemPublisherUsage, publisher_formset.cleaned_data)
         save_item_formset_data(item, ItemResourceUsage, resource_formset.cleaned_data)
         save_item_formset_data(item, ItemSubjectUsage, subject_formset.cleaned_data)
+        messages.success(request, "All item data has been saved.")
+    else:
+        # TODO: Proper handling of whatever errors can occur; for now, just debugging.
+        messages.error(request, "Problem saving data!")
+        logger.error(f"{item_form.errors=}")
 
 
 def valid_metadata_usage(usage_data: dict) -> bool:
@@ -304,3 +312,7 @@ def get_relatives(item: ProjectItem) -> dict:
     partial_relatives = get_descendants(top_parent)
     relatives = {top_parent: partial_relatives}
     return relatives
+
+
+def get_parent_item(item_id: int) -> ProjectItem:
+    return ProjectItem.objects.get(pk=item_id).parent

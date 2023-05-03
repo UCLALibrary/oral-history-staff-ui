@@ -2,6 +2,14 @@
 
 {% block content %}
 
+{% if messages %}
+<div class="box">
+{% for message in messages %}
+  <div>{{ message }}</div>
+{% endfor %}
+</div>
+{% endif %}
+
 <table class="header-metadata">
     <caption>Item Information</caption>
     <tr>
