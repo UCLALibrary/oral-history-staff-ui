@@ -75,12 +75,13 @@ class Command(BaseCommand):
             required=True,
             help="The full path of the file to process",
         )
+        master_types = self._get_master_file_type_codes()
         parser.add_argument(
             "-t",
             "--file_type",
             type=str,
             required=True,
-            help="The file type code of the file to process (e.g., audio_master)",
+            help=f"The file type code of the file to process; must be one of {master_types}",
         )
         parser.add_argument(
             "-r",
@@ -107,3 +108,12 @@ class Command(BaseCommand):
         logger.info(f"{file_type = }")
 
         process_file(item_id, file_name, file_type, request)
+
+    def _get_master_file_type_codes(self) -> list[str]:
+        """Get the codes for master file types."""
+        return [
+            mf.file_code
+            for mf in MediaFileType.objects.filter(
+                file_code__contains="_master"
+            ).order_by("file_code")
+        ]
