@@ -4,6 +4,7 @@ import logging
 from django.core.management.base import BaseCommand
 from django.http import HttpRequest
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
+from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
 from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.models import MediaFileType
@@ -36,17 +37,13 @@ def process_file(
         elif content_type == "image":
             handler = ImageFileHandler(master_file)
         elif content_type in ["pdf", "text"]:
-            pass
+            handler = GeneralFileHandler(master_file)
         else:
             # No code here; OralHistoryFile throws ValueError on unsupported content_type
             pass
 
         # Do whatever needs to be done
-        if handler:
-            handler.process_files()
-        else:
-            # temporary legacy code, until all handlers are implemented
-            master_file.process_media_file()
+        handler.process_files()
     except ValueError as ex:
         logger.error(ex)
         # Pass the exception up to the caller.
@@ -78,12 +75,13 @@ class Command(BaseCommand):
             required=True,
             help="The full path of the file to process",
         )
+        master_types = self._get_master_file_type_codes()
         parser.add_argument(
             "-t",
             "--file_type",
             type=str,
             required=True,
-            help="The file type of the file to process",
+            help=f"The file type code of the file to process; must be one of {master_types}",
         )
         parser.add_argument(
             "-r",
@@ -99,7 +97,7 @@ class Command(BaseCommand):
         request = options["request"]
         # For command-line processing
         if not isinstance(file_type, MediaFileType):
-            file_type = MediaFileType.objects.get(file_type=options["file_type"])
+            file_type = MediaFileType.objects.get(file_code=options["file_type"])
         if request is None:
             request = get_mock_request()
 
@@ -110,3 +108,12 @@ class Command(BaseCommand):
         logger.info(f"{file_type = }")
 
         process_file(item_id, file_name, file_type, request)
+
+    def _get_master_file_type_codes(self) -> list[str]:
+        """Get the codes for master file types."""
+        return [
+            mf.file_code
+            for mf in MediaFileType.objects.filter(
+                file_code__contains="_master"
+            ).order_by("file_code")
+        ]

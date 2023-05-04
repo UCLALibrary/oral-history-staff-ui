@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.http import HttpRequest
 from django.test import TestCase
 from django.contrib.auth.models import User
+from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
 from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.forms import ProjectItemForm
 from oh_staff_ui.models import (
@@ -58,7 +59,7 @@ class MediaFileTestCase(TestCase):
 
     def create_master_audio_file(self):
         # Utility function used in multiple tests.
-        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_master")
         master = OralHistoryFile(
             self.item.id,
             file_name="samples/sample.wav",
@@ -70,7 +71,7 @@ class MediaFileTestCase(TestCase):
 
     def create_bad_master_audio_file(self):
         # Purposely add a file which will fail mp3 conversion
-        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_master")
         master = OralHistoryFile(
             self.item.id,
             file_name="samples/fake_file_01.wav",
@@ -83,10 +84,23 @@ class MediaFileTestCase(TestCase):
     def create_master_image_file(self):
         # Utility function used in multiple tests.
         # Uses a tiff large enough to be resized.
-        file_type = MediaFileType.objects.get(file_type="MasterImage1")
+        file_type = MediaFileType.objects.get(file_code="image_master")
         master = OralHistoryFile(
             self.item.id,
             file_name="samples/sample_marbles.tif",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        return master
+
+    def create_master_general_file(self):
+        # Utility function used in multiple tests.
+        # Same logic applies to text/xml/pdf, no need for all to be tested.
+        file_type = MediaFileType.objects.get(file_code="text_master_transcript")
+        master = OralHistoryFile(
+            self.item.id,
+            file_name="samples/sample.xml",
             file_type=file_type,
             file_use="master",
             request=self.mock_request,
@@ -131,7 +145,7 @@ class MediaFileTestCase(TestCase):
                 created_by=self.user,
                 item=self.item,
                 sequence=2,
-                file_type=MediaFileType.objects.get(file_type="MasterAudio1"),
+                file_type=MediaFileType.objects.get(file_code="audio_master"),
             )
             # Use the filename of the first file for the second file
             path = Path(file1.media_file.file.name)
@@ -172,7 +186,7 @@ class MediaFileTestCase(TestCase):
         master = self.create_master_image_file()
         handler = ImageFileHandler(master)
         handler.process_files()
-        file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
+        file_type = MediaFileType.objects.get(file_code="image_submaster")
         # master is OralHistoryFile; submaster is MediaFile
         submaster = MediaFile.objects.get(parent=master.media_file, file_type=file_type)
         self.assertEqual(
@@ -188,7 +202,7 @@ class MediaFileTestCase(TestCase):
         master = self.create_master_image_file()
         handler = ImageFileHandler(master)
         handler.process_files()
-        file_type = MediaFileType.objects.get(file_type="ThumbnailImage1")
+        file_type = MediaFileType.objects.get(file_code="image_thumbnail")
         # master is OralHistoryFile; submaster is MediaFile
         submaster = MediaFile.objects.get(parent=master.media_file, file_type=file_type)
         self.assertEqual(
@@ -200,8 +214,35 @@ class MediaFileTestCase(TestCase):
         # Confirm master is parent of submaster.
         self.assertEqual(master.media_file, submaster.parent)
 
+    def test_master_general_file_is_added(self):
+        master = self.create_master_general_file()
+        handler = GeneralFileHandler(master)
+        handler.process_files()
+        # Confirm the new file exists.
+        self.assertEqual(Path(master.media_file.file.name).exists(), True)
+        # For masters, new file should be same size as original.
+        path = Path("samples/sample.xml")
+        self.assertEqual(master.media_file.file.size, path.stat().st_size)
+
+    def test_submaster_general_file_is_added(self):
+        master = self.create_master_general_file()
+        handler = GeneralFileHandler(master)
+        handler.process_files()
+        # master is OralHistoryFile; submaster is MediaFile
+        submaster = MediaFile.objects.get(parent=master.media_file)
+        self.assertEqual(
+            submaster.file.name,
+            "media_dev/oh_static/text/submasters/fake-abcdef-1-submaster.xml",
+        )
+        # Confirm the new file itself exists.
+        self.assertEqual(Path(submaster.file.name).exists(), True)
+        # Confirm we have 2 items, the master and submaster.
+        self.assertEqual(MediaFile.objects.count(), 2)
+        # Confirm master is parent of submaster.
+        self.assertEqual(master.media_file, submaster.parent)
+
     def test_content_type_jpeg(self):
-        file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
+        file_type = MediaFileType.objects.get(file_code="image_submaster")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.jpeg",
@@ -212,7 +253,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "image")
 
     def test_content_type_jpg(self):
-        file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
+        file_type = MediaFileType.objects.get(file_code="image_submaster")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.jpg",
@@ -223,7 +264,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "image")
 
     def test_content_type_tif(self):
-        file_type = MediaFileType.objects.get(file_type="MasterImage1")
+        file_type = MediaFileType.objects.get(file_code="image_master")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.tif",
@@ -234,7 +275,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "image")
 
     def test_content_type_tiff(self):
-        file_type = MediaFileType.objects.get(file_type="MasterImage1")
+        file_type = MediaFileType.objects.get(file_code="image_master")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.tiff",
@@ -245,7 +286,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "image")
 
     def test_content_type_mp3(self):
-        file_type = MediaFileType.objects.get(file_type="SubMasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_submaster")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.mp3",
@@ -256,7 +297,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "audio")
 
     def test_content_type_pdf(self):
-        file_type = MediaFileType.objects.get(file_type="PDF Legal Agreement")
+        file_type = MediaFileType.objects.get(file_code="pdf_master_legal_agreement")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.pdf",
@@ -267,7 +308,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "pdf")
 
     def test_content_type_txt(self):
-        file_type = MediaFileType.objects.get(file_type="Text Introduction")
+        file_type = MediaFileType.objects.get(file_code="text_master_introduction")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.txt",
@@ -278,7 +319,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "text")
 
     def test_content_type_wav(self):
-        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_master")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.wav",
@@ -289,7 +330,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "audio")
 
     def test_content_type_xml(self):
-        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        file_type = MediaFileType.objects.get(file_code="text_master_transcript")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.xml",
@@ -301,7 +342,7 @@ class MediaFileTestCase(TestCase):
 
     def test_content_type_extension_case(self):
         # Make sure file names are converted to lowercase.
-        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        file_type = MediaFileType.objects.get(file_code="text_master_transcript")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="FOO.XML",
@@ -312,7 +353,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.content_type, "text")
 
     def test_content_type_unsupported_extension(self):
-        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        file_type = MediaFileType.objects.get(file_code="text_master_transcript")
         with self.assertRaises(ValueError):
             OralHistoryFile(
                 self.item.id,
@@ -323,7 +364,7 @@ class MediaFileTestCase(TestCase):
             )
 
     def test_content_type_no_extension(self):
-        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        file_type = MediaFileType.objects.get(file_code="text_master_transcript")
         with self.assertRaises(ValueError):
             OralHistoryFile(
                 self.item.id,
@@ -338,7 +379,7 @@ class MediaFileTestCase(TestCase):
     # will need to be overridden.
 
     def test_get_target_dir_master_audio(self):
-        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_master")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.wav",
@@ -349,7 +390,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.target_dir, "media_dev/oh_lz/audio/masters")
 
     def test_get_target_dir_submaster_audio(self):
-        file_type = MediaFileType.objects.get(file_type="SubMasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_submaster")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.mp3",
@@ -360,7 +401,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.target_dir, "media_dev/oh_wowza/audio/submasters")
 
     def test_get_target_dir_master_image(self):
-        file_type = MediaFileType.objects.get(file_type="MasterImage1")
+        file_type = MediaFileType.objects.get(file_code="image_master")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.tiff",
@@ -371,7 +412,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.target_dir, "media_dev/oh_lz/masters")
 
     def test_get_target_dir_submaster_image(self):
-        file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
+        file_type = MediaFileType.objects.get(file_code="image_submaster")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.jpg",
@@ -382,7 +423,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.target_dir, "media_dev/oh_static/submasters")
 
     def test_get_target_dir_thumbnail_image(self):
-        file_type = MediaFileType.objects.get(file_type="ThumbnailImage1")
+        file_type = MediaFileType.objects.get(file_code="image_thumbnail")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.jpg",
@@ -393,7 +434,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.target_dir, "media_dev/oh_static/nails")
 
     def test_get_target_dir_master_pdf(self):
-        file_type = MediaFileType.objects.get(file_type="PDF Legal Agreement")
+        file_type = MediaFileType.objects.get(file_code="pdf_master_legal_agreement")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.pdf",
@@ -404,7 +445,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.target_dir, "media_dev/oh_lz/pdf/masters")
 
     def test_get_target_dir_submaster_pdf(self):
-        file_type = MediaFileType.objects.get(file_type="PDF Legal Agreement")
+        file_type = MediaFileType.objects.get(file_code="pdf_master_legal_agreement")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.pdf",
@@ -415,7 +456,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.target_dir, "media_dev/oh_static/pdf/submasters")
 
     def test_get_target_dir_master_text(self):
-        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        file_type = MediaFileType.objects.get(file_code="text_master_transcript")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.xml",
@@ -426,7 +467,7 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(ohf.target_dir, "media_dev/oh_lz/text/masters")
 
     def test_get_target_dir_submaster_text(self):
-        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        file_type = MediaFileType.objects.get(file_code="text_master_transcript")
         ohf = OralHistoryFile(
             self.item.id,
             file_name="foo.xml",
@@ -438,7 +479,7 @@ class MediaFileTestCase(TestCase):
 
     def test_get_target_dir_invalid_audio_thumbnail(self):
         # Audio doesn't have thumbnails
-        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_master")
         with self.assertRaises(ValueError):
             OralHistoryFile(
                 self.item.id,
@@ -450,7 +491,7 @@ class MediaFileTestCase(TestCase):
 
     def test_get_target_dir_invalid_audio_file_use(self):
         # Audio doesn't have thumbnails
-        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_master")
         with self.assertRaises(ValueError):
             OralHistoryFile(
                 self.item.id,
@@ -462,7 +503,7 @@ class MediaFileTestCase(TestCase):
 
     def test_get_target_dir_invalid_master_content_type(self):
         # Audio doesn't have thumbnails
-        file_type = MediaFileType.objects.get(file_type="MasterAudio1")
+        file_type = MediaFileType.objects.get(file_code="audio_master")
         with self.assertRaises(ValueError):
             OralHistoryFile(
                 self.item.id,

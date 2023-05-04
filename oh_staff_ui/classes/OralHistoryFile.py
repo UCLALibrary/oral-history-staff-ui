@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.files import File
 from django.db.models import Max
 from django.http import HttpRequest
-from oh_staff_ui.models import MediaFile, ProjectItem
+from oh_staff_ui.models import MediaFile, MediaFileType, ProjectItem
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class OralHistoryFile:
         self,
         item_id: int,
         file_name: str,
-        file_type: str,
+        file_type: MediaFileType,
         file_use: str,
         request: HttpRequest,
     ):
@@ -43,7 +43,7 @@ class OralHistoryFile:
         return self._file_use
 
     @property
-    def file_type(self) -> str:
+    def file_type(self) -> MediaFileType:
         return self._file_type
 
     @property

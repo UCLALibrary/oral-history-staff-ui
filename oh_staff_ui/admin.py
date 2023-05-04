@@ -134,3 +134,5 @@ class DateType(admin.ModelAdmin):
 class MediaFileType(admin.ModelAdmin):
     list_display = ("file_type", "file_type_description")
     ordering = ("file_type", "file_type_description")
+    # Don't let users edit the codes.
+    exclude = ["file_code"]

@@ -39,13 +39,20 @@
 <hr>
 <table class="header-metadata">
   <caption>File Information</caption>
+  <tr>
+    <th>File Type</th>
+    <th>Added by</th>
+    <th>Original name</th>
+    <th>New name & location</th>
+    <th>Sequence</th>
+  </tr>
   {% for file in files %}
   <tr>
     <td>{{ file.file_type }}</td>
-    <td>Added: {{ file.create_date }} by {{ file.created_by }}</td>
+    <td>{{ file.create_date }} by {{ file.created_by }}</td>
     <td>{{ file.original_file_name }}</td>
     <td>{{ file.file.name }}</td>
-    <td>Sequence: {{ file.sequence }}</td>
+    <td>{{ file.sequence }}</td>
   </tr>
   {% endfor %}
 </table>
