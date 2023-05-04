@@ -44,6 +44,7 @@
     <th>Added by</th>
     <th>Original name</th>
     <th>New name & location</th>
+    <th>Size</th>
     <th>Sequence</th>
   </tr>
   {% for file in files %}
@@ -52,6 +53,7 @@
     <td>{{ file.create_date }} by {{ file.created_by }}</td>
     <td>{{ file.original_file_name }}</td>
     <td>{{ file.file.name }}</td>
+    <td>{{ file.file_size|floatformat:"g" }}</td>
     <td>{{ file.sequence }}</td>
   </tr>
   {% endfor %}
