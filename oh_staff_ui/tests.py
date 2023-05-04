@@ -116,6 +116,8 @@ class MediaFileTestCase(TestCase):
         # For masters, new file should be same size as original.
         path = Path("samples/sample.wav")
         self.assertEqual(master.media_file.file.size, path.stat().st_size)
+        # Confirm the file size was also captured, in case file is no longer accessible.
+        self.assertEqual(master.media_file.file_size, path.stat().st_size)
 
     def test_submaster_audio_file_is_added(self):
         master = self.create_master_audio_file()
@@ -181,6 +183,8 @@ class MediaFileTestCase(TestCase):
         # For masters, new file should be same size as original.
         path = Path("samples/sample_marbles.tif")
         self.assertEqual(master.media_file.file.size, path.stat().st_size)
+        # Confirm the file size was also captured, in case file is no longer accessible.
+        self.assertEqual(master.media_file.file_size, path.stat().st_size)
 
     def test_submaster_image_file_is_added(self):
         master = self.create_master_image_file()
@@ -223,6 +227,8 @@ class MediaFileTestCase(TestCase):
         # For masters, new file should be same size as original.
         path = Path("samples/sample.xml")
         self.assertEqual(master.media_file.file.size, path.stat().st_size)
+        # Confirm the file size was also captured, in case file is no longer accessible.
+        self.assertEqual(master.media_file.file_size, path.stat().st_size)
 
     def test_submaster_general_file_is_added(self):
         master = self.create_master_general_file()

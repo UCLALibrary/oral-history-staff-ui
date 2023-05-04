@@ -80,8 +80,11 @@ class OralHistoryFile:
             parent_id=parent_id,
         )
         # Read the original file, copying it to new_name and saving the MediaFile.
+        # Get original filesize first, since it's not available in the context below.
+        file_size = Path(self._original_file_name).stat().st_size
         with Path(self._original_file_name).open(mode="rb") as f:
             new_file.file = File(f, name=new_name)
+            new_file.file_size = file_size
             new_file.save()
             # Also store it for read-only access by callers.
             self._media_file = new_file
