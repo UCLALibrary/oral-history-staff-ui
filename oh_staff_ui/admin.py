@@ -56,6 +56,8 @@ class NameType(admin.ModelAdmin):
 class Name(admin.ModelAdmin):
     list_display = ("value", "source")
     ordering = ("value", "source")
+    search_fields = ("value",)
+    list_filter = ("source",)
 
 
 @admin.register(SubjectType)
@@ -68,6 +70,8 @@ class NameType(admin.ModelAdmin):
 class Subject(admin.ModelAdmin):
     list_display = ("value", "source")
     ordering = ("value", "source")
+    search_fields = ("value",)
+    list_filter = ("source",)
 
 
 @admin.register(AltIdType)
@@ -134,5 +138,3 @@ class DateType(admin.ModelAdmin):
 class MediaFileType(admin.ModelAdmin):
     list_display = ("file_type", "file_type_description")
     ordering = ("file_type", "file_type_description")
-    # Don't let users edit the codes.
-    exclude = ["file_code"]
