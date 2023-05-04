@@ -484,16 +484,15 @@ class Date(models.Model):
 
 
 class MediaFileType(models.Model):
-    file_type = models.CharField(max_length=40, blank=False, null=False)
+    # TODO: Change file_code null=False after successful migration / data load.
+    file_code = models.CharField(max_length=40, blank=False, null=True, unique=True)
+    file_type = models.CharField(max_length=40, blank=False, null=False, unique=True)
     file_type_description = models.CharField(max_length=256, blank=False, null=False)
 
     def __str__(self):
         return self.file_type
 
     class Meta:
-        indexes = [
-            models.Index(fields=["file_type"]),
-        ]
         ordering = ["file_type"]
 
 

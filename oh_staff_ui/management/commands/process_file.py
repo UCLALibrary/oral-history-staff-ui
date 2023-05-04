@@ -80,7 +80,7 @@ class Command(BaseCommand):
             "--file_type",
             type=str,
             required=True,
-            help="The file type of the file to process",
+            help="The file type code of the file to process (e.g., audio_master)",
         )
         parser.add_argument(
             "-r",
@@ -96,7 +96,7 @@ class Command(BaseCommand):
         request = options["request"]
         # For command-line processing
         if not isinstance(file_type, MediaFileType):
-            file_type = MediaFileType.objects.get(file_type=options["file_type"])
+            file_type = MediaFileType.objects.get(file_code=options["file_code"])
         if request is None:
             request = get_mock_request()
 

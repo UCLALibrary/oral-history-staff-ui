@@ -227,7 +227,10 @@ class FormatForm(forms.Form):
 
 class FileUploadForm(forms.Form):
     file_type = forms.ModelChoiceField(
-        queryset=MediaFileType.objects.all().order_by("file_type"),
+        # Show only "master" types for upload
+        queryset=MediaFileType.objects.filter(file_code__contains="_master").order_by(
+            "file_type"
+        ),
         empty_label="Please select a file type:",
         label="File type:",
     )

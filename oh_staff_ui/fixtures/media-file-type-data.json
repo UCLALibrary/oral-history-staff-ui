@@ -3,6 +3,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 1,
         "fields": {
+            "file_code": "image_submaster",
             "file_type": "SubMasterImage1",
             "file_type_description": "UCLA Center for Oral History Research Interview Collection Submaster Image"
         }
@@ -11,6 +12,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 2,
         "fields": {
+            "file_code": "image_thumbnail",
             "file_type": "ThumbnailImage1",
             "file_type_description": "UCLA Center for Oral History Research Interview Collection Thumbnail Image"
         }
@@ -19,6 +21,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 3,
         "fields": {
+            "file_code": "audio_master",
             "file_type": "MasterAudio1",
             "file_type_description": "UCLA Center for Oral History Research Interview Collection Master Audio"
         }
@@ -27,6 +30,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 4,
         "fields": {
+            "file_code": "audio_submaster",
             "file_type": "SubMasterAudio1",
             "file_type_description": "UCLA Center for Oral History Research Interview Collection Submaster Audio"
         }
@@ -35,6 +39,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 5,
         "fields": {
+            "file_code": "pdf_master",
             "file_type": "PDF",
             "file_type_description": "UCLA Center for Oral History Research Interview Collection PDF"
         }
@@ -43,6 +48,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 6,
         "fields": {
+            "file_code": "text_master_transcript",
             "file_type": "Text Transcript",
             "file_type_description": "Oral History Text - Transcript"
         }
@@ -51,6 +57,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 7,
         "fields": {
+            "file_code": "text_master_index",
             "file_type": "Text Index",
             "file_type_description": "Oral History Text - Index"
         }
@@ -59,6 +66,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 8,
         "fields": {
+            "file_code": "image_master",
             "file_type": "MasterImage1",
             "file_type_description": "Oral History Image - Master Image"
         }
@@ -67,6 +75,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 9,
         "fields": {
+            "file_code": "text_master_introduction",
             "file_type": "Text Introduction",
             "file_type_description": "Oral History Text - Introduction"
         }
@@ -75,6 +84,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 10,
         "fields": {
+            "file_code": "text_master_biography",
             "file_type": "Text Biography",
             "file_type_description": "Oral History Text - Biography"
         }
@@ -83,6 +93,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 11,
         "fields": {
+            "file_code": "text_master_interview_history",
             "file_type": "Text Interview History",
             "file_type_description": "Oral History Text - Interview History"
         }
@@ -91,6 +102,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 12,
         "fields": {
+            "file_code": "text_master_appendix",
             "file_type": "Text Appendix",
             "file_type_description": "Oral History Text - Appendix"
         }
@@ -99,6 +111,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 13,
         "fields": {
+            "file_code": "pdf_master_appendix",
             "file_type": "PDF Appendix to Interview",
             "file_type_description": "Appendix to Interview PDF"
         }
@@ -107,6 +120,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 14,
         "fields": {
+            "file_code": "pdf_master_resume",
             "file_type": "PDF Résumé",
             "file_type_description": "Narrator’s Résumé PDF"
         }
@@ -115,6 +129,7 @@
         "model": "oh_staff_ui.MediaFileType",
         "pk": 15,
         "fields": {
+            "file_code": "pdf_master_legal_agreement",
             "file_type": "PDF Legal Agreement",
             "file_type_description": "Legal Agreement"
         }

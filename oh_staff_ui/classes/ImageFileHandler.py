@@ -39,7 +39,7 @@ class ImageFileHandler(BaseFileHandler):
             submaster_file = OralHistoryFile(
                 item_id=self._master_file.item.id,
                 file_name=submaster_file_name,
-                file_type=MediaFileType.objects.get(file_type="SubMasterImage1"),
+                file_type=MediaFileType.objects.get(file_code="image_submaster"),
                 file_use="submaster",
                 request=self._master_file.request,
             )
@@ -52,7 +52,7 @@ class ImageFileHandler(BaseFileHandler):
             thumbnail_file = OralHistoryFile(
                 item_id=self._master_file.item.id,
                 file_name=thumbnail_file_name,
-                file_type=MediaFileType.objects.get(file_type="ThumbnailImage1"),
+                file_type=MediaFileType.objects.get(file_code="image_thumbnail"),
                 file_use="thumbnail",
                 request=self._master_file.request,
             )
