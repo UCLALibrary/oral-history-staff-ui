@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.http import HttpRequest
 from django.test import TestCase
 from django.contrib.auth.models import User
+from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
 from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.forms import ProjectItemForm
 from oh_staff_ui.models import (
@@ -87,6 +88,19 @@ class MediaFileTestCase(TestCase):
         master = OralHistoryFile(
             self.item.id,
             file_name="samples/sample_marbles.tif",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        return master
+
+    def create_master_general_file(self):
+        # Utility function used in multiple tests.
+        # Same logic applies to text/xml/pdf, no need for all to be tested.
+        file_type = MediaFileType.objects.get(file_type="Text Transcript")
+        master = OralHistoryFile(
+            self.item.id,
+            file_name="samples/sample.xml",
             file_type=file_type,
             file_use="master",
             request=self.mock_request,
@@ -197,6 +211,33 @@ class MediaFileTestCase(TestCase):
         )
         # Confirm the new file itself exists.
         self.assertEqual(Path(submaster.file.name).exists(), True)
+        # Confirm master is parent of submaster.
+        self.assertEqual(master.media_file, submaster.parent)
+
+    def test_master_general_file_is_added(self):
+        master = self.create_master_general_file()
+        handler = GeneralFileHandler(master)
+        handler.process_files()
+        # Confirm the new file exists.
+        self.assertEqual(Path(master.media_file.file.name).exists(), True)
+        # For masters, new file should be same size as original.
+        path = Path("samples/sample.xml")
+        self.assertEqual(master.media_file.file.size, path.stat().st_size)
+
+    def test_submaster_general_file_is_added(self):
+        master = self.create_master_general_file()
+        handler = GeneralFileHandler(master)
+        handler.process_files()
+        # master is OralHistoryFile; submaster is MediaFile
+        submaster = MediaFile.objects.get(parent=master.media_file)
+        self.assertEqual(
+            submaster.file.name,
+            "media_dev/oh_static/text/submasters/fake-abcdef-1-submaster.xml",
+        )
+        # Confirm the new file itself exists.
+        self.assertEqual(Path(submaster.file.name).exists(), True)
+        # Confirm we have 2 items, the master and submaster.
+        self.assertEqual(MediaFile.objects.count(), 2)
         # Confirm master is parent of submaster.
         self.assertEqual(master.media_file, submaster.parent)
 

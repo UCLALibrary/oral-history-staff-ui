@@ -4,6 +4,7 @@ import logging
 from django.core.management.base import BaseCommand
 from django.http import HttpRequest
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
+from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
 from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.models import MediaFileType
@@ -36,17 +37,13 @@ def process_file(
         elif content_type == "image":
             handler = ImageFileHandler(master_file)
         elif content_type in ["pdf", "text"]:
-            pass
+            handler = GeneralFileHandler(master_file)
         else:
             # No code here; OralHistoryFile throws ValueError on unsupported content_type
             pass
 
         # Do whatever needs to be done
-        if handler:
-            handler.process_files()
-        else:
-            # temporary legacy code, until all handlers are implemented
-            master_file.process_media_file()
+        handler.process_files()
     except ValueError as ex:
         logger.error(ex)
         # Pass the exception up to the caller.
