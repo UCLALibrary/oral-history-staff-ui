@@ -29,6 +29,8 @@ class OralHistoryFile:
         self._item = ProjectItem.objects.get(pk=self._item_id)
         self._content_type = self.get_content_type(self._original_file_name)
         self._target_dir = self.get_target_dir(self._file_use, self._content_type)
+        # Combination validation checks.
+        self._validate_content_type_against_file_type()
 
     @property
     def content_type(self) -> str:
@@ -199,3 +201,16 @@ class OralHistoryFile:
         else:
             original_file_name = self._original_file_name
         return Path(original_file_name).name
+
+    def _validate_content_type_against_file_type(self) -> None:
+        """Validate content type against file type code.
+
+        Raises ValueError if they do not match.
+        """
+        file_type_code = self._file_type.file_code
+        # File type code should always start with the content type:
+        # audio_master, pdf_legal_agreement, image_thumbnail, etc.
+        if not file_type_code.startswith(self._content_type):
+            raise ValueError(
+                f"File/content type mismatch: {file_type_code=}, {self._content_type=}"
+            )

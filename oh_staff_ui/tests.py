@@ -374,6 +374,50 @@ class MediaFileTestCase(TestCase):
                 request=self.mock_request,
             )
 
+    def test_content_type_mismatch_audio(self):
+        wrong_file_type = MediaFileType.objects.get(file_code="pdf_master")
+        with self.assertRaises(ValueError):
+            OralHistoryFile(
+                self.item.id,
+                file_name="samples/sample.wav",
+                file_type=wrong_file_type,
+                file_use="master",
+                request=self.mock_request,
+            )
+
+    def test_content_type_mismatch_image(self):
+        wrong_file_type = MediaFileType.objects.get(file_code="pdf_master")
+        with self.assertRaises(ValueError):
+            OralHistoryFile(
+                self.item.id,
+                file_name="samples/sample.tiff",
+                file_type=wrong_file_type,
+                file_use="master",
+                request=self.mock_request,
+            )
+
+    def test_content_type_mismatch_pdf(self):
+        wrong_file_type = MediaFileType.objects.get(file_code="audio_master")
+        with self.assertRaises(ValueError):
+            OralHistoryFile(
+                self.item.id,
+                file_name="samples/sample.pdf",
+                file_type=wrong_file_type,
+                file_use="master",
+                request=self.mock_request,
+            )
+
+    def test_content_type_mismatch_text(self):
+        wrong_file_type = MediaFileType.objects.get(file_code="pdf_master")
+        with self.assertRaises(ValueError):
+            OralHistoryFile(
+                self.item.id,
+                file_name="samples/sample.xml",
+                file_type=wrong_file_type,
+                file_use="master",
+                request=self.mock_request,
+            )
+
     # If the target_dir tests need to run in the test/prod environment,
     # paths will need changing or several environment variables
     # will need to be overridden.
