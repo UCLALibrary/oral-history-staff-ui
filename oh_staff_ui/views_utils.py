@@ -2,7 +2,8 @@ import logging
 import requests
 import uuid
 from django.conf import settings
-from django.db.models import Q, Model, CharField
+from django.contrib import messages
+from django.db.models import Model, Q
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
@@ -26,9 +27,7 @@ from oh_staff_ui.models import (
     Date,
     Description,
     Format,
-    Name,
     ProjectItem,
-    Subject,
     ItemCopyrightUsage,
     ItemLanguageUsage,
     ItemNameUsage,
@@ -40,67 +39,20 @@ from oh_staff_ui.models import (
 logger = logging.getLogger(__name__)
 
 
-def construct_keyword_query(field: str, query: str) -> Q:
+def construct_keyword_query(query: str) -> Q:
     # Always include the full query, as a single substring.
-    full_q = Q(**{field + "__icontains": query})
+    full_q = Q(title__icontains=query)
     keywords = query.split()
     # If there's only one word, it's the same as the full query, nothing to do.
     # Otherwise, grab the first word, then AND each following word.
     if len(keywords) > 1:
-        words_q = Q(**{field + "__icontains": keywords[0]})
+        words_q = Q(title__icontains=keywords[0])
         # All except the first word
         for word in keywords[1:]:
-            words_q = words_q & Q(**{field + "__icontains": word})
+            words_q = words_q & Q(title__icontains=word)
         # OR the assembled set of words with the full query.
         full_q = full_q | words_q
     return full_q
-
-
-def get_keyword_results(query: str) -> list:
-    # look for matches in any CharField attached to any of these models
-    search_models = [ProjectItem, AltId, AltTitle, Description, Name, Subject]
-    search_results = []
-    for model in search_models:
-        model_q = Q()
-        fields = [x for x in model._meta.fields if isinstance(x, CharField)]
-        for field in fields:
-            field_q = construct_keyword_query(field.name, query)
-            model_q = model_q | field_q
-        model_results = model.objects.filter(model_q)
-        search_results.append(model_results)
-    return search_results
-
-
-def get_result_items(queryset_list: list) -> list:
-    # convert list of querysets to list of ProjectItems for display
-    output_projectitems = []
-    # by order of search_models in get_keyword_results(),
-    # queryset_list[0] contains ProjectItems
-    # these are directly copied to output list
-    for item in queryset_list[0]:
-        output_projectitems.append(item)
-    # queryset_list[1] has AltIds
-    for altid in queryset_list[1]:
-        output_projectitems.append(altid.item)
-    # queryset_list[2] has AltTitles
-    for alttitle in queryset_list[2]:
-        output_projectitems.append(alttitle.item)
-    # queryset_list[3] has Descriptions
-    for description in queryset_list[3]:
-        output_projectitems.append(description.item)
-    # queryset_list[4] has Names
-    for name in queryset_list[4]:
-        name_usages = ItemNameUsage.objects.filter(value=name)
-        for item in name_usages:
-            output_projectitems.append(item.item)
-    # queryset_list[5] has Subjects
-    for subject in queryset_list[5]:
-        subject_usages = ItemSubjectUsage.objects.filter(value=subject)
-        for item in subject_usages:
-            output_projectitems.append(item.item)
-    # sort output list by title
-    output_projectitems.sort(key=lambda x: x.title.lower())
-    return output_projectitems
 
 
 def get_ark() -> str:
@@ -211,6 +163,9 @@ def get_metadata_formset(
 
 def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     """Parse data from request and update database as appropriate."""
+    # Get parent item info needed for ProjectItemForm.
+    parent_item = get_parent_item(item_id)
+    # Unpack data from all of the forms & formsets.
     AltIdFormset = formset_factory(AltIdForm, extra=1, can_delete=True)
     AltTitleFormset = formset_factory(AltTitleForm, extra=1, can_delete=True)
     CopyrightUsageFormset = formset_factory(
@@ -226,7 +181,7 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     )
     ResourceUsageFormset = formset_factory(ResourceUsageForm, extra=1, can_delete=True)
     SubjectUsageFormset = formset_factory(SubjectUsageForm, extra=1, can_delete=True)
-    item_form = ProjectItemForm(request.POST)
+    item_form = ProjectItemForm(request.POST, parent_item=parent_item)
     alt_id_formset = AltIdFormset(request.POST, prefix="alt_ids")
     alt_title_formset = AltTitleFormset(request.POST, prefix="alt_titles")
     copyright_formset = CopyrightUsageFormset(request.POST, prefix="copyrights")
@@ -240,7 +195,6 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
     subject_formset = SubjectUsageFormset(request.POST, prefix="subjects")
 
     # TODO: Better way to check validity of all forms, without unpacking request twice.
-    logger.info(f"REQUEST.POST: {request.POST}")
     if (
         item_form.is_valid()
         & alt_id_formset.is_valid()
@@ -292,6 +246,11 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         save_item_formset_data(item, ItemPublisherUsage, publisher_formset.cleaned_data)
         save_item_formset_data(item, ItemResourceUsage, resource_formset.cleaned_data)
         save_item_formset_data(item, ItemSubjectUsage, subject_formset.cleaned_data)
+        messages.success(request, "All item data has been saved.")
+    else:
+        # TODO: Proper handling of whatever errors can occur; for now, just debugging.
+        messages.error(request, "Problem saving data!")
+        logger.error(f"{item_form.errors=}")
 
 
 def valid_metadata_usage(usage_data: dict) -> bool:
@@ -353,3 +312,7 @@ def get_relatives(item: ProjectItem) -> dict:
     partial_relatives = get_descendants(top_parent)
     relatives = {top_parent: partial_relatives}
     return relatives
+
+
+def get_parent_item(item_id: int) -> ProjectItem:
+    return ProjectItem.objects.get(pk=item_id).parent
