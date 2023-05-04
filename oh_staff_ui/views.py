@@ -17,6 +17,8 @@ from oh_staff_ui.views_utils import (
     construct_keyword_query,
     get_ark,
     get_edit_item_context,
+    get_keyword_results,
+    get_result_items,
     save_all_item_data,
 )
 
@@ -88,10 +90,14 @@ def item_search(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = ItemSearchForm(request.POST)
         if form.is_valid():
+            if form.cleaned_data["search_type"] == "status":
+                typed_query = form.cleaned_data["status_query"]
+            else:
+                typed_query = form.cleaned_data["char_query"]
             return redirect(
                 "search_results",
                 search_type=form.cleaned_data["search_type"],
-                query=form.cleaned_data["query"],
+                query=typed_query,
             )
     else:
         form = ItemSearchForm()
@@ -101,12 +107,19 @@ def item_search(request: HttpRequest) -> HttpResponse:
 @login_required
 def search_results(request: HttpRequest, search_type: str, query: str) -> HttpResponse:
     if search_type == "title":
-        full_query = construct_keyword_query(query)
+        full_query = construct_keyword_query("title", query)
         results = ProjectItem.objects.filter(full_query).order_by("title").values()
     elif search_type == "ark":
         results = (
             ProjectItem.objects.filter(ark__icontains=query).order_by("ark").values()
         )
+    elif search_type == "status":
+        results = (
+            ProjectItem.objects.filter(status__status=query).order_by("title").values()
+        )
+    elif search_type == "keyword":
+        search_data = get_keyword_results(query)
+        results = get_result_items(search_data)
     return render(request, "oh_staff_ui/search_results.html", {"results": results})
 
 
