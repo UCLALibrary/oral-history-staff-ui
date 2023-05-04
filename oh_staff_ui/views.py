@@ -91,17 +91,14 @@ def item_search(request: HttpRequest) -> HttpResponse:
         form = ItemSearchForm(request.POST)
         if form.is_valid():
             if form.cleaned_data["search_type"] == "status":
-                return redirect(
-                    "search_results",
-                    search_type=form.cleaned_data["search_type"],
-                    query=form.cleaned_data["status_query"],
-                )
+                typed_query = form.cleaned_data["status_query"]
             else:
-                return redirect(
-                    "search_results",
-                    search_type=form.cleaned_data["search_type"],
-                    query=form.cleaned_data["char_query"],
-                )
+                typed_query = form.cleaned_data["char_query"]
+            return redirect(
+                "search_results",
+                search_type=form.cleaned_data["search_type"],
+                query=typed_query,
+            )
     else:
         form = ItemSearchForm()
         return render(request, "oh_staff_ui/item_search.html", {"form": form})

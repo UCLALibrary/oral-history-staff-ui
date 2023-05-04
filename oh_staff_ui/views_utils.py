@@ -99,9 +99,11 @@ def get_result_items(queryset_list: list) -> list:
         subject_usages = ItemSubjectUsage.objects.filter(value=subject)
         for item in subject_usages:
             output_projectitems.append(item.item)
+    # remove duplicate items
+    output_projectitems_deduped = list(set(output_projectitems))
     # sort output list by title
-    output_projectitems.sort(key=lambda x: x.title.lower())
-    return output_projectitems
+    output_projectitems_deduped.sort(key=lambda x: x.title.lower())
+    return output_projectitems_deduped
 
 
 def get_ark() -> str:

@@ -47,41 +47,43 @@ function disable_upload_button(form) {
 	btn.disabled = true;
 }
 
-// Hide Status field label by default since Title is default search type
-labels = document.getElementsByTagName("label");
-console.log(labels)
-for (let i = 0; i < labels.length; i++) {
-    if (labels[i].getAttribute("for") == "id_status_query") {
-        labels[i].style.display = "none";
+if (window.location.href.includes("item_search")) {
+    // Hide Status field label by default since Title is default search type
+    labels = document.getElementsByTagName("label");
+    for (let i = 0; i < labels.length; i++) {
+        if (labels[i].getAttribute("for") == "id_status_query") {
+            labels[i].style.display = "none";
+        }
+    }
+
+    // Dynamically update available fields in item search form
+    document.getElementById("id_search_type").onchange = function(){
+        // for Status search, hide char query and make status visible
+        if (this.value == "status") {
+            document.getElementsByClassName("status-query")[0].style.display = "";
+            document.getElementsByClassName("char-query")[0].type = "hidden";
+            for (let i = 0; i < labels.length; i++) {
+                if (labels[i].getAttribute("for") == "id_char_query") {
+                    labels[i].style.display = "none";
+                }
+                if (labels[i].getAttribute("for") == "id_status_query") {
+                    labels[i].style.display = "";
+                }
+            }
+        }
+        // for all other searches, hide status and make char visible
+        else {
+            document.getElementsByClassName("status-query")[0].style.display = "none";
+            document.getElementsByClassName("char-query")[0].type = "";
+            for (let i = 0; i < labels.length; i++) {
+                if (labels[i].getAttribute("for") == "id_char_query") {
+                    labels[i].style.display = "";
+                }
+                if (labels[i].getAttribute("for") == "id_status_query") {
+                    labels[i].style.display = "none";
+                }
+            }
+        }
     }
 }
 
-// Dynamically update available fields in item search form
-document.getElementById("id_search_type").onchange = function(){
-    // for Status search, hide char query and make status visible
-    if (this.value == "status") {
-        document.getElementsByClassName("status-query")[0].style.display = "";
-        document.getElementsByClassName("char-query")[0].type = "hidden";
-        for (let i = 0; i < labels.length; i++) {
-            if (labels[i].getAttribute("for") == "id_char_query") {
-                labels[i].style.display = "none";
-            }
-            if (labels[i].getAttribute("for") == "id_status_query") {
-                labels[i].style.display = "";
-            }
-        }
-    }
-    // for all other searches, hide status and make char visible
-    else {
-        document.getElementsByClassName("status-query")[0].style.display = "none";
-        document.getElementsByClassName("char-query")[0].type = "";
-        for (let i = 0; i < labels.length; i++) {
-            if (labels[i].getAttribute("for") == "id_char_query") {
-                labels[i].style.display = "";
-            }
-            if (labels[i].getAttribute("for") == "id_status_query") {
-                labels[i].style.display = "none";
-            }
-        }
-    }
-}
