@@ -64,7 +64,7 @@ class AudioFileHandler(BaseFileHandler):
             # Info logged; re-raise as a CommandError to pass back to caller
             raise CommandError(f"Submaster error: Failed to create {output_name}")
 
-    def process_files(self):
+    def process_files(self) -> None:
         # Process master and derivatives together.
         # Master gets saved, then any derivatives.
         try:
@@ -98,7 +98,9 @@ class AudioFileHandler(BaseFileHandler):
             # don't throw FileNotFoundError if for some reason it doesn't exist.
             try:
                 Path(submaster_file_name).unlink(missing_ok=True)
-            except(UnboundLocalError):
+            except UnboundLocalError:
+                # Swallow this, which happens when create_submaster() fails
+                # so submaster_file_name is not defined.
                 pass
 
     def _item_has_files(self) -> bool:

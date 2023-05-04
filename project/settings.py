@@ -203,3 +203,25 @@ OH_MASTERSLZ = os.getenv("DJANGO_OH_MASTERSLZ")
 OH_WOWZA = os.getenv("DJANGO_OH_WOWZA")
 # Static files
 OH_STATIC = os.getenv("DJANGO_OH_STATIC")
+
+# Image conversion settings
+IMAGE_SETTINGS = {
+    "submaster_long_dimension": 750,
+    "thumbnail_long_dimension": 200,
+}
+# Legacy DLCS had these settings, which apparently were not used
+# with Oral History.  In case they're needed someday:
+# get_image_settings("Image Submaster Technical MD")
+# {
+#     "Image Sampling Frequency": "300",
+#     "Bits Per Sample": "8",
+#     "Image Quality": "100",
+#     "Image Pixels Long Dimension": "750",
+# }
+# get_image_settings("Image Thumbnail Technical MD")
+# {
+#     "Image Sampling Frequency": "72",
+#     "Bits Per Sample": "8",
+#     "Image Quality": "75",
+#     "Image Pixels Long Dimension": "200",
+# }

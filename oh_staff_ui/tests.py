@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.http import HttpRequest
 from django.test import TestCase
 from django.contrib.auth.models import User
+from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.forms import ProjectItemForm
 from oh_staff_ui.models import (
     Copyright,
@@ -65,7 +66,6 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        # master.process_media_file()
         return master
 
     def create_bad_master_audio_file(self):
@@ -74,6 +74,19 @@ class MediaFileTestCase(TestCase):
         master = OralHistoryFile(
             self.item.id,
             file_name="samples/fake_file_01.wav",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        return master
+
+    def create_master_image_file(self):
+        # Utility function used in multiple tests.
+        # Uses a tiff large enough to be resized.
+        file_type = MediaFileType.objects.get(file_type="MasterImage1")
+        master = OralHistoryFile(
+            self.item.id,
+            file_name="samples/sample_marbles.tif",
             file_type=file_type,
             file_use="master",
             request=self.mock_request,
@@ -144,6 +157,48 @@ class MediaFileTestCase(TestCase):
         handler = AudioFileHandler(file1)
         with self.assertRaises(CommandError):
             handler.process_files()
+
+    def test_master_image_file_is_added(self):
+        master = self.create_master_image_file()
+        handler = ImageFileHandler(master)
+        handler.process_files()
+        # Confirm the new file exists.
+        self.assertEqual(Path(master.media_file.file.name).exists(), True)
+        # For masters, new file should be same size as original.
+        path = Path("samples/sample_marbles.tif")
+        self.assertEqual(master.media_file.file.size, path.stat().st_size)
+
+    def test_submaster_image_file_is_added(self):
+        master = self.create_master_image_file()
+        handler = ImageFileHandler(master)
+        handler.process_files()
+        file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
+        # master is OralHistoryFile; submaster is MediaFile
+        submaster = MediaFile.objects.get(parent=master.media_file, file_type=file_type)
+        self.assertEqual(
+            submaster.file.name,
+            "media_dev/oh_static/submasters/fake-abcdef-1-submaster.jpg",
+        )
+        # Confirm the new file itself exists.
+        self.assertEqual(Path(submaster.file.name).exists(), True)
+        # Confirm master is parent of submaster.
+        self.assertEqual(master.media_file, submaster.parent)
+
+    def test_thumbnail_image_file_is_added(self):
+        master = self.create_master_image_file()
+        handler = ImageFileHandler(master)
+        handler.process_files()
+        file_type = MediaFileType.objects.get(file_type="ThumbnailImage1")
+        # master is OralHistoryFile; submaster is MediaFile
+        submaster = MediaFile.objects.get(parent=master.media_file, file_type=file_type)
+        self.assertEqual(
+            submaster.file.name,
+            "media_dev/oh_static/nails/fake-abcdef-1-thumbnail.jpg",
+        )
+        # Confirm the new file itself exists.
+        self.assertEqual(Path(submaster.file.name).exists(), True)
+        # Confirm master is parent of submaster.
+        self.assertEqual(master.media_file, submaster.parent)
 
     def test_content_type_jpeg(self):
         file_type = MediaFileType.objects.get(file_type="SubMasterImage1")
