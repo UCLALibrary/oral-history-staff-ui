@@ -3,7 +3,7 @@ import requests
 import uuid
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import Model, Q
+from django.db.models import Q, Model, CharField
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
@@ -27,7 +27,9 @@ from oh_staff_ui.models import (
     Date,
     Description,
     Format,
+    Name,
     ProjectItem,
+    Subject,
     ItemCopyrightUsage,
     ItemLanguageUsage,
     ItemNameUsage,
@@ -39,20 +41,67 @@ from oh_staff_ui.models import (
 logger = logging.getLogger(__name__)
 
 
-def construct_keyword_query(query: str) -> Q:
+def construct_keyword_query(field: str, query: str) -> Q:
     # Always include the full query, as a single substring.
-    full_q = Q(title__icontains=query)
+    full_q = Q(**{field + "__icontains": query})
     keywords = query.split()
     # If there's only one word, it's the same as the full query, nothing to do.
     # Otherwise, grab the first word, then AND each following word.
     if len(keywords) > 1:
-        words_q = Q(title__icontains=keywords[0])
+        words_q = Q(**{field + "__icontains": keywords[0]})
         # All except the first word
         for word in keywords[1:]:
-            words_q = words_q & Q(title__icontains=word)
+            words_q = words_q & Q(**{field + "__icontains": word})
         # OR the assembled set of words with the full query.
         full_q = full_q | words_q
     return full_q
+
+
+def get_keyword_results(query: str) -> list:
+    # look for matches in any CharField attached to any of these models
+    search_models = [ProjectItem, AltId, AltTitle, Description, Name, Subject]
+    search_results = []
+    for model in search_models:
+        model_q = Q()
+        fields = [x for x in model._meta.fields if isinstance(x, CharField)]
+        for field in fields:
+            field_q = construct_keyword_query(field.name, query)
+            model_q = model_q | field_q
+        model_results = model.objects.filter(model_q)
+        search_results.append(model_results)
+    return search_results
+
+
+def get_result_items(queryset_list: list) -> list:
+    # convert list of querysets to list of ProjectItems for display
+    output_projectitems = []
+    # by order of search_models in get_keyword_results(),
+    # queryset_list[0] contains ProjectItems
+    # these are directly copied to output list
+    for item in queryset_list[0]:
+        output_projectitems.append(item)
+    # queryset_list[1] has AltIds
+    for altid in queryset_list[1]:
+        output_projectitems.append(altid.item)
+    # queryset_list[2] has AltTitles
+    for alttitle in queryset_list[2]:
+        output_projectitems.append(alttitle.item)
+    # queryset_list[3] has Descriptions
+    for description in queryset_list[3]:
+        output_projectitems.append(description.item)
+    # queryset_list[4] has Names
+    for name in queryset_list[4]:
+        name_usages = ItemNameUsage.objects.filter(value=name)
+        for item in name_usages:
+            output_projectitems.append(item.item)
+    # queryset_list[5] has Subjects
+    for subject in queryset_list[5]:
+        subject_usages = ItemSubjectUsage.objects.filter(value=subject)
+        for item in subject_usages:
+            output_projectitems.append(item.item)
+    # sort output list by title
+    output_projectitems.sort(key=lambda x: x.title.lower())
+    return output_projectitems
 
 
 def get_ark() -> str:
