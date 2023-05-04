@@ -57,7 +57,7 @@ class Name(admin.ModelAdmin):
     list_display = ("value", "source")
     ordering = ("value", "source")
     search_fields = ("value",)
-    list_filter = ("source",)
+    list_filter = [("source", admin.RelatedOnlyFieldListFilter)]
 
 
 @admin.register(SubjectType)
@@ -71,7 +71,7 @@ class Subject(admin.ModelAdmin):
     list_display = ("value", "source")
     ordering = ("value", "source")
     search_fields = ("value",)
-    list_filter = ("source",)
+    list_filter = [("source", admin.RelatedOnlyFieldListFilter)]
 
 
 @admin.register(AltIdType)
