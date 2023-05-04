@@ -97,7 +97,7 @@ class Command(BaseCommand):
         request = options["request"]
         # For command-line processing
         if not isinstance(file_type, MediaFileType):
-            file_type = MediaFileType.objects.get(file_code=options["file_code"])
+            file_type = MediaFileType.objects.get(file_code=options["file_type"])
         if request is None:
             request = get_mock_request()
 
