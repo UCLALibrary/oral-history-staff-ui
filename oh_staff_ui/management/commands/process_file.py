@@ -4,6 +4,7 @@ import logging
 from django.core.management.base import BaseCommand
 from django.http import HttpRequest
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
+from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.models import MediaFileType
 
@@ -33,7 +34,7 @@ def process_file(
         if content_type == "audio":
             handler = AudioFileHandler(master_file)
         elif content_type == "image":
-            pass
+            handler = ImageFileHandler(master_file)
         elif content_type in ["pdf", "text"]:
             pass
         else:
