@@ -737,6 +737,48 @@ class ProjectItemFormTestCase(TestCase):
         # Check that form validation succeeded.
         self.assertEquals({}, form.errors)
 
+
+class ModsTestCase(TestCase):
+    # MODS related tests require an item of each type to confirm proper record creation,
+    # each has a slightly different field structure in the MODS record
+
+    # Load the lookup tables needed for these tests.
+    fixtures = [
+        "item-status-data.json",
+        "item-type-data.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        # Use QAD data for fake user and fake items.
+        cls.user = User.objects.create_user("tester")
+        # Level 1: Series.
+        cls.series_item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=cls.user,
+            last_modified_by=cls.user,
+            title="Fake series",
+            type=ItemType.objects.get(type="Series"),
+        )
+        # Level 2: Interview, child of series.
+        cls.interview_item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=cls.user,
+            last_modified_by=cls.user,
+            title="Fake interview",
+            type=ItemType.objects.get(type="Interview"),
+            parent=cls.series_item,
+        )
+        # Level 3: Audio, child of interview.
+        cls.audio_item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=cls.user,
+            last_modified_by=cls.user,
+            title="Fake audio",
+            type=ItemType.objects.get(type="Audio"),
+            parent=cls.interview_item,
+        )
+
     def test_valid_series_item_mods(self):
         item = self.series_item
         ohmods = OralHistoryMods(item.ark)
