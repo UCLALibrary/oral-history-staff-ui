@@ -132,6 +132,7 @@ dmypy.json
 .vscode
 
 # Local secrets
+api_keys*
 *secret*
 # But allow Helm secrets
 !secrets.yaml
