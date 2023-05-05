@@ -30,6 +30,8 @@ from oh_staff_ui.models import (
 
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
+from oh_staff_ui.classes.OralHistoryMods import OralHistoryMods
+
 
 logger = logging.getLogger(__name__)
 
@@ -734,3 +736,24 @@ class ProjectItemFormTestCase(TestCase):
         form = ProjectItemForm(request.POST, parent_item=self.series_item)
         # Check that form validation succeeded.
         self.assertEquals({}, form.errors)
+
+    def test_valid_series_item_mods(self):
+        item = self.series_item
+        ohmods = OralHistoryMods(item.ark)
+        ohmods.title = item.title
+
+        self.assertEqual(ohmods.is_valid(), True)
+
+    def test_valid_interview_item_mods(self):
+        item = self.interview_item
+        ohmods = OralHistoryMods(item.ark)
+        ohmods.title = item.title
+
+        self.assertEqual(ohmods.is_valid(), True)
+
+    def test_valid_audio_item_mods(self):
+        item = self.audio_item
+        ohmods = OralHistoryMods(item.ark)
+        ohmods.title = item.title
+
+        self.assertEqual(ohmods.is_valid(), True)
