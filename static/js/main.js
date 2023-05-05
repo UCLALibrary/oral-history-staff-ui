@@ -30,6 +30,9 @@ function showEmptyForm(event) {
     // Remove id & class, copied from emptyForm
     newForm.removeAttribute("id");
     newForm.classList.remove("empty_form");
+    // add a new class with name of metadataType
+    // used to prevent hiding new Description rows on file-level items
+    newForm.classList.add(metadataType);
     
     // Display the new form immediately before the (hidden) empty form.
     emptyForm.parentNode.insertBefore(newForm, emptyForm);

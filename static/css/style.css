@@ -69,6 +69,18 @@ td {
     margin-bottom: 3px;
  }
 
+/* .file_metadata: optional metadata on edit_item page
+for Audio and Video items. Hide all table rows other 
+than Description. */ 
+.file_metadata tr:not([class="description"]) {
+    display: none;
+}
+/* for file-level metadata, hide all dropdown options
+other than TableOfContents (value = "3") */ 
+.file_metadata .description select option:not([value="3"]){
+    display: none;
+}
+
 .header-metadata{
     border-collapse: collapse;
  }
