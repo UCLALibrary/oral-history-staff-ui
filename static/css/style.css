@@ -69,6 +69,14 @@ td {
     margin-bottom: 3px;
  }
 
+.file_metadata tr:not([id="description_row"]) {
+    display: none;
+}
+
+.file_metadata select option:not([value="3"]){
+    display: none;
+}
+
 .header-metadata{
     border-collapse: collapse;
  }

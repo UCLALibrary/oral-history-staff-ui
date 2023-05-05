@@ -70,7 +70,10 @@
     {{ description_formset.management_form }}
     {{ date_formset.management_form }}
     {{ format_formset.management_form }}
-    <table id="formset_table">
+    <table id="formset_table" 
+        {% if item.type.type == "Audio" or item.type.type == "Video" %} class="file_metadata">
+        {% else %} >
+        {% endif %}
         {% for name_form in name_formset %}
         <tr>
             <td>{% if forloop.first %}
@@ -191,7 +194,7 @@
             <td>Delete? {{ alt_id_formset.empty_form.DELETE }}</td>
         </tr>
         {% for description_form in description_formset %}
-        <tr>
+        <tr id = "description_row">
             <td>{% if forloop.first %}
                 <button id="description_add" class="add_formset">+</button>&nbsp;Description(s):
                 {% endif %}
