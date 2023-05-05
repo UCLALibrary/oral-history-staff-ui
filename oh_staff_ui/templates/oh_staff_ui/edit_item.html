@@ -194,7 +194,7 @@
             <td>Delete? {{ alt_id_formset.empty_form.DELETE }}</td>
         </tr>
         {% for description_form in description_formset %}
-        <tr id = "description_row">
+        <tr class = "description">
             <td>{% if forloop.first %}
                 <button id="description_add" class="add_formset">+</button>&nbsp;Description(s):
                 {% endif %}

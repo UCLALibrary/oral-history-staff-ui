@@ -30,6 +30,7 @@ function showEmptyForm(event) {
     // Remove id & class, copied from emptyForm
     newForm.removeAttribute("id");
     newForm.classList.remove("empty_form");
+    newForm.classList.add(metadataType);
     
     // Display the new form immediately before the (hidden) empty form.
     emptyForm.parentNode.insertBefore(newForm, emptyForm);

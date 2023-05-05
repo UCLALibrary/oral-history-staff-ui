@@ -69,7 +69,7 @@ td {
     margin-bottom: 3px;
  }
 
-.file_metadata tr:not([id="description_row"]) {
+.file_metadata tr:not([class="description"]) {
     display: none;
 }
 
