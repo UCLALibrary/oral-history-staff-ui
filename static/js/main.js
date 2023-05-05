@@ -50,7 +50,7 @@ function disable_upload_button(form) {
 	btn.disabled = true;
 }
 
-if (window.location.href.includes("item_search")) {
+if (document.getElementById("item_search")) {
     // Hide Status field label by default since Title is default search type
     labels = document.getElementsByTagName("label");
     for (let i = 0; i < labels.length; i++) {
