@@ -102,7 +102,7 @@ class OralHistoryFile:
             content_type = "image"
         elif file_ext in [".pdf"]:
             content_type = "pdf"
-        elif file_ext in [".txt", ".xml"]:
+        elif file_ext in [".html", ".txt", ".xml"]:
             content_type = "text"
 
         if content_type:
