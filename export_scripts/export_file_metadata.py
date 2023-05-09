@@ -31,7 +31,7 @@ def _get_query() -> str:
         inner join project_items p on cf.divid_fk = p.divid_pk
         where fg.projectid_fk = 80 -- Oral History
         and cf.create_date <= sysdate
-        order by p.item_ark, cf.file_sequence, cf.create_date
+        order by p.item_ark, cf.file_sequence, cf.create_date desc
     """
     return query
 

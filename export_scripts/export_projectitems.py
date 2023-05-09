@@ -1,6 +1,9 @@
 import oracledb
 import pandas as pd
 
+# Not included in repo, ask a colleague.
+import api_keys
+
 query = """
 select 
     a.item_ark as ark,
@@ -34,14 +37,11 @@ group by divid_fk) c on a.divid_pk = c.divid_fk
 where a.projectid_fk = 80 order by create_date
 """
 
-con = oracledb.connect(
-    user=api_keys.USER,
-    password=api_keys.PASSWORD,
-    dsn=api_keys.DSN)
+con = oracledb.connect(user=api_keys.USER, password=api_keys.PASSWORD, dsn=api_keys.DSN)
 
 df_ora = pd.read_sql_query(query, con)
 
 con.close()
 
-df_ora = df_ora.replace({r'\r\n': ''}, regex=True)
-df_ora.to_csv('project-items-export.tsv', index=False, sep='\t')
+df_ora = df_ora.replace({r"\r\n": ""}, regex=True)
+df_ora.to_csv("project-items-export.tsv", index=False, sep="\t")
