@@ -23,7 +23,7 @@ def _get_query() -> str:
         ,	cf.file_use
         ,	cf.file_sequence as seq
         ,	cf.file_size
-        ,	cf.create_date
+        ,	to_char(cf.create_date, 'YYYY-MM-DD HH24:MI:SS') as create_date
         ,	cf.file_location
         ,	cf.file_name
         from file_groups fg
@@ -31,7 +31,7 @@ def _get_query() -> str:
         inner join project_items p on cf.divid_fk = p.divid_pk
         where fg.projectid_fk = 80 -- Oral History
         and cf.create_date <= sysdate
-        order by p.item_ark, cf.file_sequence
+        order by p.item_ark, cf.file_sequence, cf.create_date
     """
     return query
 
