@@ -21,7 +21,6 @@ class Command(BaseCommand):
         dicts_list = get_dicts_from_tsv(options["filepath"])
         print(f"Found {len(dicts_list)} rows of file metadata to import.")
 
-        # TODO: REMOVE THIS - DO NOT DELETE NORMALLY!
         print("*** WARNING *** DELETING EXISTING DATA DURING TESTING ***")
         MediaFile.objects.all().delete()
 
@@ -63,7 +62,7 @@ class Command(BaseCommand):
 
                 # Get full real production path & file name
                 # print(f"{ohf.target_dir} ===> {file_name} ===> {file_location}")
-                full_file_name = self.get_correct_file_name(
+                full_file_name = self.get_full_file_name(
                     ohf.target_dir, db_file_name, file_location
                 )
 
@@ -150,7 +149,7 @@ class Command(BaseCommand):
 
         return new_file_group
 
-    def get_correct_file_name(
+    def get_full_file_name(
         self, target_dir: str, file_name: str, file_location: str
     ) -> str:
         # Combine file name and target dir for full path, with some corrections.
