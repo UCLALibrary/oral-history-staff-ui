@@ -12,8 +12,11 @@ class OralHistoryMods(MODS):
         self._item = project_item
 
     def populate_fields(self):
-        self.title = self._item.title
+        self._populate_title()
         self._populate_identifier()
+
+    def _populate_title(self):
+        self.title = self._item.title
 
     def _populate_identifier(self):
         self.identifiers.extend([mods.Identifier(text=self._item.ark)])
