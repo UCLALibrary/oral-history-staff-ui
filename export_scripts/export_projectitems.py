@@ -1,8 +1,16 @@
+import warnings
 import oracledb
 import pandas as pd
 
+# Not included in repo, ask a colleague.
+import api_keys
+
+# Because pandas complains about old-school connections,
+# and I don't want to install sqlalchemy as well.........
+warnings.filterwarnings("ignore", category=UserWarning)
+
 query = """
-select 
+select
     a.item_ark as ark,
     c.coverage,
     a.create_date,
@@ -22,26 +30,23 @@ from project_items a
     left outer join users uc on a.created_by = uc.user_name
     left outer join users um on a.modified_by = um.user_name
     left outer join (select listagg(desc_value, ',') as relation, divid_fk from desc_values
-where 
+where
     projectid_fk = 80 and
     desc_termid_fk = 899
 group by divid_fk) r on a.divid_pk = r.divid_fk
 left outer join (select listagg(desc_value, ',') as coverage, divid_fk from desc_values
-where 
+where
     projectid_fk = 80 and
     desc_termid_fk = 900
 group by divid_fk) c on a.divid_pk = c.divid_fk
 where a.projectid_fk = 80 order by create_date
 """
 
-con = oracledb.connect(
-    user=api_keys.USER,
-    password=api_keys.PASSWORD,
-    dsn=api_keys.DSN)
+con = oracledb.connect(user=api_keys.USER, password=api_keys.PASSWORD, dsn=api_keys.DSN)
 
 df_ora = pd.read_sql_query(query, con)
 
 con.close()
 
-df_ora = df_ora.replace({r'\r\n': ''}, regex=True)
-df_ora.to_csv('project-items-export.tsv', index=False, sep='\t')
+df_ora = df_ora.replace({r"\r\n": ""}, regex=True)
+df_ora.to_csv("project-items-export.tsv", index=False, sep="\t")

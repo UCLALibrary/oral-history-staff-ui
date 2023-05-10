@@ -4,11 +4,14 @@ from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.http import HttpRequest
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.contrib.auth.models import User
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
 from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.forms import ProjectItemForm
+from oh_staff_ui.management.commands.import_file_metadata import (
+    Command as FileMetadataCommand,
+)
 from oh_staff_ui.models import (
     Copyright,
     ItemCopyrightUsage,
@@ -849,3 +852,43 @@ class ModsTestCase(TestCase):
         ohmods.populate_fields()
 
         self.assertEqual(ohmods.is_valid(), True)
+
+
+class FileMetadataMigrationTestCase(SimpleTestCase):
+    # Test logic not already covered by OralHistoryFile tests.
+
+    def test_get_full_file_name_audio_submaster_newer_file_in_original_name(self):
+        # Newer file, subdirectory in file name, should go into audio/submasters
+        full_file_name = FileMetadataCommand().get_full_file_name(
+            "media_dev/oh_wowza/audio/submasters",
+            "audio/submasters/21198-zz002kpt8t-1-submaster.mp3",
+            "https://testing/audio/submasters/21198-zz002kpt8t-1-submaster.mp3/playlist.m3u8",
+        )
+        self.assertEqual(
+            full_file_name,
+            "/media/oh_wowza/audio/submasters/21198-zz002kpt8t-1-submaster.mp3",
+        )
+
+    def test_get_full_file_name_audio_submaster_newer_file_not_in_original_name(self):
+        # Newer file, no subdirectory in file name, should also go into audio/submasters
+        full_file_name = FileMetadataCommand().get_full_file_name(
+            "media_dev/oh_wowza/audio/submasters",
+            "21198-zz002kpzdt-2-submaster.mp3",
+            "https://testing/oralhistory/audio/submasters/21198-zz002kpzdt-2-submaster.mp3/"
+            "playlist.m3u8",
+        )
+        self.assertEqual(
+            full_file_name,
+            "/media/oh_wowza/audio/submasters/21198-zz002kpzdt-2-submaster.mp3",
+        )
+
+    def test_get_full_file_name_audio_submaster_older_file(self):
+        # Older file, should not go into audio/submasters
+        full_file_name = FileMetadataCommand().get_full_file_name(
+            "media_dev/oh_wowza/audio/submasters",
+            "21198-zz00094qtd-3-submaster.mp3",
+            "https://testing/oralhistory/21198-zz00094qtd-3-submaster.mp3/playlist.m3u8",
+        )
+        self.assertEqual(
+            full_file_name, "/media/oh_wowza/21198-zz00094qtd-3-submaster.mp3"
+        )

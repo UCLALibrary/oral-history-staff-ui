@@ -511,7 +511,7 @@ class MediaFile(models.Model):
         null=False,
         related_name="+",
     )
-    create_date = models.DateField(blank=False, null=False, default=timezone.now)
+    create_date = models.DateTimeField(blank=False, null=False, default=timezone.now)
     file = models.FileField(upload_to=get_target_path)
     # Files, especially masters, may not always be accessible to this application after creation,
     # so we can't rely on getting file size from FileField; capture size on creation.
