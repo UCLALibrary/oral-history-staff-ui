@@ -831,21 +831,21 @@ class ModsTestCase(TestCase):
 
     def test_valid_series_item_mods(self):
         item = self.series_item
-        ohmods = OralHistoryMods(item.ark)
-        ohmods.title = item.title
+        ohmods = OralHistoryMods(item)
+        ohmods.populate_fields()
 
         self.assertEqual(ohmods.is_valid(), True)
 
     def test_valid_interview_item_mods(self):
         item = self.interview_item
-        ohmods = OralHistoryMods(item.ark)
-        ohmods.title = item.title
+        ohmods = OralHistoryMods(item)
+        ohmods.populate_fields()
 
         self.assertEqual(ohmods.is_valid(), True)
 
     def test_valid_audio_item_mods(self):
         item = self.audio_item
-        ohmods = OralHistoryMods(item.ark)
-        ohmods.title = item.title
+        ohmods = OralHistoryMods(item)
+        ohmods.populate_fields()
 
         self.assertEqual(ohmods.is_valid(), True)
