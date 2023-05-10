@@ -37,7 +37,6 @@ class ProjectItemForm(forms.Form):
         queryset=(
             ProjectItem.objects.filter(type__type__in=["Series", "Interview"])
         ).order_by("title"),
-        widget=forms.Select(attrs={"class": "parent-dropdown"}),
     )
     title = forms.CharField(
         required=True, max_length=256, widget=forms.TextInput(attrs={"size": 140})
