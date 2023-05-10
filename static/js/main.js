@@ -90,3 +90,15 @@ if (document.getElementById("item_search")) {
     }
 }
 
+// styling for "add item" page
+if (window.location.href.endsWith("add_item/")) {
+    // hide parent dropdown
+    document.getElementById("id_parent").style.display = "none";
+    // find and hide label for parent dropdown
+    labels = document.getElementsByTagName("label");
+    for (let i = 0; i < labels.length; i++) {
+        if (labels[i].getAttribute("for") == "id_parent") {
+            labels[i].style.display = "none";
+        }
+    }
+}
