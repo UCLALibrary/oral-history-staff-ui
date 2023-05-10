@@ -5,6 +5,7 @@ ul.navbar {
     overflow: hidden;
     background-color: #d0d0d7;
     border: 1px solid black;
+    justify-content: unset;
 }
   
 .navbar li {
@@ -17,10 +18,7 @@ ul.navbar {
     text-align: center;
     padding: 10px 12px;
     text-decoration: none;
-    color: #0000ee;
 }
-
-
 
 .search-results {
    width: 100%;

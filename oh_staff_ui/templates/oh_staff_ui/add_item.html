@@ -1,4 +1,7 @@
+
 {% extends 'oh_staff_ui/base.html' %}
+
+{% load django_bootstrap5 %}
 
 {% block content %}
 
@@ -9,9 +12,9 @@
 <form name="add_item" id="add_item" method="POST">
     {% csrf_token %}
     <table>
-        {{ form.as_table }}
+        {% bootstrap_form form layout="horizontal" %}
     </table>
     <br>
-    <button type="submit">Add Item</button>
+    {% bootstrap_button button_type="submit" content="Add Item" %}
 </form>
 {% endblock %}
