@@ -101,3 +101,7 @@ form textarea {
     font-family: Helvetica, Arial, sans-serif;
     font-size: 13.333px;
 }
+
+caption {
+    color: black;
+}

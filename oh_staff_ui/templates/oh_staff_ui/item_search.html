@@ -5,7 +5,7 @@
 <form name="item_search" onsubmit ="return validateSearchForm()" id="item_search" method="POST">
     {% csrf_token %}
     <table>
-        {% bootstrap_form form %}
+        {% bootstrap_form form layout="horizontal" %}
     </table>
     <br>
     {% bootstrap_button button_type="submit" content="Search" %}

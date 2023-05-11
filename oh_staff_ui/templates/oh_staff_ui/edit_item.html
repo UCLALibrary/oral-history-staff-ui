@@ -1,4 +1,5 @@
 {% extends 'oh_staff_ui/base.html' %}
+{% load django_bootstrap5 %}
 
 {% block content %}
 
@@ -56,7 +57,7 @@
 <form name="edit_item" onsubmit="return validateEditItemForm()" id="edit_item" method="POST">
     {% csrf_token %}
     <div class="basic_metadata">
-    {{ item_form.as_div }}
+    {% bootstrap_form item_form %}
     </div>
     <br>
     {{ name_formset.management_form }}

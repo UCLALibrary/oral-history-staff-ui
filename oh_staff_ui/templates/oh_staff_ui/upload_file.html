@@ -1,7 +1,8 @@
 {% extends 'oh_staff_ui/base.html' %}
+{% load django_bootstrap5 %}
 
 {% block content %}
-<table class="header-metadata">
+<table class="header-metadata caption-top">
   <caption>Item Information</caption>
   <tr>
       <td>Title</td>
@@ -34,10 +35,9 @@
       </td>
   </tr>
 </table>
-<br>
 {% if files %}
 <hr>
-<table class="header-metadata">
+<table class="header-metadata caption-top">
   <caption>File Information</caption>
   <tr>
     <th>File Type</th>
@@ -71,16 +71,7 @@
 
 <form name="upload_file_form" method="POST" enctype="multipart/form-data" onsubmit="disable_upload_button(this);">
     {% csrf_token %}
-    <table>
-      <tr>
-        <td>{{ form.file_type.label }}</td>
-        <td>{{ form.file_name.label }}</td>
-      </tr>
-      <tr>
-        <td>{{ form.file_type }}</td>
-        <td>{{ form.file_name }}</td>
-      </tr>
-    </table>
-    <button type="submit" id="upload_button">Upload</button>
+    {% bootstrap_form form layout="horizontal" %}
+    {% bootstrap_button button_type="submit" content="Upload" %}
 </form>
 {% endblock %}
