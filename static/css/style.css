@@ -41,6 +41,10 @@ td.qualifier {
     vertical-align: baseline;
 }
 
+td.qualifier {
+    min-width: 15rem
+}
+
 .empty_form {
     display: none;
 }
@@ -84,6 +88,11 @@ caption {
     --bs-btn-padding-x: 0.5rem;
     --bs-btn-padding-y: 0.1rem;
 }
+
+/* Override bootstrap to reduce vertical space in tall forms*/
+.mb-3 {
+    margin-bottom: .4rem !important;
+  }
 
 /* Workarounds for "bootstrap_form success_css_class" not working  */
 /* CSS class "is-valid" is incorrectly applied to bound forms. */
