@@ -577,6 +577,73 @@ class MediaFileTestCase(TestCase):
             "media_dev/oh_lz/audio/masters/fake-abcdef-1-master.wav",
         )
 
+    def test_file_url_master_is_empty(self):
+        # Create minimal MediaFile object directly, with realistic file path.
+        # Use valid placeholder name, then update to realistic path, to
+        # work around SuspiciousFileOperation.
+        mf = MediaFile.objects.create(
+            created_by=self.user,
+            file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
+            item=self.item,
+            original_file_name="FAKE",
+            file="placeholder",
+        )
+        # Work around SuspiciousFileOperation
+        mf.file.name = "/media/oh_lz/text/masters/fake-abcdef-1-master.xml"
+        self.assertEqual(mf.file_url, "")
+
+    def test_file_url_audio_submaster(self):
+        # Create minimal MediaFile object directly, with realistic file path.
+        # Use valid placeholder name, then update to realistic path, to
+        # work around SuspiciousFileOperation.
+        mf = MediaFile.objects.create(
+            created_by=self.user,
+            file_type=MediaFileType.objects.get(file_code="audio_submaster"),
+            item=self.item,
+            original_file_name="FAKE",
+            file="placeholder",
+        )
+        mf.file.name = "/media/oh_wowza/audio/submasters/fake-abcdef-1-submaster.mp3"
+        self.assertEqual(
+            mf.file_url,
+            "https://wowza.library.ucla.edu/dlp/definst/mp3:oralhistory/audio/submasters/"
+            "fake-abcdef-1-submaster.mp3/playlist.m3u8",
+        )
+
+    def test_file_url_static_submaster(self):
+        # Create minimal MediaFile object directly, with realistic file path.
+        # Use valid placeholder name, then update to realistic path, to
+        # work around SuspiciousFileOperation.
+        mf = MediaFile.objects.create(
+            created_by=self.user,
+            file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
+            item=self.item,
+            original_file_name="FAKE",
+            file="placeholder",
+        )
+        mf.file.name = "/media/oh_static/text/submasters/fake-abcdef-1-master.xml"
+        self.assertEqual(
+            mf.file_url,
+            "https://static.library.ucla.edu/oralhistory/text/submasters/fake-abcdef-1-master.xml",
+        )
+
+    def test_file_url_static_thumbnail(self):
+        # Create minimal MediaFile object directly, with realistic file path.
+        # Use valid placeholder name, then update to realistic path, to
+        # work around SuspiciousFileOperation.
+        mf = MediaFile.objects.create(
+            created_by=self.user,
+            file_type=MediaFileType.objects.get(file_code="image_thumbnail"),
+            item=self.item,
+            original_file_name="FAKE",
+            file="placeholder",
+        )
+        mf.file.name = "/media/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
+        self.assertEqual(
+            mf.file_url,
+            "https://static.library.ucla.edu/oralhistory/nails/fake-abcdef-1-thumbnail.jpg",
+        )
+
     def tearDown(self):
         # If new files aren't deleted, Django will create next file with random-ish name.
         # Deleting the MediaFile object does *not* automatically delete the file itself.
