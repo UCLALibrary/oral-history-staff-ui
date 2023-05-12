@@ -5,7 +5,12 @@
 <form name="item_search" onsubmit ="return validateSearchForm()" id="item_search" method="POST">
     {% csrf_token %}
     <table>
-        {% bootstrap_form form layout="horizontal" %}
+        <tr>
+            <td class="search-type">{% bootstrap_field form.search_type layout="floating" %}</td>
+            <td></td>
+            <td>{% bootstrap_field form.char_query layout="floating" placeholder=""%}</td>
+            <td>{% bootstrap_field form.status_query layout="floating"%}</td>
+        </tr>
     </table>
     <br>
     {% bootstrap_button button_type="submit" content="Search" %}

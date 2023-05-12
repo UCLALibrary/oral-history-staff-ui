@@ -20,6 +20,10 @@ ul.navbar {
     text-decoration: none;
 }
 
+td.search-type{
+    min-width: 15rem
+}
+
 .search-results {
    width: 100%;
 }
