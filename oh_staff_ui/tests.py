@@ -21,6 +21,7 @@ from oh_staff_ui.models import (
     ItemResourceUsage,
     ItemSubjectUsage,
     ItemType,
+    Format,
     Language,
     MediaFile,
     MediaFileType,
@@ -656,6 +657,7 @@ class MetadataUniquenessTestCase(TestCase):
     fixtures = [
         "item-status-data.json",
         "item-type-data.json",
+        "authority-source-data.json",
     ]
 
     @classmethod
@@ -866,12 +868,17 @@ class ModsTestCase(TestCase):
     fixtures = [
         "item-status-data.json",
         "item-type-data.json",
+        "authority-source-data.json",
     ]
 
     @classmethod
     def setUpTestData(cls):
         # Use QAD data for fake user and fake items.
         cls.user = User.objects.create_user("tester")
+        language = Language.objects.create(
+            value="language placeholder value", source_id=1
+        )
+
         # Level 1: Series.
         cls.series_item = ProjectItem.objects.create(
             ark="fake/abcdef",
@@ -880,6 +887,8 @@ class ModsTestCase(TestCase):
             title="Fake series",
             type=ItemType.objects.get(type="Series"),
         )
+        ItemLanguageUsage.objects.create(item=cls.series_item, value=language)
+
         # Level 2: Interview, child of series.
         cls.interview_item = ProjectItem.objects.create(
             ark="fake/abcdef",
@@ -889,6 +898,8 @@ class ModsTestCase(TestCase):
             type=ItemType.objects.get(type="Interview"),
             parent=cls.series_item,
         )
+        ItemLanguageUsage.objects.create(item=cls.interview_item, value=language)
+
         # Level 3: Audio, child of interview.
         cls.audio_item = ProjectItem.objects.create(
             ark="fake/abcdef",
@@ -898,6 +909,10 @@ class ModsTestCase(TestCase):
             type=ItemType.objects.get(type="Audio"),
             parent=cls.interview_item,
         )
+        Format.objects.create(
+            item=cls.audio_item, value="format placeholder value, 1 hour"
+        )
+        ItemLanguageUsage.objects.create(item=cls.audio_item, value=language)
 
     def test_valid_series_item_mods(self):
         item = self.series_item
@@ -917,6 +932,8 @@ class ModsTestCase(TestCase):
         item = self.audio_item
         ohmods = OralHistoryMods(item)
         ohmods.populate_fields()
+
+        print(ohmods.serializeDocument())
 
         self.assertEqual(ohmods.is_valid(), True)
 
