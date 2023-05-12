@@ -58,7 +58,13 @@
 <form name="edit_item" onsubmit="return validateEditItemForm()" id="edit_item" method="POST">
     {% csrf_token %}
     <div class="basic_metadata">
-    {% bootstrap_form item_form layout="horizontal" %}
+        {% bootstrap_field item_form.parent layout="horizontal" %}
+        {% bootstrap_field item_form.title layout="horizontal" placeholder="" %}
+        {% bootstrap_field item_form.type layout="horizontal" %}
+        {% bootstrap_field item_form.sequence layout="horizontal" placeholder="" %}
+        {% bootstrap_field item_form.coverage layout="horizontal" placeholder="" %}
+        {% bootstrap_field item_form.relation layout="horizontal" placeholder="" %}
+        {% bootstrap_field item_form.status layout="horizontal" %}
     </div>
     <br>
     {{ name_formset.management_form }}
@@ -174,7 +180,7 @@
                 {% endif %}
             </td>
             <td class="qualifier">{% bootstrap_field alt_title_form.usage_id %} {% bootstrap_field alt_title_form.type show_label=False %}</td>
-            <td>{% bootstrap_field alt_title_form.value show_label=False %}</td>
+            <td>{% bootstrap_field alt_title_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field alt_title_form.DELETE %}</td>
         </tr>
         {% endfor %}
@@ -182,7 +188,7 @@
             <td></td>
             <td class="qualifier">{% bootstrap_field alt_title_formset.empty_form.usage_id %} 
                 {% bootstrap_field alt_title_formset.empty_form.type show_label=False %}</td>
-            <td>{% bootstrap_field alt_title_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field alt_title_formset.empty_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field alt_title_formset.empty_form.DELETE %}</td>
         </tr>
         {% for alt_id_form in alt_id_formset %}
@@ -192,7 +198,7 @@
                 {% endif %}
             </td>
             <td class="qualifier">{% bootstrap_field alt_id_form.usage_id %} {% bootstrap_field alt_id_form.type show_label=False %}</td>
-            <td>{% bootstrap_field alt_id_form.value show_label=False %}</td>
+            <td>{% bootstrap_field alt_id_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field alt_id_form.DELETE %}</td>
         </tr>
         {% endfor %}
@@ -200,7 +206,7 @@
             <td></td>
             <td class="qualifier">{% bootstrap_field alt_id_formset.empty_form.usage_id %} 
                 {% bootstrap_field alt_id_formset.empty_form.type show_label=False %}</td>
-            <td>{% bootstrap_field alt_id_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field alt_id_formset.empty_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field alt_id_formset.empty_form.DELETE %}</td>
         </tr>
         {% for description_form in description_formset %}
@@ -210,7 +216,7 @@
                 {% endif %}
             </td>
             <td class="qualifier">{% bootstrap_field description_form.usage_id %} {% bootstrap_field description_form.type show_label=False %}</td>
-            <td>{% bootstrap_field description_form.value show_label=False %}</td>
+            <td>{% bootstrap_field description_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field description_form.DELETE %}</td>
         </tr>
         {% endfor %}
@@ -218,7 +224,7 @@
             <td></td>
             <td class="qualifier">{% bootstrap_field description_formset.empty_form.usage_id %} 
                 {% bootstrap_field description_formset.empty_form.type show_label=False %}</td>
-            <td>{% bootstrap_field description_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field description_formset.empty_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field description_formset.empty_form.DELETE %}</td>
         </tr>
         {% for date_form in date_formset %}
@@ -228,7 +234,7 @@
                 {% endif %}
             </td>
             <td class="qualifier">{% bootstrap_field date_form.usage_id %} {% bootstrap_field date_form.type show_label=False %}</td>
-            <td>{% bootstrap_field date_form.value show_label=False %}</td>
+            <td>{% bootstrap_field date_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field date_form.DELETE %}</td>
         </tr>
         {% endfor %}
@@ -236,7 +242,7 @@
             <td></td>
             <td class="qualifier">{% bootstrap_field date_formset.empty_form.usage_id %} 
                 {% bootstrap_field date_formset.empty_form.type show_label=False %}</td>
-            <td>{% bootstrap_field date_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field date_formset.empty_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field date_formset.empty_form.DELETE %}</td>
         </tr>
         {% for format_form in format_formset %}
@@ -246,14 +252,14 @@
                 {% endif %}
             </td>
             <td>{% bootstrap_field format_form.usage_id %}</td>
-            <td>{% bootstrap_field format_form.value show_label=False %}</td>
+            <td>{% bootstrap_field format_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field format_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="format_empty_form" class="empty_form">
             <td></td>
             <td>{% bootstrap_field format_formset.empty_form.usage_id %}</td>
-            <td>{% bootstrap_field format_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field format_formset.empty_form.value show_label=False placeholder="" %}</td>
             <td>{% bootstrap_field format_formset.empty_form.DELETE %}</td>
         </tr>
         {% for language_form in language_formset %}
