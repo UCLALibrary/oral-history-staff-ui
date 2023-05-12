@@ -52,7 +52,13 @@
     <td>{{ file.file_type }}</td>
     <td>{{ file.create_date }} by {{ file.created_by }}</td>
     <td>{{ file.original_file_name }}</td>
-    <td>{{ file.file.name }}</td>
+    <td>
+      {% if file.file_url %}
+      <a href="{{ file.file_url }}">{{ file.file_name_only }}</a>
+      {% else %}
+      {{ file.file_name_only }}
+      {% endif %}
+    </td>
     <td>{{ file.file_size|floatformat:"g" }} bytes</td>
     <td>{{ file.sequence }}</td>
   </tr>
