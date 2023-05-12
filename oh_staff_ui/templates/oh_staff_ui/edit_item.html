@@ -1,4 +1,5 @@
 {% extends 'oh_staff_ui/base.html' %}
+{% load django_bootstrap5 %}
 
 {% block content %}
 
@@ -10,7 +11,7 @@
 </div>
 {% endif %}
 
-<table class="header-metadata">
+<table class="header-metadata caption-top">
     <caption>Item Information</caption>
     <tr>
         <td>Title</td>
@@ -46,6 +47,7 @@
         </td>
     </tr>
 </table>
+<br>
 <div>
     <p>Item Hierarchy Context (use arrow to expand)</p>
     <ul class="tree">
@@ -56,7 +58,13 @@
 <form name="edit_item" onsubmit="return validateEditItemForm()" id="edit_item" method="POST">
     {% csrf_token %}
     <div class="basic_metadata">
-    {{ item_form.as_div }}
+        {% bootstrap_field item_form.parent layout="horizontal" %}
+        {% bootstrap_field item_form.title layout="horizontal" placeholder="" %}
+        {% bootstrap_field item_form.type layout="horizontal" %}
+        {% bootstrap_field item_form.sequence layout="horizontal" placeholder="" %}
+        {% bootstrap_field item_form.coverage layout="horizontal" placeholder="" %}
+        {% bootstrap_field item_form.relation layout="horizontal" placeholder="" %}
+        {% bootstrap_field item_form.status layout="horizontal" %}
     </div>
     <br>
     {{ name_formset.management_form }}
@@ -70,200 +78,210 @@
     {{ description_formset.management_form }}
     {{ date_formset.management_form }}
     {{ format_formset.management_form }}
+
     <table id="formset_table" 
         {% if item.type.type == "Audio" or item.type.type == "Video" %} class="file_metadata">
         {% else %} >
         {% endif %}
         {% for name_form in name_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="name_add" class="add_formset">+</button>&nbsp;Name(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="name_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Name(s):
                 {% endif %}
             </td>
-            <td>{{ name_form.usage_id }} {{ name_form.type }}</td>
-            <td>{{ name_form.value }}</td>
-            <td>Delete? {{ name_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field name_form.usage_id %} {% bootstrap_field name_form.type show_label=False %}</td>
+            <td>{% bootstrap_field name_form.value show_label=False %}</td>
+            <td>{% bootstrap_field name_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="name_empty_form" class="empty_form">
             <td></td>
-            <td>{{ name_formset.empty_form.usage_id }} {{ name_formset.empty_form.type }}</td>
-            <td>{{ name_formset.empty_form.value }}</td>
-            <td>Delete? {{ name_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field name_formset.empty_form.usage_id %} 
+                {% bootstrap_field name_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field name_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field name_formset.empty_form.DELETE %}</td>
         </tr>
         {% for subject_form in subject_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="subject_add" class="add_formset">+</button>&nbsp;Subject(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="subject_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Subject(s):
                 {% endif %}
             </td>
-            <td>{{ subject_form.usage_id }} {{ subject_form.type }}</td>
-            <td>{{ subject_form.value }}</td>
-            <td>Delete? {{ subject_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field subject_form.usage_id %} {% bootstrap_field subject_form.type show_label=False %}</td>
+            <td>{% bootstrap_field subject_form.value show_label=False %}</td>
+            <td>{% bootstrap_field subject_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="subject_empty_form" class="empty_form">
             <td></td>
-            <td>{{ subject_formset.empty_form.usage_id }} {{ subject_formset.empty_form.type }}</td>
-            <td>{{ subject_formset.empty_form.value }}</td>
-            <td>Delete? {{ subject_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field subject_formset.empty_form.usage_id %} 
+                {% bootstrap_field subject_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field subject_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field subject_formset.empty_form.DELETE %}</td>
         </tr>
         {% for publisher_form in publisher_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="publisher_add" class="add_formset">+</button>&nbsp;Publisher(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="publisher_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Publisher(s):
                 {% endif %}
             </td>
-            <td>{{ publisher_form.usage_id }} {{ publisher_form.type }}</td>
-            <td>{{ publisher_form.value }}</td>
-            <td>Delete? {{ publisher_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field publisher_form.usage_id %} {% bootstrap_field publisher_form.type show_label=False %}</td>
+            <td>{% bootstrap_field publisher_form.value show_label=False %}</td>
+            <td>{% bootstrap_field publisher_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="publisher_empty_form" class="empty_form">
             <td></td>
-            <td>{{ publisher_formset.empty_form.usage_id }} {{ publisher_formset.empty_form.type }}</td>
-            <td>{{ publisher_formset.empty_form.value }}</td>
-            <td>Delete? {{ publisher_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field publisher_formset.empty_form.usage_id %} 
+                {% bootstrap_field publisher_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field publisher_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field publisher_formset.empty_form.DELETE %}</td>
         </tr>
         {% for copyright_form in copyright_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="copyright_add" class="add_formset">+</button>&nbsp;Copyright(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="copyright_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Copyright(s):
                 {% endif %}
             </td>
-            <td>{{ copyright_form.usage_id }} {{ copyright_form.type }}</td>
-            <td>{{ copyright_form.value }}</td>
-            <td>Delete? {{ copyright_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field copyright_form.usage_id %} {% bootstrap_field copyright_form.type show_label=False %}</td>
+            <td>{% bootstrap_field copyright_form.value show_label=False %}</td>
+            <td>{% bootstrap_field copyright_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="copyright_empty_form" class="empty_form">
             <td></td>
-            <td>{{ copyright_formset.empty_form.usage_id }} {{ copyright_formset.empty_form.type }}</td>
-            <td>{{ copyright_formset.empty_form.value }}</td>
-            <td>Delete? {{ copyright_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field copyright_formset.empty_form.usage_id %} 
+                {% bootstrap_field copyright_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field copyright_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field copyright_formset.empty_form.DELETE %}</td>
         </tr>
         {% for resource_form in resource_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="resource_add" class="add_formset">+</button>&nbsp;Resource(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="resource_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Resource(s):
                 {% endif %}
             </td>
-            <td>{{ resource_form.usage_id }} {{ resource_form.type }}</td>
-            <td>{{ resource_form.value }}</td>
-            <td>Delete? {{ resource_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field resource_form.usage_id %} {% bootstrap_field resource_form.type show_label=False %}</td>
+            <td>{% bootstrap_field resource_form.value show_label=False %}</td>
+            <td>{% bootstrap_field resource_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="resource_empty_form" class="empty_form">
             <td></td>
-            <td>{{ resource_formset.empty_form.usage_id }} {{ resource_formset.empty_form.type }}</td>
-            <td>{{ resource_formset.empty_form.value }}</td>
-            <td>Delete? {{ resource_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field resource_formset.empty_form.usage_id %} 
+                {% bootstrap_field resource_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field resource_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field resource_formset.empty_form.DELETE %}</td>
         </tr>
         {% for alt_title_form in alt_title_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="alt_title_add" class="add_formset">+</button>&nbsp;Alt Title(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="alt_title_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Alt Title(s):
                 {% endif %}
             </td>
-            <td>{{ alt_title_form.usage_id }} {{ alt_title_form.type }}</td>
-            <td>{{ alt_title_form.value }}</td>
-            <td>Delete? {{ alt_title_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field alt_title_form.usage_id %} {% bootstrap_field alt_title_form.type show_label=False %}</td>
+            <td>{% bootstrap_field alt_title_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field alt_title_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="alt_title_empty_form" class="empty_form">
             <td></td>
-            <td>{{ alt_title_formset.empty_form.usage_id }} {{ alt_title_formset.empty_form.type }}</td>
-            <td>{{ alt_title_formset.empty_form.value }}</td>
-            <td>Delete? {{ alt_title_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field alt_title_formset.empty_form.usage_id %} 
+                {% bootstrap_field alt_title_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field alt_title_formset.empty_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field alt_title_formset.empty_form.DELETE %}</td>
         </tr>
         {% for alt_id_form in alt_id_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="alt_id_add" class="add_formset">+</button>&nbsp;Alt ID(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="alt_id_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Alt ID(s):
                 {% endif %}
             </td>
-            <td>{{ alt_id_form.usage_id }} {{ alt_id_form.type }}</td>
-            <td>{{ alt_id_form.value }}</td>
-            <td>Delete? {{ alt_id_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field alt_id_form.usage_id %} {% bootstrap_field alt_id_form.type show_label=False %}</td>
+            <td>{% bootstrap_field alt_id_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field alt_id_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="alt_id_empty_form" class="empty_form">
             <td></td>
-            <td>{{ alt_id_formset.empty_form.usage_id }} {{ alt_id_formset.empty_form.type }}</td>
-            <td>{{ alt_id_formset.empty_form.value }}</td>
-            <td>Delete? {{ alt_id_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field alt_id_formset.empty_form.usage_id %} 
+                {% bootstrap_field alt_id_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field alt_id_formset.empty_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field alt_id_formset.empty_form.DELETE %}</td>
         </tr>
         {% for description_form in description_formset %}
-        <tr class = "description">
-            <td>{% if forloop.first %}
-                <button id="description_add" class="add_formset">+</button>&nbsp;Description(s):
+        <tr class = "description text-nowrap">
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="description_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Description(s):
                 {% endif %}
             </td>
-            <td>{{ description_form.usage_id }} {{ description_form.type }}</td>
-            <td>{{ description_form.value }}</td>
-            <td>Delete? {{ description_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field description_form.usage_id %} {% bootstrap_field description_form.type show_label=False %}</td>
+            <td>{% bootstrap_field description_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field description_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="description_empty_form" class="empty_form">
             <td></td>
-            <td>{{ description_formset.empty_form.usage_id }} {{ description_formset.empty_form.type }}</td>
-            <td>{{ description_formset.empty_form.value }}</td>
-            <td>Delete? {{ description_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field description_formset.empty_form.usage_id %} 
+                {% bootstrap_field description_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field description_formset.empty_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field description_formset.empty_form.DELETE %}</td>
         </tr>
         {% for date_form in date_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="date_add" class="add_formset">+</button>&nbsp;Date(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="date_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Date(s):
                 {% endif %}
             </td>
-            <td>{{ date_form.usage_id }} {{ date_form.type }}</td>
-            <td>{{ date_form.value }}</td>
-            <td>Delete? {{ date_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field date_form.usage_id %} {% bootstrap_field date_form.type show_label=False %}</td>
+            <td>{% bootstrap_field date_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field date_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="date_empty_form" class="empty_form">
             <td></td>
-            <td>{{ date_formset.empty_form.usage_id }} {{ date_formset.empty_form.type }}</td>
-            <td>{{ date_formset.empty_form.value }}</td>
-            <td>Delete? {{ date_formset.empty_form.DELETE }}</td>
+            <td class="qualifier">{% bootstrap_field date_formset.empty_form.usage_id %} 
+                {% bootstrap_field date_formset.empty_form.type show_label=False %}</td>
+            <td>{% bootstrap_field date_formset.empty_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field date_formset.empty_form.DELETE %}</td>
         </tr>
         {% for format_form in format_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="format_add" class="add_formset">+</button>&nbsp;Format(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="format_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Format(s):
                 {% endif %}
             </td>
-            <td>{{ format_form.usage_id }}</td>
-            <td>{{ format_form.value }}</td>
-            <td>Delete? {{ format_form.DELETE }}</td>
+            <td>{% bootstrap_field format_form.usage_id %}</td>
+            <td>{% bootstrap_field format_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field format_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="format_empty_form" class="empty_form">
             <td></td>
-            <td>{{ format_formset.empty_form.usage_id }}</td>
-            <td>{{ format_formset.empty_form.value }}</td>
-            <td>Delete? {{ format_formset.empty_form.DELETE }}</td>
+            <td>{% bootstrap_field format_formset.empty_form.usage_id %}</td>
+            <td>{% bootstrap_field format_formset.empty_form.value show_label=False placeholder="" %}</td>
+            <td>{% bootstrap_field format_formset.empty_form.DELETE %}</td>
         </tr>
         {% for language_form in language_formset %}
         <tr>
-            <td>{% if forloop.first %}
-                <button id="language_add" class="add_formset">+</button>&nbsp;Language(s):
+            <td class="label">{% if forloop.first %}
+                {% bootstrap_button id="language_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Language(s):
                 {% endif %}
             </td>
-            <td>{{ language_form.usage_id }}</td>
-            <td>{{ language_form.value }}</td>
-            <td>Delete? {{ language_form.DELETE }}</td>
+            <td>{% bootstrap_field language_form.usage_id %}</td>
+            <td>{% bootstrap_field language_form.value show_label=False %}</td>
+            <td>{% bootstrap_field language_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="language_empty_form" class="empty_form">
             <td></td>
-            <td>{{ language_formset.empty_form.usage_id }}</td>
-            <td>{{ language_formset.empty_form.value }}</td>
-            <td>Delete? {{ language_formset.empty_form.DELETE }}</td>
+            <td>{% bootstrap_field language_formset.empty_form.usage_id %}</td>
+            <td>{% bootstrap_field language_formset.empty_form.value show_label=False %}</td>
+            <td>{% bootstrap_field language_formset.empty_form.DELETE %}</td>
         </tr>
     </table>
     <br>
-    <button type="submit">Save</button>
+    {% bootstrap_button button_type="submit" content="Save" %}
 </form>
 {% endblock %}
 

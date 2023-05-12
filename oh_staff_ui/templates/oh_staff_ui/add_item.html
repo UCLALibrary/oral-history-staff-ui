@@ -1,4 +1,7 @@
+
 {% extends 'oh_staff_ui/base.html' %}
+
+{% load django_bootstrap5 %}
 
 {% block content %}
 
@@ -8,10 +11,13 @@
 
 <form name="add_item" id="add_item" method="POST">
     {% csrf_token %}
-    <table>
-        {{ form.as_table }}
-    </table>
-    <br>
-    <button type="submit">Add Item</button>
+    {% bootstrap_field form.parent layout="horizontal" %}
+    {% bootstrap_field form.title layout="horizontal" placeholder="" %}
+    {% bootstrap_field form.type layout="horizontal" %}
+    {% bootstrap_field form.sequence layout="horizontal" placeholder="" %}
+    {% bootstrap_field form.coverage layout="horizontal" placeholder="" %}
+    {% bootstrap_field form.relation layout="horizontal" placeholder="" %}
+    {% bootstrap_field form.status layout="horizontal" %}
+    {% bootstrap_button button_type="submit" content="Add Item" %}
 </form>
 {% endblock %}

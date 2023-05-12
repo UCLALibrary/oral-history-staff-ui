@@ -5,6 +5,7 @@ ul.navbar {
     overflow: hidden;
     background-color: #d0d0d7;
     border: 1px solid black;
+    justify-content: unset;
 }
   
 .navbar li {
@@ -17,10 +18,11 @@ ul.navbar {
     text-align: center;
     padding: 10px 12px;
     text-decoration: none;
-    color: #0000ee;
 }
 
-
+td.search-type{
+    min-width: 15rem
+}
 
 .search-results {
    width: 100%;
@@ -34,8 +36,13 @@ ul.navbar {
     font-weight: bold;
 }
 
-td {
-    vertical-align: top;
+td.label,
+td.qualifier {
+    vertical-align: baseline;
+}
+
+td.qualifier {
+    min-width: 15rem
 }
 
 .empty_form {
@@ -47,32 +54,10 @@ td {
     padding: 10px;
     border: 1px solid black;
 }
-
- form[name="edit_item"] div {
-     display: table-row;
- }
- 
- form[name="edit_item"] label {
-     display: table-cell;
- }
-
- form[name="edit_item"] select,
- form[name="edit_item"] input,
- form[name="edit_item"] textarea {
-    margin-left: 10px;
-    margin-right: 5px;
- }
-
- form[name="edit_item"] .basic_metadata select,
- form[name="edit_item"] .basic_metadata input,
- form[name="edit_item"] .basic_metadata textarea {
-    margin-bottom: 3px;
- }
-
 /* .file_metadata: optional metadata on edit_item page
 for Audio and Video items. Hide all table rows other 
 than Description. */ 
-.file_metadata tr:not([class="description"]) {
+table.file_metadata tr:not([class*="description"]) {
     display: none;
 }
 /* for file-level metadata, hide all dropdown options
@@ -84,6 +69,7 @@ other than TableOfContents (value = "3") */
 .header-metadata{
     border-collapse: collapse;
  }
+ 
 .header-metadata td{
     padding: 4px;
     border: 1px solid;
@@ -95,11 +81,36 @@ ul.tree {
 
 caption {
     font-weight: bold;
+    color: black;
 }
 
-form select,
-form input,
-form textarea {
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 13.333px;
+.add_formset {
+    --bs-btn-padding-x: 0.5rem;
+    --bs-btn-padding-y: 0.1rem;
+}
+
+/* Override bootstrap to reduce vertical space in tall forms*/
+.mb-3 {
+    margin-bottom: .4rem !important;
+  }
+
+/* Workarounds for "bootstrap_form success_css_class" not working  */
+/* CSS class "is-valid" is incorrectly applied to bound forms. */
+/* These four rules remove undesired checkmarks and green border styling. */
+.form-control {
+    background-image: none !important;
+    border-color: var(--bs-border-color) !important;
+}
+/* background-image is caret, copied from regular bootstrap select */
+.form-select.is-valid {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    border-color: var(--bs-border-color) !important;
+}
+
+.form-select.is-valid:focus {
+    box-shadow: 0 0 0 .25rem rgba(13,110,253,.25) !important;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 .25rem rgba(13,110,253,.25) !important;
 }
