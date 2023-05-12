@@ -70,7 +70,13 @@
 
 <form name="upload_file_form" method="POST" enctype="multipart/form-data" onsubmit="disable_upload_button(this);">
     {% csrf_token %}
-    {% bootstrap_form form layout="horizontal" %}
+    <table>
+      <tr>
+          <td>{% bootstrap_field form.file_type layout="floating" %}</td>
+          <td></td>
+          <td>{% bootstrap_field form.file_name layout="floating" %}</td>
+      </tr>
+  </table>
     {% bootstrap_button button_type="submit" content="Upload" %}
 </form>
 {% endblock %}
