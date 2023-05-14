@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: uclalibrary/oral-history-staff-ui
-  tag: v0.9.2
+  tag: v0.9.3
   pullPolicy: Always
 
 nameOverride: ""
@@ -53,12 +53,13 @@ django:
     db_user: "oral_history_staff"
     # Specific directory used for source files
     oh_file_source: "/media/oh_source/upload"
-    oh_libpartners: "/media/oh_source"
-    oh_masterslz: "/media/oh_lz"
-    oh_static: "/media/oh_static"
-    oh_wowza: "/media/oh_wowza"
-    # "Yes" or "No"
-    use_test_dirs: "No"
+    # Where Django looks for uploaded files
+    oh_media_root: "/media"
+    # Relative paths within oh_media_root, used by Django
+    oh_libpartners: "oh_source"
+    oh_masterslz: "oh_lz"
+    oh_static: "oh_static"
+    oh_wowza: "oh_wowza"
 
   externalSecrets:
     enabled: "true"

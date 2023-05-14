@@ -48,11 +48,11 @@ django:
     #db_password: ""
     oh_file_source: ""
     target_port: ""
+    oh_media_root: ""
     oh_libpartners: ""
     oh_masterslz: ""
     oh_static: ""
     oh_wowza: ""
-    use_test_dirs: ""
 
   externalSecrets:
     enabled: "false"
