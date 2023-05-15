@@ -196,7 +196,8 @@ In deployed container:
 
 ### Testing
 
-Tests focus on code which has significant side effects, like creating & changing files.  Run tests in the container:
+Tests focus on code which has significant side effects, like creating & changing files.  
+Run tests in the container:
 
 ```$ docker-compose exec django python manage.py test```
 
@@ -204,40 +205,59 @@ Tests focus on code which has significant side effects, like creating & changing
 
 In the local development environment, samples files for testing are in the `samples` directory.  This directory and its files are under version control, so only add small files, and be sure any real files have no copyright restrictions.
 
-As files are processed locally, they go into subdirectories of `media_dev`.  The top-level subdirectories are defined via environment variables:
+As files are processed locally, they go into subdirectories of `MEDIA_ROOT` - for developers, `/tmp/media_dev` **in the container**. 
+The top-level subdirectories are defined via environment variables:
 * `DJANGO_OH_MASTERSLZ`
 * `DJANGO_OH_WOWZA`
 * `DJANGO_OH_STATIC`
 
-These directories are under version control, but not any files or subdirectories below the top-level ones.
-```
-media_dev/
-├── oh_lz
-├── oh_static
-└── oh_wowza
-```
-
 Processed files go into various subdirectories below these top-level ones, depending on file use (master, submaster, thumbnail) and content type (audio, image, pdf, text).  Subdirectories are created automatically by Django as needed.
 
-Example, after uploading 1 of each type of master:
+To check the contents of `/tmp/media_dev`, which is only in the container:
 ```
-media_dev/
+# Easiest, but harder to read
+$ docker-compose exec django bash -c "ls -lR /tmp/media_dev"
+
+# Extra step needed after container rebuilds, but easier to read
+# Install tree utility as root (in container):
+$ docker-compose exec -u root django bash -c "apt-get install tree"
+# Then run tree (in container) as normal django user
+$ docker-compose exec django bash -c "tree /tmp/media_dev"
+```
+
+Example, after uploading 1 of each type of file, showing masters and derivatives:
+```
+/tmp/media_dev
 ├── oh_lz
 │   ├── audio
 │   │   └── masters
-│   │       └── 21198-zz000905ms-1-master.wav
+│   │       └── fake-bdef357512-1-master.wav
 │   ├── masters
-│   │   └── 21198-zz000905ms-2-master.tiff
+│   │   └── fake-bdef357512-3-master.tif
 │   ├── pdf
 │   │   └── masters
-│   │       └── 21198-zz000905ms-3-master.pdf
+│   │       └── fake-bdef357512-4-master.pdf
 │   └── text
 │       └── masters
-│           └── 21198-zz000905ms-4-master.xml
+│           └── fake-bdef357512-2-master.xml
 ├── oh_static
+│   ├── nails
+│   │   └── fake-bdef357512-3-thumbnail.jpg
+│   ├── pdf
+│   │   └── submasters
+│   │       └── fake-bdef357512-4-submaster.pdf
+│   ├── submasters
+│   │   └── fake-bdef357512-3-submaster.jpg
+│   └── text
+│       └── submasters
+│           └── fake-bdef357512-2-submaster.xml
 └── oh_wowza
+    └── audio
+        └── submasters
+            └── fake-bdef357512-1-submaster.mp3
+
+18 directories, 9 files
 ```
-TODO: This will be updated once derivative processing is in place.
 
 #### File deletion
 
