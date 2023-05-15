@@ -56,7 +56,6 @@ django:
     # Where Django looks for uploaded files
     oh_media_root: "/media"
     # Relative paths within oh_media_root, used by Django
-    oh_libpartners: "oh_source"
     oh_masterslz: "oh_lz"
     oh_static: "oh_static"
     oh_wowza: "oh_wowza"
