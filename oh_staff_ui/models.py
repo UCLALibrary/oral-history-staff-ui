@@ -496,13 +496,6 @@ class MediaFileType(models.Model):
         ordering = ["file_type"]
 
 
-def get_target_path(instance, filename):
-    # Determines where a MediaFile.file will be stored.
-    # For now, ignore instance parameter passed in by FileField.
-    # Currently, file_utils.
-    return filename
-
-
 class MediaFile(models.Model):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -512,7 +505,7 @@ class MediaFile(models.Model):
         related_name="+",
     )
     create_date = models.DateTimeField(blank=False, null=False, default=timezone.now)
-    file = models.FileField(upload_to=get_target_path)
+    file = models.FileField()
     # Files, especially masters, may not always be accessible to this application after creation,
     # so we can't rely on getting file size from FileField; capture size on creation.
     file_size = models.PositiveBigIntegerField(null=False, default=0)
@@ -530,7 +523,7 @@ class MediaFile(models.Model):
     def save(self, *args, **kwargs):
         # When files are deleted, self.file.name is already None at this point.
         if self.file.name is not None:
-            new_name = get_target_path(self, self.file.name)
+            new_name = self.file.name
             # Throw an exception if file itself exists, or if there's an object for it already.
             # Check both, since masters could be moved out of local filesystem after a while.
             if Path(new_name).exists() or MediaFile.objects.filter(file=new_name):
