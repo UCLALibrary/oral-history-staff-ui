@@ -154,10 +154,6 @@ class Command(BaseCommand):
     ) -> str:
         # Combine file name and target dir for full path, with some corrections.
 
-        # Target dir was calculated by OralHistoryFile based on environment;
-        # always use production paths for migrated legacy data.
-        target_dir = target_dir.replace("media_dev", "/media", 1)
-
         # Newer mp3 submasters are in audio/submasters subdirectory, matching target dir;
         # older ones are not, so remove that subdirectory to match.
         if "audio/submasters" not in file_location:
