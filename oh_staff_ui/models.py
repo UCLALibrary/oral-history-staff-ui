@@ -546,22 +546,21 @@ class MediaFile(models.Model):
     @property
     def file_url(self) -> str:
         # Calculate URL for a file, based on its path.  URLs are *not* stored in the database.
-        # Only meaningful for production files, which have paths (relative to app container)
-        # starting with /media/.
+        # Only meaningful for production files, not in development environment.
 
         # Skip masters for now, until policy is resolved.
         file_name = self.file.name
         if "/masters/" in file_name:
             file_url = ""
         # Non-audio submasters & thumbnails
-        elif file_name.startswith("/media/oh_static/"):
+        elif file_name.startswith("oh_static/"):
             file_url = file_name.replace(
-                "/media/oh_static/", "https://static.library.ucla.edu/oralhistory/"
+                "oh_static/", "https://static.library.ucla.edu/oralhistory/"
             )
         # Audio submasters
-        elif file_name.startswith("/media/oh_wowza/"):
+        elif file_name.startswith("oh_wowza/"):
             file_url = file_name.replace(
-                "/media/oh_wowza/",
+                "oh_wowza/",
                 "https://wowza.library.ucla.edu/dlp/definst/mp3:oralhistory/",
             )
             file_url += "/playlist.m3u8"
