@@ -4,7 +4,6 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
-import oh_staff_ui.models
 
 
 class Migration(migrations.Migration):
@@ -29,7 +28,7 @@ class Migration(migrations.Migration):
                 ("create_date", models.DateField(default=django.utils.timezone.now)),
                 (
                     "file",
-                    models.FileField(upload_to=oh_staff_ui.models.get_target_path),
+                    models.FileField(),
                 ),
                 ("sequence", models.IntegerField(default=0)),
             ],

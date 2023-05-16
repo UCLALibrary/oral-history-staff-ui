@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from django.conf import settings
 from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
@@ -65,6 +66,11 @@ class MediaFileTestCase(TestCase):
         cls.mock_request = HttpRequest()
         cls.mock_request.user = User.objects.get(username=cls.user.username)
 
+    def get_full_path(self, relative_path: str) -> Path:
+        # MediaFile.file.name contains a path relative to MEDIA_ROOT;
+        # return the full absolute path.
+        return Path(settings.MEDIA_ROOT, relative_path)
+
     def create_master_audio_file(self):
         # Utility function used in multiple tests.
         file_type = MediaFileType.objects.get(file_code="audio_master")
@@ -120,7 +126,8 @@ class MediaFileTestCase(TestCase):
         handler = AudioFileHandler(master)
         handler.process_files()
         # Confirm the new file exists.
-        self.assertEqual(Path(master.media_file.file.name).exists(), True)
+        new_path = self.get_full_path(master.media_file.file.name)
+        self.assertEqual(new_path.exists(), True)
         # For masters, new file should be same size as original.
         path = Path("samples/sample.wav")
         self.assertEqual(master.media_file.file.size, path.stat().st_size)
@@ -135,10 +142,11 @@ class MediaFileTestCase(TestCase):
         submaster = MediaFile.objects.get(parent=master.media_file)
         self.assertEqual(
             submaster.file.name,
-            "media_dev/oh_wowza/audio/submasters/fake-abcdef-1-submaster.mp3",
+            "oh_wowza/audio/submasters/fake-abcdef-1-submaster.mp3",
         )
         # Confirm the new file itself exists.
-        self.assertEqual(Path(submaster.file.name).exists(), True)
+        new_path = self.get_full_path(submaster.file.name)
+        self.assertEqual(new_path.exists(), True)
         # Confirm we have 2 items, the master and submaster.
         self.assertEqual(MediaFile.objects.count(), 2)
         # Confirm master is parent of submaster.
@@ -158,7 +166,7 @@ class MediaFileTestCase(TestCase):
                 file_type=MediaFileType.objects.get(file_code="audio_master"),
             )
             # Use the filename of the first file for the second file
-            path = Path(file1.media_file.file.name)
+            path = self.get_full_path(file1.media_file.file.name)
             new_name = file1.media_file.file.name
             with path.open(mode="rb") as f:
                 file2.file = File(f, name=new_name)
@@ -187,7 +195,8 @@ class MediaFileTestCase(TestCase):
         handler = ImageFileHandler(master)
         handler.process_files()
         # Confirm the new file exists.
-        self.assertEqual(Path(master.media_file.file.name).exists(), True)
+        new_path = self.get_full_path(master.media_file.file.name)
+        self.assertEqual(new_path.exists(), True)
         # For masters, new file should be same size as original.
         path = Path("samples/sample_marbles.tif")
         self.assertEqual(master.media_file.file.size, path.stat().st_size)
@@ -203,10 +212,11 @@ class MediaFileTestCase(TestCase):
         submaster = MediaFile.objects.get(parent=master.media_file, file_type=file_type)
         self.assertEqual(
             submaster.file.name,
-            "media_dev/oh_static/submasters/fake-abcdef-1-submaster.jpg",
+            "oh_static/submasters/fake-abcdef-1-submaster.jpg",
         )
         # Confirm the new file itself exists.
-        self.assertEqual(Path(submaster.file.name).exists(), True)
+        new_path = self.get_full_path(submaster.file.name)
+        self.assertEqual(new_path.exists(), True)
         # Confirm master is parent of submaster.
         self.assertEqual(master.media_file, submaster.parent)
 
@@ -219,10 +229,11 @@ class MediaFileTestCase(TestCase):
         submaster = MediaFile.objects.get(parent=master.media_file, file_type=file_type)
         self.assertEqual(
             submaster.file.name,
-            "media_dev/oh_static/nails/fake-abcdef-1-thumbnail.jpg",
+            "oh_static/nails/fake-abcdef-1-thumbnail.jpg",
         )
         # Confirm the new file itself exists.
-        self.assertEqual(Path(submaster.file.name).exists(), True)
+        new_path = self.get_full_path(submaster.file.name)
+        self.assertEqual(new_path.exists(), True)
         # Confirm master is parent of submaster.
         self.assertEqual(master.media_file, submaster.parent)
 
@@ -231,7 +242,8 @@ class MediaFileTestCase(TestCase):
         handler = GeneralFileHandler(master)
         handler.process_files()
         # Confirm the new file exists.
-        self.assertEqual(Path(master.media_file.file.name).exists(), True)
+        new_path = self.get_full_path(master.media_file.file.name)
+        self.assertEqual(new_path.exists(), True)
         # For masters, new file should be same size as original.
         path = Path("samples/sample.xml")
         self.assertEqual(master.media_file.file.size, path.stat().st_size)
@@ -246,10 +258,11 @@ class MediaFileTestCase(TestCase):
         submaster = MediaFile.objects.get(parent=master.media_file)
         self.assertEqual(
             submaster.file.name,
-            "media_dev/oh_static/text/submasters/fake-abcdef-1-submaster.xml",
+            "oh_static/text/submasters/fake-abcdef-1-submaster.xml",
         )
         # Confirm the new file itself exists.
-        self.assertEqual(Path(submaster.file.name).exists(), True)
+        new_path = self.get_full_path(submaster.file.name)
+        self.assertEqual(new_path.exists(), True)
         # Confirm we have 2 items, the master and submaster.
         self.assertEqual(MediaFile.objects.count(), 2)
         # Confirm master is parent of submaster.
@@ -445,7 +458,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_lz/audio/masters")
+        self.assertEqual(ohf.target_dir, "oh_lz/audio/masters")
 
     def test_get_target_dir_submaster_audio(self):
         file_type = MediaFileType.objects.get(file_code="audio_submaster")
@@ -456,7 +469,7 @@ class MediaFileTestCase(TestCase):
             file_use="submaster",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_wowza/audio/submasters")
+        self.assertEqual(ohf.target_dir, "oh_wowza/audio/submasters")
 
     def test_get_target_dir_master_image(self):
         file_type = MediaFileType.objects.get(file_code="image_master")
@@ -467,7 +480,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_lz/masters")
+        self.assertEqual(ohf.target_dir, "oh_lz/masters")
 
     def test_get_target_dir_submaster_image(self):
         file_type = MediaFileType.objects.get(file_code="image_submaster")
@@ -478,7 +491,7 @@ class MediaFileTestCase(TestCase):
             file_use="submaster",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_static/submasters")
+        self.assertEqual(ohf.target_dir, "oh_static/submasters")
 
     def test_get_target_dir_thumbnail_image(self):
         file_type = MediaFileType.objects.get(file_code="image_thumbnail")
@@ -489,7 +502,7 @@ class MediaFileTestCase(TestCase):
             file_use="thumbnail",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_static/nails")
+        self.assertEqual(ohf.target_dir, "oh_static/nails")
 
     def test_get_target_dir_master_pdf(self):
         file_type = MediaFileType.objects.get(file_code="pdf_master_legal_agreement")
@@ -500,7 +513,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_lz/pdf/masters")
+        self.assertEqual(ohf.target_dir, "oh_lz/pdf/masters")
 
     def test_get_target_dir_submaster_pdf(self):
         file_type = MediaFileType.objects.get(file_code="pdf_master_legal_agreement")
@@ -511,7 +524,7 @@ class MediaFileTestCase(TestCase):
             file_use="submaster",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_static/pdf/submasters")
+        self.assertEqual(ohf.target_dir, "oh_static/pdf/submasters")
 
     def test_get_target_dir_master_text(self):
         file_type = MediaFileType.objects.get(file_code="text_master_transcript")
@@ -522,7 +535,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_lz/text/masters")
+        self.assertEqual(ohf.target_dir, "oh_lz/text/masters")
 
     def test_get_target_dir_submaster_text(self):
         file_type = MediaFileType.objects.get(file_code="text_master_transcript")
@@ -533,7 +546,7 @@ class MediaFileTestCase(TestCase):
             file_use="submaster",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "media_dev/oh_static/text/submasters")
+        self.assertEqual(ohf.target_dir, "oh_static/text/submasters")
 
     def test_get_target_dir_invalid_audio_thumbnail(self):
         # Audio doesn't have thumbnails
@@ -577,36 +590,29 @@ class MediaFileTestCase(TestCase):
         handler.process_files()
         self.assertEqual(
             master.media_file.file.name,
-            "media_dev/oh_lz/audio/masters/fake-abcdef-1-master.wav",
+            "oh_lz/audio/masters/fake-abcdef-1-master.wav",
         )
 
     def test_file_url_master_is_empty(self):
         # Create minimal MediaFile object directly, with realistic file path.
-        # Use valid placeholder name, then update to realistic path, to
-        # work around SuspiciousFileOperation.
         mf = MediaFile.objects.create(
             created_by=self.user,
             file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
             item=self.item,
             original_file_name="FAKE",
-            file="placeholder",
+            file="oh_lz/text/masters/fake-abcdef-1-master.xml",
         )
-        # Work around SuspiciousFileOperation
-        mf.file.name = "/media/oh_lz/text/masters/fake-abcdef-1-master.xml"
         self.assertEqual(mf.file_url, "")
 
     def test_file_url_audio_submaster(self):
         # Create minimal MediaFile object directly, with realistic file path.
-        # Use valid placeholder name, then update to realistic path, to
-        # work around SuspiciousFileOperation.
         mf = MediaFile.objects.create(
             created_by=self.user,
             file_type=MediaFileType.objects.get(file_code="audio_submaster"),
             item=self.item,
             original_file_name="FAKE",
-            file="placeholder",
+            file="oh_wowza/audio/submasters/fake-abcdef-1-submaster.mp3",
         )
-        mf.file.name = "/media/oh_wowza/audio/submasters/fake-abcdef-1-submaster.mp3"
         self.assertEqual(
             mf.file_url,
             "https://wowza.library.ucla.edu/dlp/definst/mp3:oralhistory/audio/submasters/"
@@ -615,16 +621,13 @@ class MediaFileTestCase(TestCase):
 
     def test_file_url_static_submaster(self):
         # Create minimal MediaFile object directly, with realistic file path.
-        # Use valid placeholder name, then update to realistic path, to
-        # work around SuspiciousFileOperation.
         mf = MediaFile.objects.create(
             created_by=self.user,
             file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
             item=self.item,
             original_file_name="FAKE",
-            file="placeholder",
+            file="oh_static/text/submasters/fake-abcdef-1-master.xml",
         )
-        mf.file.name = "/media/oh_static/text/submasters/fake-abcdef-1-master.xml"
         self.assertEqual(
             mf.file_url,
             "https://static.library.ucla.edu/oralhistory/text/submasters/fake-abcdef-1-master.xml",
@@ -632,16 +635,13 @@ class MediaFileTestCase(TestCase):
 
     def test_file_url_static_thumbnail(self):
         # Create minimal MediaFile object directly, with realistic file path.
-        # Use valid placeholder name, then update to realistic path, to
-        # work around SuspiciousFileOperation.
         mf = MediaFile.objects.create(
             created_by=self.user,
             file_type=MediaFileType.objects.get(file_code="image_thumbnail"),
             item=self.item,
             original_file_name="FAKE",
-            file="placeholder",
+            file="oh_static/nails/fake-abcdef-1-thumbnail.jpg",
         )
-        mf.file.name = "/media/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
         self.assertEqual(
             mf.file_url,
             "https://static.library.ucla.edu/oralhistory/nails/fake-abcdef-1-thumbnail.jpg",
@@ -970,35 +970,33 @@ class FileMetadataMigrationTestCase(SimpleTestCase):
     def test_get_full_file_name_audio_submaster_newer_file_in_original_name(self):
         # Newer file, subdirectory in file name, should go into audio/submasters
         full_file_name = FileMetadataCommand().get_full_file_name(
-            "media_dev/oh_wowza/audio/submasters",
+            "oh_wowza/audio/submasters",
             "audio/submasters/21198-zz002kpt8t-1-submaster.mp3",
             "https://testing/audio/submasters/21198-zz002kpt8t-1-submaster.mp3/playlist.m3u8",
         )
         self.assertEqual(
             full_file_name,
-            "/media/oh_wowza/audio/submasters/21198-zz002kpt8t-1-submaster.mp3",
+            "oh_wowza/audio/submasters/21198-zz002kpt8t-1-submaster.mp3",
         )
 
     def test_get_full_file_name_audio_submaster_newer_file_not_in_original_name(self):
         # Newer file, no subdirectory in file name, should also go into audio/submasters
         full_file_name = FileMetadataCommand().get_full_file_name(
-            "media_dev/oh_wowza/audio/submasters",
+            "oh_wowza/audio/submasters",
             "21198-zz002kpzdt-2-submaster.mp3",
             "https://testing/oralhistory/audio/submasters/21198-zz002kpzdt-2-submaster.mp3/"
             "playlist.m3u8",
         )
         self.assertEqual(
             full_file_name,
-            "/media/oh_wowza/audio/submasters/21198-zz002kpzdt-2-submaster.mp3",
+            "oh_wowza/audio/submasters/21198-zz002kpzdt-2-submaster.mp3",
         )
 
     def test_get_full_file_name_audio_submaster_older_file(self):
         # Older file, should not go into audio/submasters
         full_file_name = FileMetadataCommand().get_full_file_name(
-            "media_dev/oh_wowza/audio/submasters",
+            "oh_wowza/audio/submasters",
             "21198-zz00094qtd-3-submaster.mp3",
             "https://testing/oralhistory/21198-zz00094qtd-3-submaster.mp3/playlist.m3u8",
         )
-        self.assertEqual(
-            full_file_name, "/media/oh_wowza/21198-zz00094qtd-3-submaster.mp3"
-        )
+        self.assertEqual(full_file_name, "oh_wowza/21198-zz00094qtd-3-submaster.mp3")

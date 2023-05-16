@@ -18,8 +18,8 @@ data:
   DJANGO_DB_NAME: {{ .Values.django.env.db_name }}
   DJANGO_DB_USER: {{ .Values.django.env.db_user }}
   DJANGO_OH_FILE_SOURCE: {{ .Values.django.env.oh_file_source }}
-  DJANGO_OH_LIBPARTNERS: {{ .Values.django.env.oh_libpartners }}
+  DJANGO_OH_MEDIA_ROOT: {{ .Values.django.env.oh_media_root }}
   DJANGO_OH_MASTERSLZ: {{ .Values.django.env.oh_masterslz }}
   DJANGO_OH_STATIC: {{ .Values.django.env.oh_static }}
   DJANGO_OH_WOWZA: {{ .Values.django.env.oh_wowza }}
-  DJANGO_USE_TEST_DIRS: {{ .Values.django.env.use_test_dirs | quote }}
+  

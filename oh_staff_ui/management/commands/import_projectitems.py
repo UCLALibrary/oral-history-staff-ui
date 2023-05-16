@@ -95,10 +95,13 @@ class Command(BaseCommand):
             seq = 0
         return int(float(seq))
 
-    def get_or_create_user(self, email: str) -> User:
-        username = email.split("@")[0]
-        if User.objects.filter(username=username).exists():
-            return User.objects.get(username=username)
+    def get_or_create_user(self, user_name: str) -> User:
+        # A few DLCS items have no user_name in modified_by;
+        # allow these through, as "NO_DATA" user.
+        if not user_name:
+            user_name = "NO_DATA"
+        if User.objects.filter(username=user_name).exists():
+            return User.objects.get(username=user_name)
         else:
-            print(f"Created new user for email {email}")
-            return User.objects.create_user(username, email=email)
+            print(f"Created new user for {user_name}")
+            return User.objects.create_user(user_name)
