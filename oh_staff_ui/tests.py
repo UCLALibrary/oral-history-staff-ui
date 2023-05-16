@@ -903,6 +903,12 @@ class ModsTestCase(TestCase):
         )
         ItemLanguageUsage.objects.create(item=cls.interview_item, value=language)
         # type_id values are taken from description-type-data.json fixture
+        # adminnote = 1
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Abstract element",
+            type_id=1,
+        )
         # adminnote = 4
         Description.objects.create(
             item=cls.interview_item,
@@ -951,6 +957,21 @@ class ModsTestCase(TestCase):
 
         self.assertEqual(ohmods.is_valid(), True)
 
+    def test_valid_abstract_parse(self):
+        item = self.interview_item
+        ohmods = OralHistoryMods(item)
+        ohmods.populate_fields()
+
+        ohmods_from_string = load_xmlobject_from_string(
+            ohmods.serializeDocument(), mods.MODS
+        )
+
+        self.assertEqual(ohmods_from_string.is_valid(), True)
+
+        # Assert abstract generated properly
+        mods_xml = ohmods_from_string.serialize(pretty=True)
+        self.assertTrue(b"<mods:abstract>Abstract element</mods:abstract>" in mods_xml)
+
     def test_valid_description_parse(self):
         item = self.interview_item
         ohmods = OralHistoryMods(item)
@@ -960,8 +981,15 @@ class ModsTestCase(TestCase):
             ohmods.serializeDocument(), mods.MODS
         )
 
-        # Confirm MODS still valid as read from string
+        # Assert MODS still valid as read from string
         self.assertEqual(ohmods_from_string.is_valid(), True)
+
+        # Assert specific description type properly exists
+        mods_xml = ohmods_from_string.serialize(pretty=True)
+        self.assertTrue(
+            b'<mods:note displayLabel="Processing of Interview" type="processinterview">'
+            in mods_xml
+        )
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
