@@ -14,6 +14,7 @@ from oh_staff_ui.management.commands.import_file_metadata import (
 )
 from oh_staff_ui.models import (
     Copyright,
+    Description,
     ItemCopyrightUsage,
     ItemLanguageUsage,
     ItemNameUsage,
@@ -869,6 +870,7 @@ class ModsTestCase(TestCase):
         "item-status-data.json",
         "item-type-data.json",
         "authority-source-data.json",
+        "description-type-data.json",
     ]
 
     @classmethod
@@ -913,6 +915,11 @@ class ModsTestCase(TestCase):
             item=cls.audio_item, value="format placeholder value, 1 hour"
         )
         ItemLanguageUsage.objects.create(item=cls.audio_item, value=language)
+        Description.objects.create(
+            item=cls.audio_item,
+            value="SUPPORTING DOCUMENTS:Test for admin note split",
+            type_id=4,
+        )
 
     def test_valid_series_item_mods(self):
         item = self.series_item
@@ -932,8 +939,6 @@ class ModsTestCase(TestCase):
         item = self.audio_item
         ohmods = OralHistoryMods(item)
         ohmods.populate_fields()
-
-        print(ohmods.serializeDocument())
 
         self.assertEqual(ohmods.is_valid(), True)
 
