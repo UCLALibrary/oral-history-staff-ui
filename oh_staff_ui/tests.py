@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.http import HttpRequest
 from django.test import SimpleTestCase, TestCase
 from django.contrib.auth.models import User
+from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
 from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.forms import ProjectItemForm
@@ -901,6 +902,19 @@ class ModsTestCase(TestCase):
             parent=cls.series_item,
         )
         ItemLanguageUsage.objects.create(item=cls.interview_item, value=language)
+        # type_id values are taken from description-type-data.json fixture
+        # adminnote = 4
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Processing of interview:Process interview description as admin note",
+            type_id=4,
+        )
+        # processinterview = 6
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Process interview description as qualifier",
+            type_id=6,
+        )
 
         # Level 3: Audio, child of interview.
         cls.audio_item = ProjectItem.objects.create(
@@ -915,11 +929,6 @@ class ModsTestCase(TestCase):
             item=cls.audio_item, value="format placeholder value, 1 hour"
         )
         ItemLanguageUsage.objects.create(item=cls.audio_item, value=language)
-        Description.objects.create(
-            item=cls.audio_item,
-            value="SUPPORTING DOCUMENTS:Test for admin note split",
-            type_id=4,
-        )
 
     def test_valid_series_item_mods(self):
         item = self.series_item
@@ -941,6 +950,18 @@ class ModsTestCase(TestCase):
         ohmods.populate_fields()
 
         self.assertEqual(ohmods.is_valid(), True)
+
+    def test_valid_description_parse(self):
+        item = self.interview_item
+        ohmods = OralHistoryMods(item)
+        ohmods.populate_fields()
+
+        ohmods_from_string = load_xmlobject_from_string(
+            ohmods.serializeDocument(), mods.MODS
+        )
+
+        # Confirm MODS still valid as read from string
+        self.assertEqual(ohmods_from_string.is_valid(), True)
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):

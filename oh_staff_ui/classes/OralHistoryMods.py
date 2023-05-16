@@ -106,6 +106,45 @@ class OralHistoryMods(MODS):
                                 text=admin_note_value,
                             )
                         )
-
+            elif desc_type == "personpresent":
+                self.notes.append(
+                    mods.Note(
+                        label="Persons Present",
+                        type=desc_type,
+                        text=desc.value,
+                    )
+                )
+            elif desc_type == "place":
+                self.notes.append(
+                    mods.Note(
+                        label="Place Conducted",
+                        type=desc_type,
+                        text=desc.value,
+                    )
+                )
+            elif desc_type == "supportingdocuments":
+                self.notes.append(
+                    mods.Note(
+                        label="Supporting Documents",
+                        type=desc_type,
+                        text=desc.value,
+                    )
+                )
+            elif desc_type == "interviewerhistory":
+                self.notes.append(
+                    mods.Note(
+                        label="Interviewer Background and Preparation",
+                        type=desc_type,
+                        text=desc.value,
+                    )
+                )
+            elif desc_type == "processinterview":
+                self.notes.append(
+                    mods.Note(
+                        label="Processing of Interview",
+                        type=desc_type,
+                        text=desc.value,
+                    )
+                )
             else:
                 self.notes.append(mods.Note(text=desc.value))
