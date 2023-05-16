@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import QuerySet
+from django.db.models import Max, QuerySet
 from oh_staff_ui.models import (
     AltIdType,
     AltTitleType,
@@ -77,6 +77,8 @@ class ProjectItemForm(forms.Form):
         self.fields["type"].queryset = item_types
         # Default to the first value in the queryset, which will always have at least one value.
         self.fields["type"].initial = item_types[0]
+        # Get next sequence for default value in form, based on parent item's type.
+        self.fields["sequence"].initial = self._get_next_sequence(parent_item)
 
     def _get_relevant_item_types(
         self, parent_item: ProjectItem | None = None
@@ -94,6 +96,29 @@ class ProjectItemForm(forms.Form):
         elif parent_item.type.type == "Interview":
             item_types = ["Audio", "Video"]
         return ItemType.objects.filter(type__in=item_types).order_by("type")
+
+    def _get_next_sequence(self, parent_item: ProjectItem | None = None) -> int:
+        """Get next sequence value.
+
+        If parent item is an Interview, find max sequence used by other children
+        of parent (if any), and add 1.
+        Otherwise, return 1.
+        """
+        if parent_item is None or parent_item.type.type == "Series":
+            next_sequence = 1
+        else:
+            # Get the max sequence used by children of this parent.
+            max_sequence = (
+                ProjectItem.objects.filter(parent=parent_item)
+                .aggregate(Max("sequence"))
+                .get("sequence__max")
+            )
+            if max_sequence is None:
+                # No other children, so start at 1.
+                next_sequence = 1
+            else:
+                next_sequence = max_sequence + 1
+        return next_sequence
 
 
 class ItemSearchForm(forms.Form):

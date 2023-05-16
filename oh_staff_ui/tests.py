@@ -757,15 +757,30 @@ class ProjectItemFormTestCase(TestCase):
             type=ItemType.objects.get(type="Interview"),
             parent=cls.series_item,
         )
-        # Level 3: Audio, child of interview.
-        cls.audio_item = ProjectItem.objects.create(
+        # Level 3: Audio, child #1 of interview.
+        cls.audio_item1 = ProjectItem.objects.create(
             ark="fake/abcdef",
             created_by=cls.user,
             last_modified_by=cls.user,
+            sequence=1,
             title="Fake audio",
             type=ItemType.objects.get(type="Audio"),
             parent=cls.interview_item,
         )
+        # Level 3: Audio, child #2 of interview.
+        cls.audio_item2 = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=cls.user,
+            last_modified_by=cls.user,
+            sequence=2,
+            title="Fake audio",
+            type=ItemType.objects.get(type="Audio"),
+            parent=cls.interview_item,
+        )
+
+    def test_all_setup_items_are_created(self):
+        # Series, interview, and 2 audio items created in setUpTestData().
+        self.assertEqual(ProjectItem.objects.count(), 4)
 
     def test_default_form_item_type_is_series(self):
         # Test that the form is correct for /add_item with no parent.
@@ -821,7 +836,7 @@ class ProjectItemFormTestCase(TestCase):
 
     def test_audio_form_item_type_is_audio(self):
         # Test that the form handles display of choices for audio items.
-        item = self.audio_item
+        item = self.audio_item1
         form = ProjectItemForm(
             data={
                 "parent": item.parent,
@@ -856,6 +871,36 @@ class ProjectItemFormTestCase(TestCase):
         form = ProjectItemForm(request.POST, parent_item=self.series_item)
         # Check that form validation succeeded.
         self.assertEquals({}, form.errors)
+
+    def test_next_sequence_non_file_item(self):
+        # Test that the form displays 1 for sequence for non-file
+        # (series and interview) items.
+        for item in [self.series_item, self.interview_item]:
+            form = ProjectItemForm(
+                data={
+                    "parent": item.parent,
+                    "title": item.title,
+                    "type": item.type,
+                    "sequence": item.sequence,
+                    "coverage": item.coverage,
+                    "relation": item.relation,
+                    "status": item.status,
+                }
+            )
+            form_type_field = form.fields["sequence"]
+            self.assertEquals(form_type_field.initial, 1)
+
+    def test_next_sequence_file_item(self):
+        # Test that the form displays 3 for sequence for the next
+        # file-level items, given audio items 1 & 2 already exist.
+        # Simulate call to /add_item/<parent_item_id>
+        form = ProjectItemForm(
+            data={
+                "parent": self.interview_item,
+            }
+        )
+        form_type_field = form.fields["sequence"]
+        self.assertEquals(form_type_field.initial, 3)
 
 
 class ModsTestCase(TestCase):
