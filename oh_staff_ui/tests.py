@@ -17,6 +17,7 @@ from oh_staff_ui.management.commands.import_file_metadata import (
 from oh_staff_ui.models import (
     Copyright,
     Description,
+    DescriptionType,
     ItemCopyrightUsage,
     ItemLanguageUsage,
     ItemNameUsage,
@@ -902,24 +903,29 @@ class ModsTestCase(TestCase):
             parent=cls.series_item,
         )
         ItemLanguageUsage.objects.create(item=cls.interview_item, value=language)
-        # type_id values are taken from description-type-data.json fixture
-        # adminnote = 1
+
         Description.objects.create(
             item=cls.interview_item,
             value="Abstract element",
-            type_id=1,
+            type=DescriptionType.objects.get(type="abstract"),
         )
-        # adminnote = 4
+
         Description.objects.create(
             item=cls.interview_item,
             value="Processing of interview:Process interview description as admin note",
-            type_id=4,
+            type=DescriptionType.objects.get(type="adminnote"),
         )
-        # processinterview = 6
+
         Description.objects.create(
             item=cls.interview_item,
             value="Process interview description as qualifier",
-            type_id=6,
+            type=DescriptionType.objects.get(type="processinterview"),
+        )
+
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Biographical note with invalid XML characters & \" ' ` < >",
+            type=DescriptionType.objects.get(type="biographicalNote"),
         )
 
         # Level 3: Audio, child of interview.

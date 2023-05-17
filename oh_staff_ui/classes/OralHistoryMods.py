@@ -3,7 +3,6 @@ from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODS
 from oh_staff_ui.models import (
     Description,
-    DescriptionType,
     ItemLanguageUsage,
     Format,
 )
@@ -51,6 +50,16 @@ class OralHistoryMods(MODS):
     def _populate_description(self):
         descriptions = Description.objects.filter(item=self._item)
 
+        # Similar note element behaving qualifiers
+        type_labels = {
+            "biographicalnote": "Biographical Information",
+            "interviewerhistory": "Interviewer Background and Preparation",
+            "personpresent": "Persons Present",
+            "place": "Place Conducted",
+            "processinterview": "Processing of Interview",
+            "supportingdocuments": "Supporting Documents",
+        }
+
         for desc in descriptions:
             desc_type = desc.type.type.lower()
 
@@ -58,93 +67,49 @@ class OralHistoryMods(MODS):
                 self.create_abstract()
                 self.abstract.text = desc.value
 
-            elif desc_type in ["not qualified", "caption", "note"]:
-                self.notes.append(mods.Note(text=desc.value))
-
-            elif desc_type == "biographicalnote":
-                self.notes.append(
-                    mods.Note(
-                        type="biographical",
-                        label="Biographical Information",
-                        text=desc.value,
-                    )
-                )
-
             elif desc_type == "adminnote":
-                note_components = desc.value.split(":", 1)
+                self.notes.append(self._parse_adminnote(desc.value))
 
-                if len(note_components) <= 1:
-                    self.notes.append(mods.Note(text=desc.value))
-
-                else:
-                    admin_note_type = note_components[0].lower()
-                    admin_note_value = note_components[1]
-
-                    if admin_note_type == "supporting documents":
-                        self.notes.append(
-                            mods.Note(
-                                label="Supporting Documents",
-                                type="supportingdocuments",
-                                text=admin_note_value,
-                            )
-                        )
-
-                    elif admin_note_type == "interviewer background and preperation":
-                        self.notes.append(
-                            mods.Note(
-                                label="Interviewer Background and Preperation",
-                                type="interviewerhistory",
-                                text=admin_note_value,
-                            )
-                        )
-
-                    elif admin_note_type == "processing of interview":
-                        self.notes.append(
-                            mods.Note(
-                                label="Processing of Interview",
-                                type="processinterview",
-                                text=admin_note_value,
-                            )
-                        )
-            elif desc_type == "personpresent":
+            elif desc_type in type_labels.keys():
+                type_value = (
+                    "biographical" if desc_type == "biographicalnote" else desc_type
+                )
                 self.notes.append(
                     mods.Note(
-                        label="Persons Present",
-                        type=desc_type,
-                        text=desc.value,
+                        type=type_value, label=type_labels[desc_type], text=desc.value
                     )
                 )
-            elif desc_type == "place":
-                self.notes.append(
-                    mods.Note(
-                        label="Place Conducted",
-                        type=desc_type,
-                        text=desc.value,
-                    )
-                )
-            elif desc_type == "supportingdocuments":
-                self.notes.append(
-                    mods.Note(
-                        label="Supporting Documents",
-                        type=desc_type,
-                        text=desc.value,
-                    )
-                )
-            elif desc_type == "interviewerhistory":
-                self.notes.append(
-                    mods.Note(
-                        label="Interviewer Background and Preparation",
-                        type=desc_type,
-                        text=desc.value,
-                    )
-                )
-            elif desc_type == "processinterview":
-                self.notes.append(
-                    mods.Note(
-                        label="Processing of Interview",
-                        type=desc_type,
-                        text=desc.value,
-                    )
-                )
+
             else:
                 self.notes.append(mods.Note(text=desc.value))
+
+    def _parse_adminnote(self, desc_value: str) -> mods.Note:
+        note_components = desc_value.split(":", 1)
+
+        if len(note_components) <= 1:
+            return mods.Note(text=desc_value)
+
+        else:
+            admin_note_type = note_components[0].lower()
+            admin_note_value = note_components[1]
+
+            if admin_note_type == "supporting documents":
+                return mods.Note(
+                    label="Supporting Documents",
+                    type="supportingdocuments",
+                    text=admin_note_value,
+                )
+
+            elif admin_note_type == "interviewer background and preperation":
+                return mods.Note(
+                    label="Interviewer Background and Preperation",
+                    type="interviewerhistory",
+                    text=admin_note_value,
+                )
+
+            elif admin_note_type == "processing of interview":
+                return mods.Note(
+                    label="Processing of Interview",
+                    type="processinterview",
+                    text=admin_note_value,
+                )
