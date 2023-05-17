@@ -48,7 +48,8 @@ class OralHistoryMods(MODS):
             self.physical_description.extent = format.value
 
     def _populate_description(self):
-        descriptions = Description.objects.filter(item=self._item)
+        # Exclude adminnote and tableOfContents types from query entirely
+        descriptions = Description.objects.filter(item=self._item).exclude(type__type__in=["adminnote", "tableOfContents"]) 
 
         # Similar note element behaving qualifiers
         type_labels = {
@@ -78,4 +79,5 @@ class OralHistoryMods(MODS):
                 )
 
             else:
+                # Remaining 'note' types or non-matching get element with no type
                 self.notes.append(mods.Note(text=desc.value))

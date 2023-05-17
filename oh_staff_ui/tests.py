@@ -912,7 +912,7 @@ class ModsTestCase(TestCase):
 
         Description.objects.create(
             item=cls.interview_item,
-            value="Processing of interview:Process interview description as admin note",
+            value="Admin note should not display",
             type=DescriptionType.objects.get(type="adminnote"),
         )
 
@@ -926,6 +926,12 @@ class ModsTestCase(TestCase):
             item=cls.interview_item,
             value="Biographical note with invalid XML characters & \" ' ` < >",
             type=DescriptionType.objects.get(type="biographicalNote"),
+        )
+
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Generic note should display",
+            type=DescriptionType.objects.get(type="note"),
         )
 
         # Level 3: Audio, child of interview.
@@ -995,6 +1001,12 @@ class ModsTestCase(TestCase):
         self.assertTrue(
             b'<mods:note type="processinterview" displayLabel="Processing of Interview">'
             in mods_xml
+        )
+        self.assertTrue(
+            b"<mods:note>Generic note should display</mods:note>" in mods_xml
+        )
+        self.assertFalse(
+            b"<mods:note>Admin note should not display</mods:note>" in mods_xml
         )
 
 
