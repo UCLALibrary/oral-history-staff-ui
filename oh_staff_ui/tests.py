@@ -7,6 +7,7 @@ from django.db import IntegrityError
 from django.http import HttpRequest
 from django.test import SimpleTestCase, TestCase
 from django.contrib.auth.models import User
+from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
 from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
 from oh_staff_ui.forms import ProjectItemForm
@@ -15,6 +16,8 @@ from oh_staff_ui.management.commands.import_file_metadata import (
 )
 from oh_staff_ui.models import (
     Copyright,
+    Description,
+    DescriptionType,
     ItemCopyrightUsage,
     ItemLanguageUsage,
     ItemNameUsage,
@@ -22,6 +25,7 @@ from oh_staff_ui.models import (
     ItemResourceUsage,
     ItemSubjectUsage,
     ItemType,
+    Format,
     Language,
     MediaFile,
     MediaFileType,
@@ -656,6 +660,7 @@ class MetadataUniquenessTestCase(TestCase):
     fixtures = [
         "item-status-data.json",
         "item-type-data.json",
+        "authority-source-data.json",
     ]
 
     @classmethod
@@ -911,12 +916,18 @@ class ModsTestCase(TestCase):
     fixtures = [
         "item-status-data.json",
         "item-type-data.json",
+        "authority-source-data.json",
+        "description-type-data.json",
     ]
 
     @classmethod
     def setUpTestData(cls):
         # Use QAD data for fake user and fake items.
         cls.user = User.objects.create_user("tester")
+        language = Language.objects.create(
+            value="language placeholder value", source_id=1
+        )
+
         # Level 1: Series.
         cls.series_item = ProjectItem.objects.create(
             ark="fake/abcdef",
@@ -925,6 +936,8 @@ class ModsTestCase(TestCase):
             title="Fake series",
             type=ItemType.objects.get(type="Series"),
         )
+        ItemLanguageUsage.objects.create(item=cls.series_item, value=language)
+
         # Level 2: Interview, child of series.
         cls.interview_item = ProjectItem.objects.create(
             ark="fake/abcdef",
@@ -934,6 +947,38 @@ class ModsTestCase(TestCase):
             type=ItemType.objects.get(type="Interview"),
             parent=cls.series_item,
         )
+        ItemLanguageUsage.objects.create(item=cls.interview_item, value=language)
+
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Abstract element",
+            type=DescriptionType.objects.get(type="abstract"),
+        )
+
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Admin note should not display",
+            type=DescriptionType.objects.get(type="adminnote"),
+        )
+
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Process interview description as qualifier",
+            type=DescriptionType.objects.get(type="processinterview"),
+        )
+
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Biographical note with invalid XML characters & \" ' ` < >",
+            type=DescriptionType.objects.get(type="biographicalNote"),
+        )
+
+        Description.objects.create(
+            item=cls.interview_item,
+            value="Generic note should display",
+            type=DescriptionType.objects.get(type="note"),
+        )
+
         # Level 3: Audio, child of interview.
         cls.audio_item = ProjectItem.objects.create(
             ark="fake/abcdef",
@@ -943,6 +988,10 @@ class ModsTestCase(TestCase):
             type=ItemType.objects.get(type="Audio"),
             parent=cls.interview_item,
         )
+        Format.objects.create(
+            item=cls.audio_item, value="format placeholder value, 1 hour"
+        )
+        ItemLanguageUsage.objects.create(item=cls.audio_item, value=language)
 
     def test_valid_series_item_mods(self):
         item = self.series_item
@@ -964,6 +1013,46 @@ class ModsTestCase(TestCase):
         ohmods.populate_fields()
 
         self.assertEqual(ohmods.is_valid(), True)
+
+    def test_valid_abstract_parse(self):
+        item = self.interview_item
+        ohmods = OralHistoryMods(item)
+        ohmods.populate_fields()
+
+        ohmods_from_string = load_xmlobject_from_string(
+            ohmods.serializeDocument(), mods.MODS
+        )
+
+        self.assertEqual(ohmods_from_string.is_valid(), True)
+
+        # Assert abstract generated properly
+        mods_xml = ohmods_from_string.serialize(pretty=True)
+        self.assertTrue(b"<mods:abstract>Abstract element</mods:abstract>" in mods_xml)
+
+    def test_valid_description_parse(self):
+        item = self.interview_item
+        ohmods = OralHistoryMods(item)
+        ohmods.populate_fields()
+
+        ohmods_from_string = load_xmlobject_from_string(
+            ohmods.serializeDocument(), mods.MODS
+        )
+
+        # Assert MODS still valid as read from string
+        self.assertEqual(ohmods_from_string.is_valid(), True)
+
+        # Assert specific description type properly exists
+        mods_xml = ohmods_from_string.serialize(pretty=True)
+        self.assertTrue(
+            b'<mods:note type="processinterview" displayLabel="Processing of Interview">'
+            in mods_xml
+        )
+        self.assertTrue(
+            b"<mods:note>Generic note should display</mods:note>" in mods_xml
+        )
+        self.assertFalse(
+            b"<mods:note>Admin note should not display</mods:note>" in mods_xml
+        )
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
