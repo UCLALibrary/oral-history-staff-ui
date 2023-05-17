@@ -67,9 +67,6 @@ class OralHistoryMods(MODS):
                 self.create_abstract()
                 self.abstract.text = desc.value
 
-            elif desc_type == "adminnote":
-                self.notes.append(self._parse_adminnote(desc.value))
-
             elif desc_type in type_labels.keys():
                 type_value = (
                     "biographical" if desc_type == "biographicalnote" else desc_type
@@ -82,34 +79,3 @@ class OralHistoryMods(MODS):
 
             else:
                 self.notes.append(mods.Note(text=desc.value))
-
-    def _parse_adminnote(self, desc_value: str) -> mods.Note:
-        note_components = desc_value.split(":", 1)
-
-        if len(note_components) <= 1:
-            return mods.Note(text=desc_value)
-
-        else:
-            admin_note_type = note_components[0].lower()
-            admin_note_value = note_components[1]
-
-            if admin_note_type == "supporting documents":
-                return mods.Note(
-                    label="Supporting Documents",
-                    type="supportingdocuments",
-                    text=admin_note_value,
-                )
-
-            elif admin_note_type == "interviewer background and preperation":
-                return mods.Note(
-                    label="Interviewer Background and Preperation",
-                    type="interviewerhistory",
-                    text=admin_note_value,
-                )
-
-            elif admin_note_type == "processing of interview":
-                return mods.Note(
-                    label="Processing of Interview",
-                    type="processinterview",
-                    text=admin_note_value,
-                )

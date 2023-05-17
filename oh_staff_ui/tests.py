@@ -993,7 +993,7 @@ class ModsTestCase(TestCase):
         # Assert specific description type properly exists
         mods_xml = ohmods_from_string.serialize(pretty=True)
         self.assertTrue(
-            b'<mods:note displayLabel="Processing of Interview" type="processinterview">'
+            b'<mods:note type="processinterview" displayLabel="Processing of Interview">'
             in mods_xml
         )
 
