@@ -15,6 +15,8 @@ from oh_staff_ui.management.commands.import_file_metadata import (
     Command as FileMetadataCommand,
 )
 from oh_staff_ui.models import (
+    AltTitle,
+    AltTitleType,
     Copyright,
     Date,
     DateType,
@@ -921,6 +923,7 @@ class ModsTestCase(TestCase):
         "authority-source-data.json",
         "description-type-data.json",
         "date-type-data.json",
+        "alttitle-type-data.json",
     ]
 
     @classmethod
@@ -986,6 +989,12 @@ class ModsTestCase(TestCase):
             item=cls.interview_item,
             value="2000",
             type=DateType.objects.get(type="creation"),
+        )
+
+        AltTitle.objects.create(
+            item=cls.interview_item,
+            value="Alternate Title",
+            type=AltTitleType.objects.get(type="descriptive"),
         )
 
         # Level 3: Audio, child of interview.
@@ -1059,10 +1068,14 @@ class ModsTestCase(TestCase):
         self.assertTrue(
             b"<mods:note>Generic note should display</mods:note>" in mods_xml
         )
+
         self.assertFalse(
             b"<mods:note>Admin note should not display</mods:note>" in mods_xml
         )
+
         self.assertTrue(b"<mods:dateCreated>2000</mods:dateCreated>" in mods_xml)
+
+        self.assertTrue(b'<mods:titleInfo type="alternative">' in mods_xml)
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
