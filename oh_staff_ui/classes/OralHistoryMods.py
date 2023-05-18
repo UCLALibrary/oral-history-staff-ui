@@ -2,6 +2,7 @@ import logging
 from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODS
 from oh_staff_ui.models import (
+    Date,
     Description,
     ItemLanguageUsage,
     Format,
@@ -24,6 +25,7 @@ class OralHistoryMods(MODS):
         self._populate_language()
         self._populate_format()
         self._populate_description()
+        self._populate_create_date()
 
     def _populate_title(self):
         self.title = self._item.title
@@ -81,3 +83,11 @@ class OralHistoryMods(MODS):
             else:
                 # Remaining 'note' types or non-matching get element with no type
                 self.notes.append(mods.Note(text=desc.value))
+    
+    def _populate_create_date(self):
+        dates = Date.objects.filter(item=self._item, type__type__exact="creation")
+        
+        for date in dates:
+            self.create_origin_info()
+            self.origin_info.created.append(mods.DateCreated(date=date))
+

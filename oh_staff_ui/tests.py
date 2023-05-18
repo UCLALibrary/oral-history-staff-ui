@@ -16,6 +16,8 @@ from oh_staff_ui.management.commands.import_file_metadata import (
 )
 from oh_staff_ui.models import (
     Copyright,
+    Date,
+    DateType,
     Description,
     DescriptionType,
     ItemCopyrightUsage,
@@ -918,6 +920,7 @@ class ModsTestCase(TestCase):
         "item-type-data.json",
         "authority-source-data.json",
         "description-type-data.json",
+        "date-type-data.json",
     ]
 
     @classmethod
@@ -977,6 +980,12 @@ class ModsTestCase(TestCase):
             item=cls.interview_item,
             value="Generic note should display",
             type=DescriptionType.objects.get(type="note"),
+        )
+
+        Date.objects.create(
+            item=cls.interview_item,
+            value="2000",
+            type=DateType.objects.get(type="creation"),
         )
 
         # Level 3: Audio, child of interview.
@@ -1053,6 +1062,11 @@ class ModsTestCase(TestCase):
         self.assertFalse(
             b"<mods:note>Admin note should not display</mods:note>" in mods_xml
         )
+        self.assertTrue(
+            b"<mods:dateCreated>2000</mods:dateCreated>" in mods_xml
+        )
+
+        print(ohmods.serializeDocument())
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
