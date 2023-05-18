@@ -2,6 +2,7 @@ import logging
 from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODS
 from oh_staff_ui.models import (
+    AltTitle,
     Date,
     Description,
     ItemLanguageUsage,
@@ -19,6 +20,7 @@ class OralHistoryMods(MODS):
     def populate_fields(self):
         # Elements used in MODS directly on the ProjectItem
         self._populate_title()
+        self._populate_alttitle()
         self._populate_identifier()
         self._populate_relation()
 
@@ -29,6 +31,15 @@ class OralHistoryMods(MODS):
 
     def _populate_title(self):
         self.title = self._item.title
+
+    def _populate_alttitle(self):
+        # All alternate titles are assigned mods type of "alternate", no matter the database assignment
+        self.create_title_info()
+        alt_titles = AltTitle.objects.filter(item=self._item)
+        for alt_title in alt_titles:
+            self.title_info_list.append(
+                mods.TitleInfo(title=alt_title, type="alternative")
+            )
 
     def _populate_identifier(self):
         self.identifiers.extend([mods.Identifier(text=self._item.ark)])
