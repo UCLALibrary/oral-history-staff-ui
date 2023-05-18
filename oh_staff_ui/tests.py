@@ -1064,8 +1064,6 @@ class ModsTestCase(TestCase):
         )
         self.assertTrue(b"<mods:dateCreated>2000</mods:dateCreated>" in mods_xml)
 
-        print(ohmods.serializeDocument())
-
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
     # Test logic not already covered by OralHistoryFile tests.
