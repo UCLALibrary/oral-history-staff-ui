@@ -1062,9 +1062,7 @@ class ModsTestCase(TestCase):
         self.assertFalse(
             b"<mods:note>Admin note should not display</mods:note>" in mods_xml
         )
-        self.assertTrue(
-            b"<mods:dateCreated>2000</mods:dateCreated>" in mods_xml
-        )
+        self.assertTrue(b"<mods:dateCreated>2000</mods:dateCreated>" in mods_xml)
 
         print(ohmods.serializeDocument())
 
