@@ -3,9 +3,11 @@ from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODS
 from oh_staff_ui.models import (
     AltTitle,
+    AltId,
     Date,
     Description,
     ItemLanguageUsage,
+
     Format,
 )
 
@@ -42,7 +44,13 @@ class OralHistoryMods(MODS):
             )
 
     def _populate_identifier(self):
-        self.identifiers.extend([mods.Identifier(text=self._item.ark)])
+        # Always add Ark as identifier 
+        self.identifiers.append(mods.Identifier(text=self._item.ark))
+        # If we have other AltIds, add with type
+        alt_ids = AltId.objects.filter(item=self._item)
+        for alt_id in alt_ids:
+            self.identifiers.append(mods.Identifier(text=alt_id.value, type=alt_id.type.type))
+
 
     def _populate_relation(self):
         if self._item.relation:

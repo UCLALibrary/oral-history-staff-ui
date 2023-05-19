@@ -15,6 +15,8 @@ from oh_staff_ui.management.commands.import_file_metadata import (
     Command as FileMetadataCommand,
 )
 from oh_staff_ui.models import (
+    AltId,
+    AltIdType,
     AltTitle,
     AltTitleType,
     Copyright,
@@ -924,6 +926,7 @@ class ModsTestCase(TestCase):
         "description-type-data.json",
         "date-type-data.json",
         "alttitle-type-data.json",
+        "altid-type-data.json",
     ]
 
     @classmethod
@@ -995,6 +998,12 @@ class ModsTestCase(TestCase):
             item=cls.interview_item,
             value="Alternate Title",
             type=AltTitleType.objects.get(type="descriptive"),
+        )
+
+        AltId.objects.create(
+            item=cls.interview_item,
+            value="Alt Id",
+            type=AltIdType.objects.get(type="OPAC"),
         )
 
         # Level 3: Audio, child of interview.
@@ -1087,6 +1096,14 @@ class ModsTestCase(TestCase):
         self.assertEqual(ohmods.is_valid(), True)
         self.assertTrue(
             b'<mods:titleInfo type="alternative">' in ohmods.serializeDocument()
+        )
+
+    def test_valid_mods_altid(self):
+        ohmods = self.get_mods_from_interview_item()
+        self.assertEqual(ohmods.is_valid(), True)
+        self.assertTrue(
+            b'<mods:identifier type="OPAC">Alt Id</mods:identifier>'
+            in ohmods.serializeDocument()
         )
 
 
