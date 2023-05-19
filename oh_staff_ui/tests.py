@@ -20,6 +20,7 @@ from oh_staff_ui.models import (
     AltTitle,
     AltTitleType,
     Copyright,
+    CopyrightType,
     Date,
     DateType,
     Description,
@@ -927,6 +928,7 @@ class ModsTestCase(TestCase):
         "date-type-data.json",
         "alttitle-type-data.json",
         "altid-type-data.json",
+        "copyright-type-data.json",
     ]
 
     @classmethod
@@ -1004,6 +1006,14 @@ class ModsTestCase(TestCase):
             item=cls.interview_item,
             value="Alt Id",
             type=AltIdType.objects.get(type="OPAC"),
+        )
+
+        cr = Copyright.objects.create(value="Rights statement", source_id=1)
+
+        ItemCopyrightUsage.objects.create(
+            item=cls.interview_item,
+            value=cr,
+            type=CopyrightType.objects.get(type="copyrightStatus"),
         )
 
         # Level 3: Audio, child of interview.
@@ -1103,6 +1113,13 @@ class ModsTestCase(TestCase):
         self.assertEqual(ohmods.is_valid(), True)
         self.assertTrue(
             b'<mods:identifier type="OPAC">Alt Id</mods:identifier>'
+            in ohmods.serializeDocument()
+        )
+
+    def test_valid_mods_copyright(self):
+        ohmods = self.get_mods_from_interview_item()
+        self.assertTrue(
+            b"<mods:accessCondition>Rights statement</mods:accessCondition>"
             in ohmods.serializeDocument()
         )
 

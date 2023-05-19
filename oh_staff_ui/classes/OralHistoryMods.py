@@ -6,9 +6,9 @@ from oh_staff_ui.models import (
     AltId,
     Date,
     Description,
-    ItemLanguageUsage,
-
     Format,
+    ItemCopyrightUsage,
+    ItemLanguageUsage,
 )
 
 logger = logging.getLogger(__name__)
@@ -20,16 +20,16 @@ class OralHistoryMods(MODS):
         self._item = project_item
 
     def populate_fields(self):
-        # Elements used in MODS directly on the ProjectItem
-        self._populate_title()
-        self._populate_alttitle()
-        self._populate_identifier()
-        self._populate_relation()
 
-        self._populate_language()
-        self._populate_format()
-        self._populate_description()
+        self._populate_alttitle()
         self._populate_create_date()
+        self._populate_description()
+        self._populate_format()
+        self._populate_identifier()
+        self._populate_language()
+        self._populate_relation()
+        self._populate_rights()
+        self._populate_title()
 
     def _populate_title(self):
         self.title = self._item.title
@@ -44,23 +44,29 @@ class OralHistoryMods(MODS):
             )
 
     def _populate_identifier(self):
-        # Always add Ark as identifier 
+        # Always add Ark as identifier
         self.identifiers.append(mods.Identifier(text=self._item.ark))
         # If we have other AltIds, add with type
         alt_ids = AltId.objects.filter(item=self._item)
         for alt_id in alt_ids:
-            self.identifiers.append(mods.Identifier(text=alt_id.value, type=alt_id.type.type))
-
-
-    def _populate_relation(self):
-        if self._item.relation:
-            self.related_items.extend([mods.RelatedItem(title=self._item.relation)])
+            self.identifiers.append(
+                mods.Identifier(text=alt_id.value, type=alt_id.type.type)
+            )
 
     def _populate_language(self):
         for ilu in ItemLanguageUsage.objects.filter(item=self._item):
             lang = mods.Language()
             lang.terms.append(mods.LanguageTerm(text=ilu.value))
             self.languages.append(lang)
+
+    def _populate_relation(self):
+        if self._item.relation:
+            self.related_items.extend([mods.RelatedItem(title=self._item.relation)])
+
+    def _populate_rights(self):
+        # Following previous MODS generation process, accessRights is used with no type assignment
+        for copyright in ItemCopyrightUsage.objects.filter(item=self._item):
+            self.access_conditions.append(mods.AccessCondition(text=copyright.value))
 
     def _populate_format(self):
         format = Format.objects.filter(item=self._item).first()
