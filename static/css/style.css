@@ -73,6 +73,7 @@ other than TableOfContents (value = "3") */
 .header-metadata td{
     padding: 4px;
     border: 1px solid;
+    vertical-align: top;
 }
 
 ul.tree {

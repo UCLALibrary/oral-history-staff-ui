@@ -1,7 +1,7 @@
 import logging
+from threading import Thread
 from requests.exceptions import HTTPError
 from django.contrib import messages
-from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
@@ -12,13 +12,14 @@ from oh_staff_ui.forms import (
     ProjectItemForm,
     ItemSearchForm,
 )
-from oh_staff_ui.models import MediaFile, ProjectItem
+from oh_staff_ui.models import MediaFile, MediaFileError, ProjectItem
 from oh_staff_ui.views_utils import (
     construct_keyword_query,
     get_ark,
     get_edit_item_context,
     get_keyword_results,
     get_result_items,
+    run_process_file_command,
     save_all_item_data,
 )
 
@@ -142,29 +143,44 @@ def show_log(request, line_count: int = 200) -> HttpResponse:
 def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
     item = ProjectItem.objects.get(pk=item_id)
     files = MediaFile.objects.filter(item=item)
+    file_errors = MediaFileError.objects.filter(item=item).order_by("create_date")
     if request.method == "POST":
-        form = FileUploadForm(request.POST)
+        # Pass item_id and request to submitted form to help with validation.
+        form = FileUploadForm(request.POST, item_id=item_id, request=request)
         if form.is_valid():
             file_type = form.cleaned_data["file_type"]
             file_name = form.cleaned_data["file_name"]
-            try:
-                call_command(
-                    "process_file",
-                    item_id=item_id,
-                    file_name=file_name,
-                    file_type=file_type,
-                    request=request,
+            # Audio masters are usually large; process in background.
+            if file_type.file_code == "audio_master":
+                messages.info(
+                    request,
+                    f"{file_name} is being processed in the background. "
+                    "You can continue editing while this is happening.",
                 )
-                messages.success(request, f"{file_name} was successfully processed")
-
-            # Errors from process_file, called above
-            # TODO: Are there more specific errors to be caught?
-            except (CommandError, FileExistsError, ValueError) as e:
-                messages.error(request, str(e))
-            except Exception as e:
-                logger.exception(e)
-                messages.error(request, "General error: " + str(e))
+                thread = Thread(
+                    target=run_process_file_command,
+                    args=[item_id, file_name, file_type, request],
+                    daemon=True,
+                )
+                thread.start()
+            else:
+                try:
+                    run_process_file_command(
+                        item_id=item_id,
+                        file_name=file_name,
+                        file_type=file_type,
+                        request=request,
+                    )
+                    messages.success(request, f"{file_name} was successfully processed")
+                # Errors from process_file, called above
+                except (CommandError, FileExistsError, ValueError) as e:
+                    messages.error(request, str(e))
+                except Exception as e:
+                    logger.exception(e)
+                    messages.error(request, "General error: " + str(e))
+            # Redirect (via GET) so user refreshing page does not resubmit form.
+            return redirect("upload_file", item_id=item_id)
     else:
         form = FileUploadForm()
-    context = {"item": item, "files": files, "form": form}
+    context = {"item": item, "files": files, "file_errors": file_errors, "form": form}
     return render(request, "oh_staff_ui/upload_file.html", context)

@@ -4,7 +4,7 @@ import ffmpeg  # ffmpeg-python
 from django.core.management.base import CommandError
 from oh_staff_ui.classes.BaseFileHandler import BaseFileHandler
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
-from oh_staff_ui.models import MediaFile, MediaFileType
+from oh_staff_ui.models import MediaFile, MediaFileError, MediaFileType
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,13 @@ class AudioFileHandler(BaseFileHandler):
             # Full exception for the record.
             # stderr captured from ffmpeg.run(), includes stdout params and
             # exception info (which is minimal anyhow).
-            logger.exception(ex.stderr)
+            # ex.stderr is bytes; decode it
+            error_message = ex.stderr.decode()
+            logger.exception(error_message)
+            # Capture ffmpeg error to database for display in template as well.
+            MediaFileError.objects.create(
+                file_name=input_name, item=self._master_file.item, message=error_message
+            )
             # Info logged; re-raise as a CommandError to pass back to caller
             raise CommandError(f"Submaster error: Failed to create {output_name}")
 

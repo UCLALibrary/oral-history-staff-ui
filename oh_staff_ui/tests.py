@@ -36,6 +36,7 @@ from oh_staff_ui.models import (
     Format,
     Language,
     MediaFile,
+    MediaFileError,
     MediaFileType,
     Name,
     NameType,
@@ -195,11 +196,21 @@ class MediaFileTestCase(TestCase):
             handler = AudioFileHandler(file2)
             handler.process_files()
 
-    def test_bad_audio_submaster_is_bound(self):
-        file1 = self.create_bad_master_audio_file()
-        handler = AudioFileHandler(file1)
+    def test_bad_audio_submaster_raises_error(self):
+        # Confirm processing a bad master audio file raises an error.
+        master = self.create_bad_master_audio_file()
+        handler = AudioFileHandler(master)
         with self.assertRaises(CommandError):
             handler.process_files()
+
+    def test_bad_audio_submaster_is_logged_to_db(self):
+        # Confirm processing a bad master audio file adds a MediaFileError to db.
+        master = self.create_bad_master_audio_file()
+        handler = AudioFileHandler(master)
+        try:
+            handler.process_files()
+        except CommandError:
+            self.assertEquals(MediaFileError.objects.count(), 1)
 
     def test_master_image_file_is_added(self):
         master = self.create_master_image_file()
@@ -657,6 +668,23 @@ class MediaFileTestCase(TestCase):
             mf.file_url,
             "https://static.library.ucla.edu/oralhistory/nails/fake-abcdef-1-thumbnail.jpg",
         )
+
+    def test_file_size_file_exists(self):
+        # Uses real file samples/sample.xml
+        file = self.create_master_general_file()
+        self.assertEquals(file.file_size, 902)
+
+    def test_file_size_file_does_not_exist(self):
+        # Uses non-existent file
+        file_type = MediaFileType.objects.get(file_code="text_master_transcript")
+        file = OralHistoryFile(
+            self.item.id,
+            file_name="/some/fake/file.xml",
+            file_type=file_type,
+            file_use="master",
+            request=self.mock_request,
+        )
+        self.assertEquals(file.file_size, 0)
 
     def tearDown(self):
         # If new files aren't deleted, Django will create next file with random-ish name.

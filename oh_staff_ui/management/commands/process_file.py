@@ -1,7 +1,6 @@
 import logging
-
-# from django.contrib import messages
 from django.core.management.base import BaseCommand
+from django.core.management.base import CommandError
 from django.http import HttpRequest
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
@@ -21,17 +20,15 @@ def process_file(
 ) -> None:
     """Do the actual work.
 
-    This will be extended to handle submasters and thumbnails.
+    This script only processes user-uploaded files, which are always masters.
+    Create initial file object, determine content type, then pass it to
+    an appropriate handler to generate derivatives and save all to database
+    and file system.
     """
-    # This script only processes user-uploaded files, which are always masters.
-    # Create initial file object, determine content type, then pass it to
-    # an appropriate handler to generate derivatives and save all to database
-    # and file system.
     file_use = "master"
     try:
         master_file = OralHistoryFile(item_id, file_name, file_type, file_use, request)
         content_type = master_file.content_type
-        handler = None  # temporary, until all handlers are implemented
         if content_type == "audio":
             handler = AudioFileHandler(master_file)
         elif content_type == "image":
@@ -39,12 +36,14 @@ def process_file(
         elif content_type in ["pdf", "text"]:
             handler = GeneralFileHandler(master_file)
         else:
-            # No code here; OralHistoryFile throws ValueError on unsupported content_type
+            # No code here; OralHistoryFile (above) raises ValueError on unsupported content_type.
             pass
 
         # Do whatever needs to be done
         handler.process_files()
-    except ValueError as ex:
+    except (CommandError, ValueError) as ex:
+        # AudioFileHandler raises CommandError if ffmpeg fails.
+        # OralHistoryFile raises ValueError if validation fails.
         logger.error(ex)
         # Pass the exception up to the caller.
         raise
