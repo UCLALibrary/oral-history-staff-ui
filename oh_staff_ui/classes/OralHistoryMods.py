@@ -9,6 +9,7 @@ from oh_staff_ui.models import (
     Format,
     ItemCopyrightUsage,
     ItemLanguageUsage,
+    ItemNameUsage,
 )
 
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ class OralHistoryMods(MODS):
         self._populate_format()
         self._populate_identifier()
         self._populate_language()
+        self._populate_name()
         self._populate_relation()
         self._populate_rights()
         self._populate_title()
@@ -58,6 +60,13 @@ class OralHistoryMods(MODS):
             lang = mods.Language()
             lang.terms.append(mods.LanguageTerm(text=ilu.value))
             self.languages.append(lang)
+
+    def _populate_name(self):
+        for inu in ItemNameUsage.objects.filter(item=self._item):
+            name = mods.Name()
+            name.name_parts.append(mods.NamePart(text=inu.value.value))
+            name.roles.append(mods.Role(type="text", text=inu.type.type))
+            self.names.append(name)
 
     def _populate_relation(self):
         if self._item.relation:
