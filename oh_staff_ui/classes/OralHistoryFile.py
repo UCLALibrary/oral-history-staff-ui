@@ -26,6 +26,7 @@ class OralHistoryFile:
         self._file_use = file_use
         self._request = request
         # Calculate several elements for later use, also read-only.
+        self._file_size = self._get_file_size(self._original_file_name)
         self._item = ProjectItem.objects.get(pk=self._item_id)
         self._content_type = self.get_content_type(self._original_file_name)
         self._target_dir = self.get_target_dir(self._file_use, self._content_type)
@@ -43,6 +44,10 @@ class OralHistoryFile:
     @property
     def file_use(self) -> str:
         return self._file_use
+
+    @property
+    def file_size(self) -> int:
+        return self._file_size
 
     @property
     def file_type(self) -> MediaFileType:
@@ -81,7 +86,7 @@ class OralHistoryFile:
         )
         # Read the original file, copying it to new_name and saving the MediaFile.
         # Get original filesize first, since it's not available in the context below.
-        file_size = Path(self._original_file_name).stat().st_size
+        file_size = self._file_size
         with Path(self._original_file_name).open(mode="rb") as f:
             new_file.file = File(f, name=new_name)
             new_file.file_size = file_size
@@ -217,3 +222,15 @@ class OralHistoryFile:
             raise ValueError(
                 f"File/content type mismatch: {file_type_code=}, {self._content_type=}"
             )
+
+    def _get_file_size(self, file_name: str) -> int:
+        """Get the size of the file, in bytes.
+
+        Returns 0 if the file doesn't exist, to avoid complicating
+        migration of legacy data.
+        """
+        file = Path(file_name)
+        if file.exists():
+            return file.stat().st_size
+        else:
+            return 0

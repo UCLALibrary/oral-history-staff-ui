@@ -560,3 +560,19 @@ class MediaFile(models.Model):
         else:
             file_url = ""
         return file_url
+
+
+class MediaFileError(models.Model):
+    """Error messages related to MediaFile processing.
+
+    MediaFile records may not exist, if error happens during creation of them,
+    so this links to the ProjectItem record being used.
+    """
+
+    create_date = models.DateTimeField(blank=False, null=False, default=timezone.now)
+    file_name = models.CharField(max_length=256, blank=False, null=False)
+    # message can contain large stack traces.
+    message = models.TextField(blank=False, null=False)
+    item = models.ForeignKey(
+        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+    )

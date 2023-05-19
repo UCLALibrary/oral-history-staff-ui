@@ -1,8 +1,10 @@
 import logging
+from django.db import connection
 import requests
 import uuid
 from django.conf import settings
 from django.contrib import messages
+from django.core.management import call_command
 from django.db.models import Q, Model, CharField
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
@@ -403,3 +405,24 @@ def save_sequence_data(request: HttpRequest, items_list: list) -> None:
     else:
         messages.error(request, "Problem saving data!")
         logger.error(f"{formset.errors=}")
+
+
+def run_process_file_command(
+    item_id: int,
+    file_name: str,
+    file_type: str,
+    request: HttpRequest,
+) -> None:
+    # Wrapper for Django call_command(), providing a callable
+    # for running in background by thread.
+    call_command(
+        "process_file",
+        item_id=item_id,
+        file_name=file_name,
+        file_type=file_type,
+        request=request,
+    )
+    # Apparently Django starts a new db connection for each thread;
+    # testing confirms this, though it does close after 30 seconds or so.
+    # To be safe, explicitly close this one when done.
+    connection.close()

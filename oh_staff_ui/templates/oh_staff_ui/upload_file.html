@@ -35,12 +35,13 @@
       </td>
   </tr>
 </table>
+
 {% if files %}
 <hr>
 <table class="header-metadata caption-top">
   <caption>File Information</caption>
   <tr>
-    <th>File Type</th>
+    <th>File type</th>
     <th>Added by</th>
     <th>Original name</th>
     <th>New name & location</th>
@@ -65,7 +66,45 @@
   {% endfor %}
 </table>
 {% endif %}
+
+{% if file_errors %}
 <hr>
+<table class="header-metadata caption-top">
+  <caption>File Errors</caption>
+  <tr>
+    <th>File name</th>
+    <th>Occurred</th>
+    <th>Error message(s)</th>
+  </tr>
+  {% for file_error in file_errors %}
+  <tr>
+    <td>{{ file_error.file_name }}</td>
+    <td>{{ file_error.create_date }}</td>
+    <td>{{ file_error.message|linebreaksbr }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+{% if form.errors %}
+<div class="box">
+  <h4>Please fix the following errors</h4>
+  <ul>
+    {% for field in form %}
+      {% if field.errors %}
+        {% for error in field.errors %}
+          <li><a href="#id_{{ field.name }}" class="error">{{ error|escape }}</a></li>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  </ul>
+  {% if form.non_field_errors %}
+    {{ form.non_field_errors }}
+  {% endif %}
+</div>
+{% endif %}
+
+
 {% if messages %}
 <div class="box">
 {% for message in messages %}
@@ -74,6 +113,7 @@
 </div>
 {% endif %}
 
+<hr>
 <form name="upload_file_form" method="POST" enctype="multipart/form-data" onsubmit="disable_upload_button(this);">
     {% csrf_token %}
     <table>
