@@ -1039,6 +1039,16 @@ class ModsTestCase(TestCase):
             type=SubjectType.objects.get(type="level1"),
         )
 
+        subject = Subject.objects.create(
+            value="Arts, Literature, Music, and Film",
+            source=AuthoritySource.objects.get(source="local"),
+        )
+        ItemSubjectUsage.objects.create(
+            item=cls.interview_item,
+            value=subject,
+            type=SubjectType.objects.get(type="level1"),
+        )
+
         # Level 3: Audio, child of interview.
         cls.audio_item = ProjectItem.objects.create(
             ark="fake/abcdef",
@@ -1163,6 +1173,11 @@ class ModsTestCase(TestCase):
         )
         self.assertTrue(
             b"<mods:topic>Sample Subject</mods:topic>" in ohmods.serializeDocument()
+        )
+        # Confirm one of the excluded subjects is not in the record
+        self.assertTrue(
+            b"<mods:topic>Arts, Literature, Music, and Film</mods:topic>"
+            not in ohmods.serializeDocument()
         )
 
 
