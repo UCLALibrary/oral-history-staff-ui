@@ -43,6 +43,7 @@ from oh_staff_ui.models import (
     Publisher,
     Resource,
     Subject,
+    SubjectType,
 )
 
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
@@ -932,6 +933,7 @@ class ModsTestCase(TestCase):
         "altid-type-data.json",
         "copyright-type-data.json",
         "name-type-data.json",
+        "subject-type-data.json",
     ]
 
     @classmethod
@@ -1026,6 +1028,25 @@ class ModsTestCase(TestCase):
             item=cls.interview_item,
             value=name,
             type=NameType.objects.get(type="interviewer"),
+        )
+
+        subject = Subject.objects.create(
+            value="Sample Subject", source=AuthoritySource.objects.get(source="local")
+        )
+        ItemSubjectUsage.objects.create(
+            item=cls.interview_item,
+            value=subject,
+            type=SubjectType.objects.get(type="level1"),
+        )
+
+        subject = Subject.objects.create(
+            value="Arts, Literature, Music, and Film",
+            source=AuthoritySource.objects.get(source="local"),
+        )
+        ItemSubjectUsage.objects.create(
+            item=cls.interview_item,
+            value=subject,
+            type=SubjectType.objects.get(type="level1"),
         )
 
         # Level 3: Audio, child of interview.
@@ -1143,6 +1164,20 @@ class ModsTestCase(TestCase):
         )
         self.assertTrue(
             b"<mods:namePart>Joe Bruin</mods:namePart>" in ohmods.serializeDocument()
+        )
+
+    def test_valid_mods_subject(self):
+        ohmods = self.get_mods_from_interview_item()
+        self.assertTrue(
+            b'<mods:subject authority="local">' in ohmods.serializeDocument()
+        )
+        self.assertTrue(
+            b"<mods:topic>Sample Subject</mods:topic>" in ohmods.serializeDocument()
+        )
+        # Confirm one of the excluded subjects is not in the record
+        self.assertTrue(
+            b"<mods:topic>Arts, Literature, Music, and Film</mods:topic>"
+            not in ohmods.serializeDocument()
         )
 
 

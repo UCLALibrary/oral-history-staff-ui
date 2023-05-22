@@ -10,6 +10,7 @@ from oh_staff_ui.models import (
     ItemCopyrightUsage,
     ItemLanguageUsage,
     ItemNameUsage,
+    ItemSubjectUsage,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class OralHistoryMods(MODS):
         self._populate_name()
         self._populate_relation()
         self._populate_rights()
+        self._populate_subjects()
         self._populate_title()
 
     def _populate_title(self):
@@ -76,6 +78,23 @@ class OralHistoryMods(MODS):
         # Following previous MODS generation process, accessRights is used with no type assignment
         for copyright in ItemCopyrightUsage.objects.filter(item=self._item):
             self.access_conditions.append(mods.AccessCondition(text=copyright.value))
+
+    def _populate_subjects(self):
+        subs_to_exclude = [
+            "Arts, Literature, Music, and Film",
+            "Donated Oral Histories",
+            "Latinas and Latinos in Music",
+            "Latinas and Latinos in Politics",
+            "Mexican American Civil Rights",
+        ]
+        for isu in ItemSubjectUsage.objects.filter(item=self._item).exclude(
+            value__value__in=subs_to_exclude
+        ):
+            self.subjects.append(
+                mods.Subject(
+                    authority=isu.value.source.source.lower(), topic=isu.value.value
+                )
+            )
 
     def _populate_format(self):
         format = Format.objects.filter(item=self._item).first()
