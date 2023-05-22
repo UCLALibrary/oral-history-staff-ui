@@ -19,7 +19,9 @@ from oh_staff_ui.views_utils import (
     get_edit_item_context,
     get_keyword_results,
     get_result_items,
+    get_sequence_formset,
     save_all_item_data,
+    save_sequence_data,
 )
 
 logger = logging.getLogger(__name__)
@@ -168,3 +170,20 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
         form = FileUploadForm()
     context = {"item": item, "files": files, "form": form}
     return render(request, "oh_staff_ui/upload_file.html", context)
+
+
+@login_required
+def order_files(request: HttpRequest, item_id: int) -> HttpResponse:
+    item = ProjectItem.objects.get(pk=item_id)
+    children = list(
+        ProjectItem.objects.filter(parent=item).order_by("sequence", "title")
+    )
+    if request.method == "POST":
+        save_sequence_data(request, children)
+        # get children again, in case they were reordered
+        children = list(
+            ProjectItem.objects.filter(parent=item).order_by("sequence", "title")
+        )
+    formset = get_sequence_formset(children)
+    context = {"item": item, "formset": formset}
+    return render(request, "oh_staff_ui/order_files.html", context)

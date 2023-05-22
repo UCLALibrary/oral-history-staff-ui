@@ -44,6 +44,9 @@
             <a href="{% url 'add_item_from_parent' item.id %}">Add a child item</a>   |   
             {% endif %}
             <a href="{% url 'upload_file' item.id %}">View files</a>
+            {% if item.type.type == "Interview" %}
+               |   <a href="{% url 'order_files' item.id %}">Configure file order</a>
+            {% endif %}
         </td>
     </tr>
 </table>

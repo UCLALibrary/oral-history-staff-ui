@@ -300,3 +300,22 @@ class FileUploadForm(forms.Form):
 
         super().__init__(*args, **kwargs)
         self.base_fields["file_name"].choices = choices
+
+
+class BaseItemSequenceFormset(forms.BaseFormSet):
+    def get_form_kwargs(self, index):
+        # override get_form_kwargs to add item_list
+        kwargs = super(BaseItemSequenceFormset, self).get_form_kwargs(index)
+        item = kwargs["items_list"][index]
+        return {"item": item}
+
+
+class ItemSequenceForm(forms.Form):
+    def __init__(self, *args, item, **kwargs):
+        # override init to allow use of item kwarg
+        self.item = item
+        super().__init__(*args, **kwargs)
+
+    sequence = forms.CharField(
+        required=True, max_length=3, widget=forms.TextInput(attrs={"size": 3})
+    )

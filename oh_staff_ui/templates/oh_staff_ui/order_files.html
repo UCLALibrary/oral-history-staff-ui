@@ -1,0 +1,68 @@
+{% extends 'oh_staff_ui/base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+
+{% if messages %}
+<div class="box">
+{% for message in messages %}
+  <div>{{ message }}</div>
+{% endfor %}
+</div>
+{% endif %}
+
+<table class="header-metadata caption-top">
+    <caption>Item Information</caption>
+    <tr>
+        <td>Title</td>
+        <td>{{ item.title }}</td>
+    </tr>
+    <tr>
+        <td>ARK</td>
+        <td>{{ item.ark }}</td>
+    </tr>
+    <tr>
+        <td>Parent</td>
+        <td>{% if item.parent %}
+            <a href="{% url 'edit_item' item.parent.id %}">{{ item.parent }}</a>
+            {% else %}
+            {{ item.parent }}
+            {% endif %}</td>
+    </tr>
+    <tr>
+        <td>Created</td>
+        <td>{{ item.create_date }} by {{ item.created_by }}</td>
+    </tr>
+    <tr>
+        <td>Updated</td>
+        <td>{{ item.last_modified_date }} by {{ item.last_modified_by }}</td>
+    </tr>
+    <tr>
+        <td>Item Actions</td>
+        <td>
+            <a href="{% url 'edit_item' item.id %}">View metadata</a>
+        </td>
+    </tr>
+</table>
+<br>
+
+<form name="order_files" id="order_files" method="POST">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <table>
+        <tr>
+            <th>Item Name</th>
+            <th>Sequence Number</th>
+        </tr>
+        {% for form in formset %}
+        <tr>
+            <td><a href="{% url 'edit_item' form.item.id %}">{{ form.item }}</a></td>
+            <td>{% bootstrap_field form.sequence show_label=False %}</td>
+        </tr>        
+        {% endfor %}
+    </table>
+    {% bootstrap_button button_type="submit" content="Save" %}
+</form>
+
+
+{% endblock %}
