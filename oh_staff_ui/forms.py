@@ -1,7 +1,9 @@
 from django import forms
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db.models import Max, QuerySet
+from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.models import (
     AltIdType,
     AltTitleType,
@@ -286,10 +288,10 @@ class FileUploadForm(forms.Form):
     )
     file_name = forms.FilePathField(**_file_name_kw)
 
-    # __init__ is called every time the form is needed.
-    # Cache values for 5 seconds (arbitrary); use cache if populated,
-    # otherwise start fresh.
     def __init__(self, *args, **kwargs):
+        # __init__ is called every time the form is needed.
+        # Cache values for 5 seconds (arbitrary); use cache if populated,
+        # otherwise start fresh.
         seconds_to_cache = 5
         key = "file_name-cache-key"
         choices = cache.get(key)
@@ -298,8 +300,32 @@ class FileUploadForm(forms.Form):
             choices = field.choices
             cache.set(key, choices, seconds_to_cache)
 
+        # Set some optional values, used in validation.
+        # These must get pulled out (via pop) before calling super().
+        self._item_id = kwargs.pop("item_id", None)
+        self._request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
+        # Finally, add file names to choices.
         self.base_fields["file_name"].choices = choices
+
+    def clean(self):
+        # Use OralHistoryFile initialization to validate data.
+        # This can raise ValueError, which gets re-raised as
+        # ValidationError to be available in the template
+        # in form.non_field_errors.
+        cleaned_data = super().clean()
+        file_name = cleaned_data.get("file_name")
+        file_type = cleaned_data.get("file_type")
+        try:
+            OralHistoryFile(
+                item_id=self._item_id,
+                file_name=file_name,
+                file_type=file_type,
+                file_use="master",
+                request=self._request,
+            )
+        except ValueError as e:
+            raise ValidationError(str(e))
 
 
 class BaseItemSequenceFormset(forms.BaseFormSet):
