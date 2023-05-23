@@ -180,10 +180,8 @@ def order_files(request: HttpRequest, item_id: int) -> HttpResponse:
     )
     if request.method == "POST":
         save_sequence_data(request, children)
-        # get children again, in case they were reordered
-        children = list(
-            ProjectItem.objects.filter(parent=item).order_by("sequence", "title")
-        )
+        # Redirect (via GET) so user refreshing page does not resubmit form.
+        return redirect("order_files", item_id=item_id)
     formset = get_sequence_formset(children)
     context = {"item": item, "formset": formset}
     return render(request, "oh_staff_ui/order_files.html", context)

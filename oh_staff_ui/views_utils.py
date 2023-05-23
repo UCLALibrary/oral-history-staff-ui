@@ -374,10 +374,12 @@ def get_parent_item(item_id: int) -> ProjectItem:
 def get_sequence_formset(items: list) -> BaseFormSet:
     sequence_list = []
     for item in items:
-        sequence_list.append({"item": item, "sequence": item.sequence})
+        sequence_list.append({"sequence": item.sequence})
     factory = formset_factory(
         ItemSequenceForm, extra=0, formset=BaseItemSequenceFormset, validate_min=True
     )
+    # ItemSequenceForm only includes sequence field, so we need to pass items_list to formset
+    # via form_kwargs in order to associate each sequence with its item.
     formset = factory(initial=sequence_list, form_kwargs={"items_list": items})
     return formset
 
@@ -386,6 +388,7 @@ def save_sequence_data(request: HttpRequest, items_list: list) -> None:
     factory = formset_factory(
         ItemSequenceForm, extra=0, formset=BaseItemSequenceFormset, validate_min=True
     )
+    # Include items_list in form_kwargs so we can associate each sequence with its item
     formset = factory(request.POST, form_kwargs={"items_list": items_list})
     if formset.is_valid():
         for form in formset:
