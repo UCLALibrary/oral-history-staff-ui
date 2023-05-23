@@ -15,4 +15,5 @@ urlpatterns = [
     path("logs/", views.show_log, name="show_log"),
     path("logs/<int:line_count>", views.show_log, name="show_log"),
     path("upload_file/<int:item_id>", views.upload_file, name="upload_file"),
+    path("order_files/<int:item_id>", views.order_files, name="order_files"),
 ]
