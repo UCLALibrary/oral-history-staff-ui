@@ -110,17 +110,30 @@ def item_search(request: HttpRequest) -> HttpResponse:
 def search_results(request: HttpRequest, search_type: str, query: str) -> HttpResponse:
     if search_type == "title":
         full_query = construct_keyword_query("title", query)
-        results = ProjectItem.objects.filter(full_query).order_by("title").values()
+        # Explicitly get values needed in search results template so we can access parent__title,
+        # not just parent_id.
+        results = (
+            ProjectItem.objects.filter(full_query)
+            .order_by("title")
+            .values("id", "ark", "title", "parent__title")
+        )
     elif search_type == "ark":
         results = (
-            ProjectItem.objects.filter(ark__icontains=query).order_by("ark").values()
+            ProjectItem.objects.filter(ark__icontains=query)
+            .order_by("ark")
+            .values("id", "ark", "title", "parent__title")
         )
     elif search_type == "status":
         results = (
-            ProjectItem.objects.filter(status__status=query).order_by("title").values()
+            ProjectItem.objects.filter(status__status=query)
+            .order_by("title")
+            .values("id", "ark", "title", "parent__title")
         )
     elif search_type == "keyword":
         search_data = get_keyword_results(query)
+        # get_result_items() doesn't use queryset .values(), so we'll get item parent
+        # instead of parent_id.
+        # Difference in fields returned from keyword vs. other searches is handled in template.
         results = get_result_items(search_data)
     return render(request, "oh_staff_ui/search_results.html", {"results": results})
 
