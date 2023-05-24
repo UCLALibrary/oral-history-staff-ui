@@ -1,6 +1,9 @@
 import logging
+from django.db.models import Q
+from eulxml import xmlmap
 from eulxml.xmlmap import mods
-from eulxml.xmlmap.mods import MODS
+from eulxml.xmlmap.mods import MODSv34
+from eulxml.xmlmap.mods import Common
 from oh_staff_ui.models import (
     AltTitle,
     AltId,
@@ -11,18 +14,20 @@ from oh_staff_ui.models import (
     ItemLanguageUsage,
     ItemNameUsage,
     ItemSubjectUsage,
+    MediaFile,
+    ProjectItem,
 )
+
 
 logger = logging.getLogger(__name__)
 
 
-class OralHistoryMods(MODS):
+class OralHistoryMods(MODSv34):
     def __init__(self, project_item):
         super().__init__()
         self._item = project_item
 
     def populate_fields(self):
-
         self._populate_alttitle()
         self._populate_create_date()
         self._populate_description()
@@ -34,6 +39,7 @@ class OralHistoryMods(MODS):
         self._populate_rights()
         self._populate_subjects()
         self._populate_title()
+        self._populate_constituent_audio()
 
     def _populate_title(self):
         self.title = self._item.title
@@ -145,3 +151,53 @@ class OralHistoryMods(MODS):
         for date in dates:
             self.create_origin_info()
             self.origin_info.created.append(mods.DateCreated(date=date))
+
+    def _populate_constituent_audio(self):
+        # For each child of the item, get submaster audio MediaFile
+        for child in ProjectItem.objects.filter(parent=self._item).order_by("sequence"):
+            for audiofile in MediaFile.objects.filter(
+                Q(item=child) & Q(file_type__file_code="audio_submaster")
+            ):
+                self.related_items.append(self._create_relateditem_audio(audiofile))
+
+    def _create_relateditem_audio(self, mi: MediaFile) -> MODSv34:
+        pi = mi.item
+        ri = RelatedItemOH(href=mi.file_url, type="constituent")
+        ri.title = pi.title
+        ri.identifiers.append(mods.Identifier(text=pi.ark))
+        ri.parts.append(PartOH(order=pi.sequence, type="session_audio"))
+
+        for toc in Description.objects.filter(item=pi, type__type="tableOfContents"):
+            ri.toc = TableOfContents(text=toc.value)
+
+        for ts in MediaFile.objects.filter(
+            Q(item=pi) & Q(file_type__file_code="text_master_index")
+        ):
+            if ts.file_url != "":
+                ri.locations.append(
+                    LocationOH(url=ts.file_url, usage="primary display")
+                )
+
+        return ri
+
+
+# Extended classes to supply some additional attributes not in stock library that we use
+
+
+class LocationOH(mods.Location):
+    usage = xmlmap.StringField("mods:url/@usage")
+
+
+class PartOH(mods.Part):
+    order = xmlmap.StringField("@order")
+
+
+class TableOfContents(Common):
+    ROOT_NAME = "tableOfContents"
+    text = xmlmap.StringField("text()")
+
+
+class RelatedItemOH(mods.RelatedItem):
+    MODSv34.ROOT_NAMESPACES["xlink"] = "http://www.w3.org/1999/xlink"
+    href = xmlmap.StringField("@xlink:href")
+    toc = xmlmap.NodeField("mods:tableOfContents", TableOfContents)

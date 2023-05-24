@@ -962,6 +962,7 @@ class ModsTestCase(TestCase):
         "copyright-type-data.json",
         "name-type-data.json",
         "subject-type-data.json",
+        "media-file-type-data.json",
     ]
 
     @classmethod
@@ -1090,6 +1091,27 @@ class ModsTestCase(TestCase):
             item=cls.audio_item, value="format placeholder value, 1 hour"
         )
         ItemLanguageUsage.objects.create(item=cls.audio_item, value=language)
+        Description.objects.create(
+            item=cls.audio_item,
+            value="Table of Contents",
+            type=DescriptionType.objects.get(type="tableOfContents"),
+        )
+
+        # The order these files are created seem to matter
+        MediaFile.objects.create(
+            created_by=cls.user,
+            file_type=MediaFileType.objects.get(file_code="audio_submaster"),
+            item=cls.audio_item,
+            original_file_name="FAKE",
+            file="oh_wowza/audio/submasters/fake-abcdef-1-submaster.mp3",
+        )
+        MediaFile.objects.create(
+            created_by=cls.user,
+            file_type=MediaFileType.objects.get(file_code="text_master_index"),
+            item=cls.audio_item,
+            original_file_name="FAKE_TIMED_LOG",
+            file="oh_static/text/submasters/fake-abcdef-1-master.xml",
+        )
 
     # Utility method to return MODS specific to interview item
     def get_mods_from_interview_item(self) -> ProjectItem:
@@ -1207,6 +1229,18 @@ class ModsTestCase(TestCase):
             b"<mods:topic>Arts, Literature, Music, and Film</mods:topic>"
             not in ohmods.serializeDocument()
         )
+
+    def test_valid_related_audio_item(self):
+        ohmods = self.get_mods_from_interview_item()
+        self.assertTrue(
+            b'<mods:relatedItem xlink:href="https://wowza.library.ucla.edu/'
+            b"dlp/definst/mp3:oralhistory/audio/submasters/fake-abcdef-1-submaster.mp3/"
+            b'playlist.m3u8" type="constituent">' in ohmods.serializeDocument()
+        )
+
+    def test_valid_timing_log(self):
+        ohmods = self.get_mods_from_interview_item()
+        self.assertTrue(b"<mods:tableOfContents>" in ohmods.serializeDocument())
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
