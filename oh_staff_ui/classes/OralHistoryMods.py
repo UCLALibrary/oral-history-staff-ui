@@ -3,6 +3,7 @@ from django.db.models import Q
 from eulxml import xmlmap
 from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODS
+from eulxml.xmlmap.mods import MODSv34
 from eulxml.xmlmap.mods import Common
 from oh_staff_ui.models import (
     AltTitle,
@@ -23,7 +24,7 @@ from oh_staff_ui.models import (
 logger = logging.getLogger(__name__)
 
 
-class OralHistoryMods(MODS):
+class OralHistoryMods(MODSv34):
     def __init__(self, project_item):
         super().__init__()
         self._item = project_item
@@ -157,11 +158,11 @@ class OralHistoryMods(MODS):
         # For each child of the item, get submaster audio MediaFile
         for child in ProjectItem.objects.filter(parent=self._item).order_by("sequence"):
             for audiofile in MediaFile.objects.filter(
-                Q(item=child) & Q(file_type__file_type="SubMasterAudio1")
+                Q(item=child) & Q(file_type__file_code="audio_submaster")
             ):
                 self.related_items.append(self._create_relateditem_audio(audiofile))
 
-    def _create_relateditem_audio(self, mi: MediaFile) -> MODS:
+    def _create_relateditem_audio(self, mi: MediaFile) -> MODSv34:
         pi = mi.item
         ri = RelatedItemOH(href=mi.file_url, type="constituent")
         ri.title = pi.title
@@ -172,10 +173,12 @@ class OralHistoryMods(MODS):
             ri.toc = TableOfContents(text=toc.value)
 
         for ts in MediaFile.objects.filter(
-            Q(item=pi) & Q(file_type__file_type="Text Index")
+            Q(item=pi) & Q(file_type__file_code="text_master_index")
         ):
             if ts.file_url != "":
-                ri.locations.append(LocationOH(url=ts.file_url, usage="timed log"))
+                ri.locations.append(
+                    LocationOH(url=ts.file_url, usage="primary display")
+                )
 
         return ri
 
