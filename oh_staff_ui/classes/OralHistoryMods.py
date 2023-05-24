@@ -2,7 +2,6 @@ import logging
 from django.db.models import Q
 from eulxml import xmlmap
 from eulxml.xmlmap import mods
-from eulxml.xmlmap.mods import MODS
 from eulxml.xmlmap.mods import MODSv34
 from eulxml.xmlmap.mods import Common
 from oh_staff_ui.models import (
@@ -10,7 +9,6 @@ from oh_staff_ui.models import (
     AltId,
     Date,
     Description,
-    DescriptionType,
     Format,
     ItemCopyrightUsage,
     ItemLanguageUsage,
@@ -200,6 +198,6 @@ class TableOfContents(Common):
 
 
 class RelatedItemOH(mods.RelatedItem):
-    MODS.ROOT_NAMESPACES["xlink"] = "http://www.w3.org/1999/xlink"
+    MODSv34.ROOT_NAMESPACES["xlink"] = "http://www.w3.org/1999/xlink"
     href = xmlmap.StringField("@xlink:href")
     toc = xmlmap.NodeField("mods:tableOfContents", TableOfContents)

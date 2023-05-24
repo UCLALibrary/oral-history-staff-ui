@@ -1233,8 +1233,9 @@ class ModsTestCase(TestCase):
     def test_valid_related_audio_item(self):
         ohmods = self.get_mods_from_interview_item()
         self.assertTrue(
-            b'<mods:relatedItem xlink:href="https://wowza.library.ucla.edu/dlp/definst/mp3:oralhistory/audio/submasters/fake-abcdef-1-submaster.mp3/playlist.m3u8" type="constituent">'
-            in ohmods.serializeDocument()
+            b'<mods:relatedItem xlink:href="https://wowza.library.ucla.edu/'
+            b"dlp/definst/mp3:oralhistory/audio/submasters/fake-abcdef-1-submaster.mp3/"
+            b'playlist.m3u8" type="constituent">' in ohmods.serializeDocument()
         )
 
     def test_valid_timing_log(self):
