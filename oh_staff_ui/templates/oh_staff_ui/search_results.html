@@ -2,15 +2,21 @@
 
 {% block content %}
 {% if results %}
-<table class="search-results">
-    <tr>
-        <th>ARK</th>
-        <th>Title</th>
-    </tr>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ARK</th>
+            <th>Title</th>
+            <th>Parent</th>
+        </tr>
+    </thead>
     {% for item in results %}
     <tr>
         <td><a href="{% url 'edit_item' item.id %}">{{ item.ark }}</a></td>
-        <td>{{ item.title}}</td>
+        <td>{{ item.title }}</td>
+        {# Keyword searches will have item.parent. All others have item.parent__title. If None, display blank. #}
+        <td>{% if item.parent__title %}{{ item.parent__title }}
+            {% elif item.parent %}{{ item.parent }}{% endif %}</td>
     </tr>
     {% endfor %}
 </table>
