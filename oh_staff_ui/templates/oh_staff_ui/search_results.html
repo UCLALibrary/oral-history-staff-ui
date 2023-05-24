@@ -14,7 +14,7 @@
     <tr>
         <td><a href="{% url 'edit_item' item.id %}">{{ item.ark }}</a></td>
         <td>{{ item.title }}</td>
-        <!-- Keyword searches will have item.parent. All others have item.parent__title. If None, display blank. --> 
+        {# Keyword searches will have item.parent. All others have item.parent__title. If None, display blank. #}
         <td>{% if item.parent__title %}{{ item.parent__title }}
             {% elif item.parent %}{{ item.parent }}{% endif %}</td>
     </tr>
