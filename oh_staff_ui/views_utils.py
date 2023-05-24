@@ -369,7 +369,7 @@ def get_relatives(item: ProjectItem) -> dict:
     return relatives
 
 
-def get_series_and_interviews() -> dict:
+def get_all_series_and_interviews() -> dict:
     # For Series browse page, get only Series and Interviews (not File items)
     # formatted as nested dicts for item_tree template.
     series_tree = {}
