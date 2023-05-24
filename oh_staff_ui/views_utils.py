@@ -369,6 +369,22 @@ def get_relatives(item: ProjectItem) -> dict:
     return relatives
 
 
+def get_all_series_and_interviews() -> dict:
+    # For Series browse page, get only Series and Interviews (not File items)
+    # formatted as nested dicts for item_tree template.
+    series_tree = {}
+    all_series = ProjectItem.objects.filter(type__type="Series").order_by("title")
+    for series in all_series:
+        interview_tree = {}
+        child_interviews = ProjectItem.objects.filter(parent=series).order_by(
+            "sequence", "title"
+        )
+        for interview in child_interviews:
+            interview_tree[interview] = None
+        series_tree[series] = interview_tree
+    return series_tree
+
+
 def get_parent_item(item_id: int) -> ProjectItem:
     return ProjectItem.objects.get(pk=item_id).parent
 

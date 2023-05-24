@@ -17,6 +17,7 @@ from oh_staff_ui.views_utils import (
     construct_keyword_query,
     get_ark,
     get_edit_item_context,
+    get_all_series_and_interviews,
     get_keyword_results,
     get_result_items,
     get_sequence_formset,
@@ -214,3 +215,9 @@ def order_files(request: HttpRequest, item_id: int) -> HttpResponse:
     formset = get_sequence_formset(children)
     context = {"item": item, "formset": formset}
     return render(request, "oh_staff_ui/order_files.html", context)
+
+
+@login_required
+def browse(request: HttpRequest) -> HttpResponse:
+    context = {"relatives": get_all_series_and_interviews()}
+    return render(request, "oh_staff_ui/browse.html", context)

@@ -1,0 +1,23 @@
+{% extends 'oh_staff_ui/base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+
+{% if messages %}
+<div class="box">
+{% for message in messages %}
+  <div>{{ message }}</div>
+{% endfor %}
+</div>
+{% endif %}
+
+<div>
+    <p>This list contains all Series and Interviews in the database. 
+        Click the arrows to view Interviews under each Series. 
+        Any Series with no arrow has no Interviews.</p>
+    <ul class="tree">
+        {% include "oh_staff_ui/item_tree.html" %}
+    </ul>
+</div>
+
+{% endblock %}
