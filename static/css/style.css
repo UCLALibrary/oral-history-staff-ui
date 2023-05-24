@@ -33,6 +33,10 @@ td.qualifier {
     vertical-align: baseline;
 }
 
+td.label {
+    white-space: nowrap;
+}
+
 td.qualifier {
     min-width: 15rem
 }

@@ -161,7 +161,7 @@
         {% for resource_form in resource_formset %}
         <tr>
             <td class="label">{% if forloop.first %}
-                {% bootstrap_button id="resource_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Resource(s):
+                {% bootstrap_button id="resource_add" button_type="button" button_class="btn-primary add_formset" content="+" %}&nbsp;Type(s) of Resource:
                 {% endif %}
             </td>
             <td class="qualifier">{% bootstrap_field resource_form.usage_id %} {% bootstrap_field resource_form.type show_label=False %}</td>
