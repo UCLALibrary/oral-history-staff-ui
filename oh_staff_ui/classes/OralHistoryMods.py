@@ -159,7 +159,7 @@ class OralHistoryMods(MODS):
             for audiofile in MediaFile.objects.filter(
                 Q(item=child) & Q(file_type__file_type="SubMasterAudio1")
             ):
-                relatedmods = self._create_relateditem_audio(audiofile)
+                self.related_items.append(self._create_relateditem_audio(audiofile))
 
     def _create_relateditem_audio(self, mi: MediaFile) -> MODS:
         pi = mi.item
@@ -171,8 +171,11 @@ class OralHistoryMods(MODS):
         for toc in Description.objects.filter(item=pi, type__type="tableOfContents"):
             ri.toc = TableOfContents(text=toc.value)
 
-        for ts in MediaFile.objects.filter(Q(item=pi)):
-            ri.locations.append(LocationOH(url="Timed log xml link", usage="timed log"))
+        for ts in MediaFile.objects.filter(
+            Q(item=pi) & Q(file_type__file_type="Text Index")
+        ):
+            if ts.file_url != "":
+                ri.locations.append(LocationOH(url=ts.file_url, usage="timed log"))
 
         return ri
 
