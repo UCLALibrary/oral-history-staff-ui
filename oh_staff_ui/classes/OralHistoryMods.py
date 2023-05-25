@@ -1,5 +1,4 @@
 import logging
-from django.db.models import Q
 from eulxml import xmlmap
 from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODSv34
@@ -159,7 +158,7 @@ class OralHistoryMods(MODSv34):
         # For each child of the item, get submaster audio MediaFile
         for child in ProjectItem.objects.filter(parent=self._item).order_by("sequence"):
             for audiofile in MediaFile.objects.filter(
-                Q(item=child) & Q(file_type__file_code="audio_submaster")
+                item=child, file_type__file_code="audio_submaster"
             ):
                 self.related_items.append(self._create_relateditem_audio(audiofile))
 
@@ -174,7 +173,7 @@ class OralHistoryMods(MODSv34):
             ri.toc = TableOfContents(text=toc.value)
 
         for ts in MediaFile.objects.filter(
-            Q(item=pi) & Q(file_type__file_code="text_master_index")
+            item=pi, file_type__file_code="text_master_index"
         ):
             if ts.file_url != "":
                 ri.locations.append(
@@ -185,7 +184,7 @@ class OralHistoryMods(MODSv34):
 
     def _populate_narrator_image(self):
         for img in MediaFile.objects.filter(
-            Q(item=self._item) & Q(file_type__file_code="image_submaster")
+            item=self._item, file_type__file_code="image_submaster"
         ).order_by("sequence"):
             self.locations.append(
                 LocationOH(url=img.file_url, label="Image of Narrator")
@@ -203,7 +202,7 @@ class OralHistoryMods(MODSv34):
         }
 
         for f in MediaFile.objects.filter(
-            Q(item=self._item) & Q(file_type__file_code__in=fc_to_label.keys())
+            item=self._item, file_type__file_code__in=fc_to_label.keys()
         ).order_by("sequence"):
             if f.file_url != "":
                 label = fc_to_label[f.file_type.file_code]
