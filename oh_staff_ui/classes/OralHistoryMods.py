@@ -42,6 +42,7 @@ class OralHistoryMods(MODSv34):
         self._populate_constituent_audio()
         self._populate_narrator_image()
         self._populate_interview_content()
+        self._populate_series_content()
 
     def _populate_title(self):
         self.title = self._item.title
@@ -80,7 +81,7 @@ class OralHistoryMods(MODSv34):
 
     def _populate_relation(self):
         if self._item.relation:
-            self.related_items.extend([mods.RelatedItem(title=self._item.relation)])
+            self.related_items.append(mods.RelatedItem(title=self._item.relation))
 
     def _populate_rights(self):
         # Following previous MODS generation process, accessRights is used with no type assignment
@@ -205,9 +206,28 @@ class OralHistoryMods(MODSv34):
             Q(item=self._item) & Q(file_type__file_code__in=fc_to_label.keys())
         ):
             if f.file_url != "":
-                self.locations.append(
-                    LocationOH(url=f.file_url, label=fc_to_label[f.file_type.file_code])
-                )
+                label = fc_to_label[f.file_type.file_code]
+
+                if f.file_type.file_code == "text_master_transcript":
+                    if f.file_name_only.endswith(".html"):
+                        label = f"{label} (Printable Version)"
+                    else:
+                        label = f"{label} (TEI/P5 XML)"
+
+                self.locations.append(LocationOH(url=f.file_url, label=label))
+
+    def _populate_series_content(self):
+        p = self._item.parent
+        if p and p.type.type.lower() == "series":
+            ri = mods.RelatedItem(type="series")
+            ri.title = p.title
+            ri.identifiers.append(mods.Identifier(text=p.ark))
+
+            for d in Description.objects.filter(item=p, type__type="abstract"):
+                ri.create_abstract()
+                ri.abstract.text = d.value
+
+            self.related_items.append(ri)
 
 
 # Extended classes to supply some additional attributes not in stock library that we use
