@@ -186,7 +186,7 @@ class OralHistoryMods(MODSv34):
     def _populate_narrator_image(self):
         for img in MediaFile.objects.filter(
             Q(item=self._item) & Q(file_type__file_code="image_submaster")
-        ):
+        ).order_by("sequence"):
             self.locations.append(
                 LocationOH(url=img.file_url, label="Image of Narrator")
             )
@@ -204,7 +204,7 @@ class OralHistoryMods(MODSv34):
 
         for f in MediaFile.objects.filter(
             Q(item=self._item) & Q(file_type__file_code__in=fc_to_label.keys())
-        ):
+        ).order_by("sequence"):
             if f.file_url != "":
                 label = fc_to_label[f.file_type.file_code]
 
