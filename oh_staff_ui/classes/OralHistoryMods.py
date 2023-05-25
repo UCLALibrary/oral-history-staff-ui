@@ -40,6 +40,8 @@ class OralHistoryMods(MODSv34):
         self._populate_subjects()
         self._populate_title()
         self._populate_constituent_audio()
+        self._populate_narrator_image()
+        self._populate_interview_content()
 
     def _populate_title(self):
         self.title = self._item.title
@@ -180,11 +182,39 @@ class OralHistoryMods(MODSv34):
 
         return ri
 
+    def _populate_narrator_image(self):
+        for img in MediaFile.objects.filter(
+            Q(item=self._item) & Q(file_type__file_code="image_submaster")
+        ):
+            self.locations.append(
+                LocationOH(url=img.file_url, label="Image of Narrator")
+            )
+
+    def _populate_interview_content(self):
+        fc_to_label = {
+            "pdf_master": "Interview Full Transcript (PDF)",
+            "text_master_transcript": "Interview Full Transcript",
+            "text_master_biography": "Interviewee Biography",
+            "text_master_interview_history": "Interview History",
+            "pdf_master_appendix": "Appendix to Interview",
+            "text_master_appendix": "Appendix to Interview",
+            "pdf_master_resume": "Narrator's Resume",
+        }
+
+        for f in MediaFile.objects.filter(
+            Q(item=self._item) & Q(file_type__file_code__in=fc_to_label.keys())
+        ):
+            if f.file_url != "":
+                self.locations.append(
+                    LocationOH(url=f.file_url, label=fc_to_label[f.file_type.file_code])
+                )
+
 
 # Extended classes to supply some additional attributes not in stock library that we use
 
 
 class LocationOH(mods.Location):
+    label = xmlmap.StringField("@displayLabel")
     usage = xmlmap.StringField("mods:url/@usage")
 
 
