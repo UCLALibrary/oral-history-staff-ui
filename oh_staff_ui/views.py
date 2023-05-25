@@ -14,12 +14,10 @@ from oh_staff_ui.forms import (
 )
 from oh_staff_ui.models import MediaFile, MediaFileError, ProjectItem
 from oh_staff_ui.views_utils import (
-    construct_keyword_query,
     get_ark,
     get_edit_item_context,
     get_all_series_and_interviews,
-    get_keyword_results,
-    get_result_items,
+    get_search_results,
     get_sequence_formset,
     run_process_file_command,
     save_all_item_data,
@@ -110,33 +108,7 @@ def item_search(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def search_results(request: HttpRequest, search_type: str, query: str) -> HttpResponse:
-    if search_type == "title":
-        full_query = construct_keyword_query("title", query)
-        # Explicitly get values needed in search results template so we can access parent__title,
-        # not just parent_id.
-        results = (
-            ProjectItem.objects.filter(full_query)
-            .order_by("title")
-            .values("id", "ark", "title", "parent__title")
-        )
-    elif search_type == "ark":
-        results = (
-            ProjectItem.objects.filter(ark__icontains=query)
-            .order_by("ark")
-            .values("id", "ark", "title", "parent__title")
-        )
-    elif search_type == "status":
-        results = (
-            ProjectItem.objects.filter(status__status=query)
-            .order_by("title")
-            .values("id", "ark", "title", "parent__title")
-        )
-    elif search_type == "keyword":
-        search_data = get_keyword_results(query)
-        # get_result_items() doesn't use queryset .values(), so we'll get item parent
-        # instead of parent_id.
-        # Difference in fields returned from keyword vs. other searches is handled in template.
-        results = get_result_items(search_data)
+    results = get_search_results(search_type, query)
     return render(request, "oh_staff_ui/search_results.html", {"results": results})
 
 
