@@ -975,7 +975,7 @@ class ModsTestCase(TestCase):
 
         # Level 1: Series.
         cls.series_item = ProjectItem.objects.create(
-            ark="fake/abcdef",
+            ark="fakeseries/abcdef",
             created_by=cls.user,
             last_modified_by=cls.user,
             title="Fake series",
@@ -985,7 +985,7 @@ class ModsTestCase(TestCase):
 
         # Level 2: Interview, child of series.
         cls.interview_item = ProjectItem.objects.create(
-            ark="fake/abcdef",
+            ark="fakeinterview/abcdef",
             created_by=cls.user,
             last_modified_by=cls.user,
             title="Fake interview",
@@ -1103,7 +1103,7 @@ class ModsTestCase(TestCase):
 
         # Level 3: Audio, child of interview.
         cls.audio_item = ProjectItem.objects.create(
-            ark="fake/abcdef",
+            ark="fakeaudio/abcdef",
             created_by=cls.user,
             last_modified_by=cls.user,
             title="Fake audio",
@@ -1136,9 +1136,25 @@ class ModsTestCase(TestCase):
             file="oh_static/text/submasters/fake-abcdef-2-master.xml",
         )
 
-    # Utility method to return MODS specific to interview item
-    def get_mods_from_interview_item(self) -> ProjectItem:
+    # Utility methods to return MODS specific to item type
+    def get_mods_from_audio_item(self):
+        return self.get_mods_from_item_type(type="audio")
+
+    def get_mods_from_interview_item(self):
+        return self.get_mods_from_item_type(type="interview")
+
+    def get_mods_from_series_item(self):
+        return self.get_mods_from_item_type(type="series")
+
+    def get_mods_from_item_type(self, type: str = "interview") -> OralHistoryMods:
         item = self.interview_item
+
+        if type == "series":
+            item = self.series_item
+
+        if type == "audio":
+            item = self.audio_item
+
         ohmods = OralHistoryMods(item)
         ohmods.populate_fields()
 
@@ -1284,6 +1300,21 @@ class ModsTestCase(TestCase):
         self.assertTrue(
             b'<mods:location displayLabel="Interview Full Transcript (PDF)">'
             in ohmods.serializeDocument()
+        )
+
+    def test_series_relateditem_on_items(self):
+        # A relatedItem of type series should only be present in items of interview type
+        ohmods = self.get_mods_from_interview_item()
+        self.assertTrue(
+            b'<mods:relatedItem type="series">' in ohmods.serializeDocument()
+        )
+        ohmods = self.get_mods_from_series_item()
+        self.assertTrue(
+            b'<mods:relatedItem type="series">' not in ohmods.serializeDocument()
+        )
+        ohmods = self.get_mods_from_audio_item()
+        self.assertTrue(
+            b'<mods:relatedItem type="series">' not in ohmods.serializeDocument()
         )
 
 
