@@ -124,6 +124,7 @@ class ProjectItemForm(forms.Form):
 
 
 class ItemSearchForm(forms.Form):
+    # If these change, views_utils.get_search_results() must be updated too.
     search_types = [
         ("title", "Title"),
         ("status", "Status"),
