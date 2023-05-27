@@ -234,7 +234,7 @@ class OralHistoryMods(MODSv34):
     def write_mods_record(self):
         ark_ns = self._item.ark.replace("/", "-")
 
-        p = Path(f"{settings.OH_STATIC}/mods")
+        p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods")
         p.mkdir(exist_ok=True, parents=True)
 
         with open(f"{p}/{ark_ns}-mods.xml", "wb") as mods_file:
