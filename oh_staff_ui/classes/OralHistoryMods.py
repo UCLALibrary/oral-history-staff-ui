@@ -239,7 +239,9 @@ class OralHistoryMods(MODSv34):
 
         with open(f"{p}/{ark_ns}-mods.xml", "wb") as mods_file:
             mods_file.write(self.serializeDocument(pretty=True))
-            logger.info(f"Wrote MODS for item id: {self._item.id} to file: {ark_ns}-mods.xml")
+            logger.info(
+                f"Wrote MODS for item id: {self._item.id} to file: {ark_ns}-mods.xml"
+            )
 
 
 # Extended classes to supply some additional attributes not in stock library that we use

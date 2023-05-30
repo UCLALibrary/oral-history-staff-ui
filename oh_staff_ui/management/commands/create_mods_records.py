@@ -28,8 +28,8 @@ class Command(BaseCommand):
             required=True,
             help="The id of the item to export mods record of",
         )
-    
+
     def handle(self, *args, **options):
-        
+
         item_id = options["item_id"]
         create_mods_records(item_id)
