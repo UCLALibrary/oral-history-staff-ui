@@ -1,4 +1,6 @@
 import logging
+from django.conf import settings
+from pathlib import Path
 from eulxml import xmlmap
 from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODSv34
@@ -25,6 +27,7 @@ class OralHistoryMods(MODSv34):
     def __init__(self, project_item):
         super().__init__()
         self._item = project_item
+        self.populate_fields()
 
     def populate_fields(self):
         self._populate_alttitle()
@@ -227,6 +230,18 @@ class OralHistoryMods(MODSv34):
                 ri.abstract.text = d.value
 
             self.related_items.append(ri)
+
+    def write_mods_record(self):
+        ark_ns = self._item.ark.replace("/", "-")
+
+        p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods")
+        p.mkdir(exist_ok=True, parents=True)
+
+        with open(f"{p}/{ark_ns}-mods.xml", "wb") as mods_file:
+            mods_file.write(self.serializeDocument(pretty=True))
+            logger.info(
+                f"Wrote MODS for item id: {self._item.id} to file: {ark_ns}-mods.xml"
+            )
 
 
 # Extended classes to supply some additional attributes not in stock library that we use

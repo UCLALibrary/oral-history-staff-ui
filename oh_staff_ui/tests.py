@@ -1317,6 +1317,15 @@ class ModsTestCase(TestCase):
             b'<mods:relatedItem type="series">' not in ohmods.serializeDocument()
         )
 
+    def test_writing_single_mods(self):
+        ohmods = self.get_mods_from_interview_item()
+        ohmods.write_mods_record()
+
+        ark_ns = self.interview_item.ark.replace("/", "-")
+        # Verify file exists
+        p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods/{ark_ns}-mods.xml")
+        self.assertTrue(p.is_file())
+
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
     # Test logic not already covered by OralHistoryFile tests.
