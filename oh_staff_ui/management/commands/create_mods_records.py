@@ -10,13 +10,15 @@ from django.contrib.auth.models import User
 logger = logging.getLogger(__name__)
 
 
-def export_mods_record(item_id: int) -> None:
+def create_mods_records(item_id: int) -> None:
     """Given an item_id write the related MODS record to public location"""
-    logger.info(f"{item_id = }")
+    pi = ProjectItem.objects.filter(id=item_id).first()
+    if pi:
+        OralHistoryMods(pi).write_mods_record()
 
 
 class Command(BaseCommand):
-    help = "Django management command to process Oral History files"
+    help = "Django management command to generate Oral History MODS records"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -26,3 +28,8 @@ class Command(BaseCommand):
             required=True,
             help="The id of the item to export mods record of",
         )
+    
+    def handle(self, *args, **options):
+        
+        item_id = options["item_id"]
+        create_mods_records(item_id)
