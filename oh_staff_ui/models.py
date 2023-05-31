@@ -3,10 +3,6 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 
 class ItemStatus(models.Model):
     status = models.CharField(max_length=40)

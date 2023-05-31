@@ -100,12 +100,6 @@ class Command(BaseCommand):
         if request is None:
             request = get_mock_request()
 
-        # Log arguments, for now
-        logger.info("\n\n===== Starting new run =====")
-        logger.info(f"{item_id = }")
-        logger.info(f"{file_name = }")
-        logger.info(f"{file_type = }")
-
         process_file(item_id, file_name, file_type, request)
 
     def _get_master_file_type_codes(self) -> list[str]:

@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 from django.conf import settings
 from django.core.files import File
@@ -50,9 +49,6 @@ from oh_staff_ui.models import (
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
 from oh_staff_ui.classes.OralHistoryMods import OralHistoryMods
-
-
-logger = logging.getLogger(__name__)
 
 
 class MediaFileTestCase(TestCase):
