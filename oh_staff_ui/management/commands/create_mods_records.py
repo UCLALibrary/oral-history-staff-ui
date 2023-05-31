@@ -17,7 +17,7 @@ class Command(BaseCommand):
             nargs="+",
             type=int,
             required=False,
-            help="The id of the item to export mods record of, multiple ids are permitted",
+            help="The id(s) of the item to export mods record of",
         )
         parser.add_argument(
             "-b",
@@ -43,6 +43,7 @@ class Command(BaseCommand):
             pi = ProjectItem.objects.get(id=item_id)
             OralHistoryMods(pi).write_mods_record()
             logger.info(f"Item: {pi.id} with ark {pi.ark} MODS record written")
+
         except (ProjectItem.DoesNotExist) as e:
             logger.error(e)
             raise CommandError(f"ProjectItem with id {item_id} does not exist")
