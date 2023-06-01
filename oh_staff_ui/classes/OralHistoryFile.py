@@ -1,13 +1,10 @@
 # Utility functions for file handling.
-import logging
 from pathlib import Path
 from django.conf import settings
 from django.core.files import File
 from django.db.models import Max
 from django.http import HttpRequest
 from oh_staff_ui.models import MediaFile, MediaFileType, ProjectItem
-
-logger = logging.getLogger(__name__)
 
 
 class OralHistoryFile:
@@ -74,7 +71,6 @@ class OralHistoryFile:
         new_file_name = self.get_new_file_name(next_sequence)
         # Combine filename with directory to get full path for MediaFile creation.
         new_name = f"{self._target_dir}/{new_file_name}"
-        logger.info(f"{new_name = }")
 
         new_file = MediaFile(
             created_by=self._request.user,

@@ -150,7 +150,7 @@ def get_ark() -> str:
             ark = response.text.strip()[4:]
             return ark
         except requests.HTTPError as http_error:
-            logger.fatal(http_error)
+            logger.error(http_error)
             # Kick it back to the calling view
             raise
 
@@ -288,19 +288,19 @@ def save_all_item_data(item_id: int, request: HttpRequest) -> None:
         & resource_formset.is_valid()
         & subject_formset.is_valid()
     ):
-        logger.info(f"Saving data for item {item_id}")
-        logger.info(f"ITEM: {item_form.cleaned_data}")
-        logger.info(f"NAMES: {name_formset.cleaned_data}")
-        logger.info(f"SUBJECTS: {subject_formset.cleaned_data}")
-        logger.info(f"PUBLISHERS: {publisher_formset.cleaned_data}")
-        logger.info(f"COPYRIGHTS: {copyright_formset.cleaned_data}")
-        logger.info(f"LANGUAGES: {language_formset.cleaned_data}")
-        logger.info(f"RESOURCES: {resource_formset.cleaned_data}")
-        logger.info(f"ALT IDS: {alt_id_formset.cleaned_data}")
-        logger.info(f"ALT TITLES: {alt_title_formset.cleaned_data}")
-        logger.info(f"DESCRIPTIONS: {description_formset.cleaned_data}")
-        logger.info(f"DATES: {date_formset.cleaned_data}")
-        logger.info(f"FORMATS: {format_formset.cleaned_data}")
+        logger.debug(f"Saving data for item {item_id}")
+        logger.debug(f"ITEM: {item_form.cleaned_data}")
+        logger.debug(f"NAMES: {name_formset.cleaned_data}")
+        logger.debug(f"SUBJECTS: {subject_formset.cleaned_data}")
+        logger.debug(f"PUBLISHERS: {publisher_formset.cleaned_data}")
+        logger.debug(f"COPYRIGHTS: {copyright_formset.cleaned_data}")
+        logger.debug(f"LANGUAGES: {language_formset.cleaned_data}")
+        logger.debug(f"RESOURCES: {resource_formset.cleaned_data}")
+        logger.debug(f"ALT IDS: {alt_id_formset.cleaned_data}")
+        logger.debug(f"ALT TITLES: {alt_title_formset.cleaned_data}")
+        logger.debug(f"DESCRIPTIONS: {description_formset.cleaned_data}")
+        logger.debug(f"DATES: {date_formset.cleaned_data}")
+        logger.debug(f"FORMATS: {format_formset.cleaned_data}")
         # Item data
         item = ProjectItem.objects.get(pk=item_id)
         item.coverage = item_form.cleaned_data["coverage"]

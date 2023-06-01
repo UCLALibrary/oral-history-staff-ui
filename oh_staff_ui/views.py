@@ -80,7 +80,6 @@ def add_item(request: HttpRequest, parent_id: int | None = None) -> HttpResponse
 
 @login_required
 def edit_item(request: HttpRequest, item_id: int) -> HttpResponse:
-    logger.info("\n==========================================")
     if request.method == "POST":
         save_all_item_data(item_id, request)
     context = get_edit_item_context(item_id)
