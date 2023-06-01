@@ -8,16 +8,15 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Django management command to generate Oral History MODS records"
+    help = "Django management command to generate Oral History MODS records, and must be run with 1 argument"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "-i",
             "--item_id",
-            nargs="+",
             type=int,
             required=False,
-            help="The id(s) of the item to export mods record of",
+            help="The id of the item to export mods record of",
         )
         parser.add_argument(
             "-b",
@@ -25,24 +24,28 @@ class Command(BaseCommand):
             type=str,
             required=False,
             choices=["series", "interview", "audio", "all"],
-            help="The type of items to bulk export, choices are: series, interview, assets and all",
+            help="The type of items to bulk export MODS records, choices are: series, interview, assets and all",
         )
 
     def handle(self, *args, **options):
 
-        if options["item_id"]:
-            for item_id in options["item_id"]:
-                self._create_mods_record(item_id)
+        if bool(options["item_id"]) ^ bool(options["bulk"]):
+            
+            if options["item_id"]:
+                self._create_mods_record(options["item_id"])
 
-        if options["bulk"]:
-            self._create_bulk_mods_records(options["bulk"])
+            if options["bulk"]:
+                self._create_bulk_mods_records(options["bulk"])
+        
+        else:
+            raise CommandError("This command must be executed with 1 argument")
 
     def _create_mods_record(self, item_id: int) -> None:
         """Given an item_id write the related MODS record to public location"""
         try:
             pi = ProjectItem.objects.get(id=item_id)
             OralHistoryMods(pi).write_mods_record()
-            logger.info(f"Item: {pi.id} with ark {pi.ark} MODS record written")
+            logger.debug(f"Item: {pi.id} with ark {pi.ark} MODS record written")
 
         except (ProjectItem.DoesNotExist) as e:
             logger.error(e)
