@@ -30,13 +30,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         if bool(options["item_id"]) ^ bool(options["bulk"]):
-            
+
             if options["item_id"]:
                 self._create_mods_record(options["item_id"])
 
             if options["bulk"]:
                 self._create_bulk_mods_records(options["bulk"])
-        
+
         else:
             raise CommandError("This command must be executed with 1 argument")
 
