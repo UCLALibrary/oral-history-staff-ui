@@ -45,7 +45,7 @@ echo "=================================="
 echo "Reloading all data, please wait..."
 
 # Files are TSV, in export_scripts directory.
-DATA_DIR=${PROJECT_ROOT}/export_scripts
+DATA_DIR=${PROJECT_ROOT}/migration_data
 python manage.py import_projectitems ${DATA_DIR}/project-items-export.tsv
 python manage.py import_altids ${DATA_DIR}/Alt_ID.tsv
 python manage.py import_alttitles ${DATA_DIR}/AltTitle.tsv
