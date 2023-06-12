@@ -86,6 +86,13 @@ persistentVolumes:
     server: ""
     path: ""
 
+persistentVolumesAnnotations: {}
+  # helm weights and hooks - https://helm.sh/docs/topics/charts_hooks/
+  # argocd waves and hooks - https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/
+persistentVolumeClaimsAnnotations: {}
+  # helm weights and hooks - https://helm.sh/docs/topics/charts_hooks/
+  # argocd waves and hooks - https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/
+
 # Volume mount specification for the container
 volumeMounts: []
 #  - name: ""

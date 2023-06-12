@@ -3,6 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "oh-staff.fullname" . }}-pvc-ohstatic
   namespace: oh-staff{{ .Values.django.env.run_env }}
+  {{- with .Values.persistentVolumeClaimsAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   accessModes:
     - {{ .Values.persistentVolumes.ohstatic.access }}

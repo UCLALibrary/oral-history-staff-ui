@@ -63,7 +63,7 @@ django:
   externalSecrets:
     enabled: "true"
     annotations: 
-      argocd.argoproj.io/sync-wave: "-1"
+      argocd.argoproj.io/sync-wave: "-3"
     env:
       # Application database used by django
       db_password: "/systems/prodsoftwaredev/oh-staff/db_password"
@@ -91,6 +91,12 @@ persistentVolumes:
     access: "ReadWriteMany"
     server: "dlp.in.library.ucla.edu"
     path: "/oralhistory"
+
+persistentVolumesAnnotations:
+  argocd.argoproj.io/sync-wave: "-2"
+
+persistentVolumeClaimsAnnotations:
+  argocd.argoproj.io/sync-wave: "-1"
 
 # Volume mount specification for the container
 volumeMounts:
