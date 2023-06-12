@@ -2,6 +2,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz00097zsm	level1	African American History	COHR
 21198/zz000s9kx2	level1	African American History	COHR
 21198/zz002dx7sf	level1	African American History	COHR
+21198/zz0015t9hn	level1	African American History	COHR
 21198/zz000nmdd8	level1	African American History	COHR
 21198/zz00096t3w	level1	African American History	COHR
 21198/zz00096t5x	level1	African American History	COHR
@@ -19,6 +20,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0008zrqp	level1	African American History	COHR
 21198/zz00090285	level1	African American History	COHR
 21198/zz0008zpqq	level1	African American History	COHR
+21198/zz0008zrvr	level1	African American History	COHR
 21198/zz000906kr	level1	African American History	COHR
 21198/zz000903rw	level1	African American History	COHR
 21198/zz002khbcc	level1	African American History	COHR
@@ -37,8 +39,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0008zqmn	level1	African American History	COHR
 21198/zz000905zz	level1	African American History	COHR
 21198/zz0009d4h4	level1	African American History	COHR
-21198/zz0008zrvr	level1	African American History	COHR
-21198/zz0015t9hn	level1	African American History	COHR
 21198/zz002kdg1s	level1	Iranian American History	COHR
 21198/zz002k3bh2	level1	Iranian American History	COHR
 21198/zz002kdffh	level1	Iranian American History	COHR
@@ -576,6 +576,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz00096qm6	level1	African American History	COHR
 21198/zz00096t90	level1	African American History	COHR
 21198/zz00097q1v	level1	African American History	COHR
+21198/zz0008zrd1	level1	African American History	COHR
 21198/zz002kpb82	level1	African American History	COHR
 21198/zz002kdm69	level1	African American History	COHR
 21198/zz00096tbh	level1	African American History	COHR
@@ -599,7 +600,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0015z8gf	level1	African American History	COHR
 21198/zz00099pr4	level1	African American History	COHR
 21198/zz00099pt5	level1	African American History	COHR
-21198/zz0008zrd1	level1	African American History	COHR
 21198/zz002kdg29	level1	Iranian American History	COHR
 21198/zz002k3b2b	level1	Iranian American History	COHR
 21198/zz002kdfz8	level1	Iranian American History	COHR
@@ -1040,6 +1040,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz002cds25	level2	Mexican American Civil Rights	COHR
 21198/zz002kdk9c	level2	Mexican American Civil Rights	COHR
 21198/zz0025mnq8	level1	Asian American History	COHR
+21198/zz002hgnsn	level1	Asian American History	COHR
 21198/zz001jmjpg	level1	Asian American History	COHR
 21198/zz00096qxv	level1	Asian American History	COHR
 21198/zz001d0kvt	level1	Asian American History	COHR
@@ -1070,7 +1071,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz002kp202	level1	COVID-19 Pandemic	COHR
 21198/zz002kp1hb	level1	COVID-19 Pandemic	COHR
 21198/zz002kftpw	level1	COVID-19 Pandemic	COHR
-21198/zz002hgnsn	level1	Asian American History	COHR
 21198/zz00096c86	level1	African American History	COHR
 21198/zz002hgcg4	level1	African American History	COHR
 21198/zz000962xp	level1	African American History	COHR
@@ -1095,6 +1095,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0008zpm5	level1	African American History	COHR
 21198/zz0008zgzf	level1	African American History	COHR
 21198/zz0009d4k5	level1	African American History	COHR
+21198/zz002kmp4x	level1	African American History	COHR
 21198/zz002kmp6z	level1	African American History	COHR
 21198/zz002kmp3d	level1	African American History	COHR
 21198/zz0008znc2	level1	African American History	COHR
@@ -1107,7 +1108,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0009fqmb	level1	African American History	COHR
 21198/zz00096c7p	level1	African American History	COHR
 21198/zz00099pnk	level1	African American History	COHR
-21198/zz002kmp4x	level1	African American History	COHR
 21198/zz002k3bgj	level1	Iranian American History	COHR
 21198/zz002kdf19	level1	Iranian American History	COHR
 21198/zz002k3cd0	level1	Iranian American History	COHR
@@ -1367,6 +1367,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0008zp7g	level1	Arts, Literature, Music, and Film	COHR
 21198/zz0008zk1x	level1	Arts, Literature, Music, and Film	COHR
 21198/zz0008z7gt	level1	Arts, Literature, Music, and Film	COHR
+21198/zz002kq1zh	level1	Arts, Literature, Music, and Film	COHR
 21198/zz001nx5gb	level1	Arts, Literature, Music, and Film	COHR
 21198/zz002kps27	level1	Arts, Literature, Music, and Film	COHR
 21198/zz002k6rmr	level1	Arts, Literature, Music, and Film	COHR
@@ -1625,11 +1626,13 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz001d0rf1	level1	African American History	COHR
 21198/zz00096b4n	level1	African American History	COHR
 21198/zz0009d4mp	level1	African American History	COHR
+21198/zz002kpb61	level1	African American History	COHR
 21198/zz00096t2c	level1	African American History	COHR
 21198/zz0008zd9n	level1	African American History	COHR
 21198/zz0008zm1d	level1	African American History	COHR
 21198/zz000905n9	level1	African American History	COHR
 21198/zz0008zsdh	level1	African American History	COHR
+21198/zz002kpkx8	level1	African American History	COHR
 21198/zz002kpbb3	level1	African American History	COHR
 21198/zz002kpbm7	level1	African American History	COHR
 21198/zz002kpbqs	level1	African American History	COHR
@@ -1657,8 +1660,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz001d0rh2	level1	African American History	COHR
 21198/zz00099pqm	level1	African American History	COHR
 21198/zz002kq04m	geographicPlace	African American History	COHR
-21198/zz002kpb61	level1	African American History	COHR
-21198/zz002kpkx8	level1	African American History	COHR
 21198/zz002k3cz8	level1	Iranian American History	COHR
 21198/zz002kdgbf	level1	Iranian American History	COHR
 21198/zz002k3bc0	level1	Iranian American History	COHR
@@ -2199,6 +2200,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz002kpzjw	level1	African American History	COHR
 21198/zz002kq02k	level1	African American History	COHR
 21198/zz002kpzmx	level1	African American History	COHR
+21198/zz002kps06	level1	African American History	COHR
 21198/zz002kpbj6	level1	African American History	COHR
 21198/zz002kpnbf	level1	African American History	COHR
 21198/zz002kq033	level1	African American History	COHR
@@ -2222,7 +2224,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0009frjs	level1	African American History	COHR
 21198/zz001hpph9	level1	African American History	COHR
 21198/zz001769vk	level1	African American History	COHR
-21198/zz002kps06	level1	African American History	COHR
 21198/zz002k3c9f	level1	Iranian American History	COHR
 21198/zz002kdfhj	level1	Iranian American History	COHR
 21198/zz002k3bjk	level1	Iranian American History	COHR
@@ -2741,6 +2742,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz002kpmqn	level1	African American History	COHR
 21198/zz002kpndg	level1	African American History	COHR
 21198/zz002kpn8d	level1	African American History	COHR
+21198/zz002kpkwr	level1	African American History	COHR
 21198/zz0008zzm1	level1	African American History	COHR
 21198/zz0008zmxv	level1	African American History	COHR
 21198/zz00179s7c	level1	African American History	COHR
@@ -2753,7 +2755,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0008zrm4	level1	African American History	COHR
 21198/zz0008zq6f	level1	African American History	COHR
 21198/zz001hppxh	level1	African American History	COHR
-21198/zz002kpkwr	level1	African American History	COHR
 21198/zz0015tpcw	level1	Iranian American History	COHR
 21198/zz002k3b9z	level1	Iranian American History	COHR
 21198/zz002kdfw7	level1	Iranian American History	COHR
@@ -3306,6 +3307,8 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz00096t7z	level1	African American History	COHR
 21198/zz002hgcfm	level1	African American History	COHR
 21198/zz0008zg9m	level1	African American History	COHR
+21198/zz0008zn3x	level1	African American History	COHR
+21198/zz0008zf0g	level1	African American History	COHR
 21198/zz000901nc	level1	African American History	COHR
 21198/zz002kpnk2	level1	African American History	COHR
 21198/zz00096t0b	level1	African American History	COHR
@@ -3316,6 +3319,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0008zpkn	level1	African American History	COHR
 21198/zz000903sd	level1	African American History	COHR
 21198/zz0009025m	level1	African American History	COHR
+21198/zz002kpbcm	level1	African American History	COHR
 21198/zz002kmp7g	level1	African American History	COHR
 21198/zz0009d4gm	level1	African American History	COHR
 21198/zz002kc2mb	level1	African American History	COHR
@@ -3330,9 +3334,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz002kcr6s	level1	African American History	COHR
 21198/zz002kcqwn	level1	African American History	COHR
 21198/zz00099psn	level1	African American History	COHR
-21198/zz0008zf0g	level1	African American History	COHR
-21198/zz0008zn3x	level1	African American History	COHR
-21198/zz002kpbcm	level1	African American History	COHR
 21198/zz002k39xs	level1	Iranian American History	COHR
 21198/zz002kdg4b	level1	Iranian American History	COHR
 21198/zz002k3bbg	level1	Iranian American History	COHR
@@ -3829,6 +3830,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz001d0rgj	level1	African American History	COHR
 21198/zz00096t4d	level1	African American History	COHR
 21198/zz0008zcf7	level1	African American History	COHR
+21198/zz0008zm7h	level1	African American History	COHR
 21198/zz0008zngm	level1	African American History	COHR
 21198/zz0008zxx6	level1	African American History	COHR
 21198/zz0008zdxz	level1	African American History	COHR
@@ -3844,6 +3846,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz0008z8zj	level1	African American History	COHR
 21198/zz001d0rbg	level1	African American History	COHR
 21198/zz002kmp5f	level1	African American History	COHR
+21198/zz001d0qch	level1	African American History	COHR
 21198/zz001d0rs6	level1	African American History	COHR
 21198/zz0008zmb2	level1	African American History	COHR
 21198/zz00097z9c	level1	African American History	COHR
@@ -3856,8 +3859,6 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz002k33m7	level1	African American History	COHR
 21198/zz00098tzq	level1	African American History	COHR
 21198/zz001d0qd1	level1	African American History	COHR
-21198/zz001d0qch	level1	African American History	COHR
-21198/zz0008zm7h	level1	African American History	COHR
 21198/zz002k3c3b	level1	Iranian American History	COHR
 21198/zz002k3c7d	level1	Iranian American History	COHR
 21198/zz002k3chj	level1	Iranian American History	COHR
@@ -4324,6 +4325,7 @@ ARK	TYPE	VALUE	SOURCE
 21198/zz002k7gmb	level1	Buddhism	COHR
 21198/zz002khdxm	level1	Buddhism	COHR
 21198/zz002k7j00	level1	Buddhism	COHR
+21198/zz002kq1zh	level1	Chinese Studies	COHR
 21198/zz002kp4pc	level1	COVID-19 Pandemic	COHR
 21198/zz002kp3pw	level1	COVID-19 Pandemic	COHR
 21198/zz002knzgd	level1	COVID-19 Pandemic	COHR
