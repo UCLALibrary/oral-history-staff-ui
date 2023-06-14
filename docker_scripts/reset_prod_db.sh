@@ -58,4 +58,4 @@ python manage.py import_names ${DATA_DIR}/Name.tsv
 python manage.py import_publishers ${DATA_DIR}/Publisher.tsv
 python manage.py import_resources ${DATA_DIR}/Type_of_Resource_.tsv
 python manage.py import_subjects ${DATA_DIR}/Subject.tsv
-python manage.py import_subjects ${DATA_DIR}/file_metadata.tsv
+python manage.py import_file_metadata ${DATA_DIR}/file_metadata.tsv
