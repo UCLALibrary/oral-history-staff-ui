@@ -7,6 +7,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest  # for code completion
 from django.http.response import HttpResponse  # for code completion
+from django.http.response import HttpResponseBadRequest
 from oh_staff_ui.forms import (
     FileUploadForm,
     ProjectItemForm,
@@ -22,6 +23,8 @@ from oh_staff_ui.views_utils import (
     run_process_file_command,
     save_all_item_data,
     save_sequence_data,
+    get_listrecords_oai,
+    get_record_oai,
 )
 
 logger = logging.getLogger(__name__)
@@ -192,3 +195,25 @@ def order_files(request: HttpRequest, item_id: int) -> HttpResponse:
 def browse(request: HttpRequest) -> HttpResponse:
     context = {"relatives": get_all_series_and_interviews()}
     return render(request, "oh_staff_ui/browse.html", context)
+
+def oai(request: HttpRequest) -> HttpResponse:
+    try:
+        # Verb is required, ark is optional
+        verb = request.GET['verb']
+        ark = request.GET.get('identifier')
+        
+        if verb not in ("GetRecord", "ListRecords"):
+            raise Exception
+        
+        if verb == "GetRecord":
+            xml_content = get_record_oai(ark)
+        
+        elif verb == "ListRecords":
+            xml_content = get_listrecords_oai()
+
+        return HttpResponse(xml_content, content_type='text/xml')
+    
+    except Exception as e:
+        return HttpResponseBadRequest(); 
+    
+    

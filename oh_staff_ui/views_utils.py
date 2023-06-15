@@ -1,5 +1,6 @@
 import logging
 from django.db import connection
+from lxml import etree
 import requests
 import uuid
 from django.conf import settings
@@ -41,6 +42,7 @@ from oh_staff_ui.models import (
     ItemResourceUsage,
     ItemSubjectUsage,
 )
+from oh_staff_ui.classes.OralHistoryMods import OralHistoryMods
 
 logger = logging.getLogger(__name__)
 
@@ -466,3 +468,23 @@ def run_process_file_command(
     # testing confirms this, though it does close after 30 seconds or so.
     # To be safe, explicitly close this one when done.
     connection.close()
+
+def get_listrecords_oai(verb:str, ark:str = None) -> str:
+
+    pi_set = ProjectItem.objects.filter(status__status__iexact="completed")
+
+    if ark:
+        ark_s = ark.replace("-", "/")
+        pi_set = pi_set.filter(ark=ark_s)
+
+    verb_element = etree.Element(verb)
+
+    for pi in pi_set:
+        verb_element.append(OralHistoryMods(pi).add_oai_envelope())
+    
+    return etree.tostring(verb_element)
+
+def get_record_oai(ark:str = None) -> str:
+    return get_listrecords_oai("GetRecord", ark)
+
+

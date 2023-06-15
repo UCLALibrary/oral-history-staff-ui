@@ -1,6 +1,8 @@
 import logging
 from django.conf import settings
+from datetime import datetime
 from pathlib import Path
+from lxml import etree
 from eulxml import xmlmap
 from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODSv34
@@ -242,7 +244,29 @@ class OralHistoryMods(MODSv34):
             logger.info(
                 f"Wrote MODS for item id: {self._item.id} to file: {ark_ns}-mods.xml"
             )
+    
+    def add_oai_envelope(self):
 
+        ark_ns = self._item.ark.replace("/", "-")
+
+        rec = etree.Element("record")
+        h = etree.Element("header")
+
+        i = etree.Element("identifier")
+        i.text = ark_ns
+        
+        ds = etree.Element("datestamp")
+        ds.text = self._item.create_date.strftime('%Y-%m-%d')
+        
+        h.append(i)
+        h.append(ds)
+        rec.append(h)
+
+        md = etree.Element("metadata")
+        md.append(self.node)
+        rec.append(md)
+
+        return rec
 
 # Extended classes to supply some additional attributes not in stock library that we use
 
