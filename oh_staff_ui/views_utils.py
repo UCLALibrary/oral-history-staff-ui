@@ -1,5 +1,6 @@
 import logging
 from django.db import connection
+from datetime import datetime
 from lxml import etree
 import requests
 import uuid
@@ -9,6 +10,7 @@ from django.core.management import call_command
 from django.db.models import CharField, Model, Q, QuerySet
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
+from django.urls import reverse
 from django.utils import timezone
 from oh_staff_ui.forms import (
     AltIdForm,
@@ -469,22 +471,49 @@ def run_process_file_command(
     # To be safe, explicitly close this one when done.
     connection.close()
 
-def get_listrecords_oai(verb:str, ark:str = None) -> str:
+
+def get_listrecords_oai(verb: str, ark: str = None) -> str:
 
     pi_set = ProjectItem.objects.filter(status__status__iexact="completed")
 
     if ark:
-        ark_s = ark.replace("-", "/")
-        pi_set = pi_set.filter(ark=ark_s)
+        ark = ark.replace("-", "/")
+        pi_set = pi_set.filter(ark=ark)
 
     verb_element = etree.Element(verb)
 
     for pi in pi_set:
         verb_element.append(OralHistoryMods(pi).add_oai_envelope())
-    
-    return etree.tostring(verb_element)
 
-def get_record_oai(ark:str = None) -> str:
+    return wrap_oai_content(verb_element, verb, ark)
+
+
+def get_record_oai(ark: str = None) -> str:
     return get_listrecords_oai("GetRecord", ark)
 
 
+def wrap_oai_content(xml_element, verb: str, ark_ns: str) -> str:
+
+    oai_envelope = """
+            <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" 
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ 
+                http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd" />
+            """
+    oai_tree = etree.fromstring(oai_envelope)
+    d = datetime.now()
+
+    etree.SubElement(oai_tree, "responseDate").text = d.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    req = f"""<request metadataPrefix="mods" 
+                verb="{verb}">{reverse("oai")}
+                </request>"""
+
+    e_req = etree.fromstring(req)
+    if ark_ns:
+        e_req.set("identifier", ark_ns)
+
+    oai_tree.append(e_req)
+    oai_tree.append(xml_element)
+
+    return etree.tostring(oai_tree)

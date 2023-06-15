@@ -196,24 +196,23 @@ def browse(request: HttpRequest) -> HttpResponse:
     context = {"relatives": get_all_series_and_interviews()}
     return render(request, "oh_staff_ui/browse.html", context)
 
+
 def oai(request: HttpRequest) -> HttpResponse:
     try:
         # Verb is required, ark is optional
-        verb = request.GET['verb']
-        ark = request.GET.get('identifier')
-        
+        verb = request.GET["verb"]
+        ark = request.GET.get("identifier")
+
         if verb not in ("GetRecord", "ListRecords"):
             raise Exception
-        
+
         if verb == "GetRecord":
             xml_content = get_record_oai(ark)
-        
-        elif verb == "ListRecords":
-            xml_content = get_listrecords_oai()
 
-        return HttpResponse(xml_content, content_type='text/xml')
-    
+        elif verb == "ListRecords":
+            xml_content = get_listrecords_oai("ListRecords")
+
+        return HttpResponse(xml_content, content_type="text/xml")
+
     except Exception as e:
-        return HttpResponseBadRequest(); 
-    
-    
+        return HttpResponseBadRequest()
