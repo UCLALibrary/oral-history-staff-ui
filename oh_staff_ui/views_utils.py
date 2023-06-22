@@ -491,7 +491,7 @@ def get_listrecords_oai(verb: str, ark: str = None) -> str:
     return wrap_oai_content(verb_element, verb, ark)
 
 
-def wrap_oai_content(xml_element, verb: str, ark: str) -> str:
+def wrap_oai_content(xml_element: etree.Element, verb: str, ark: str) -> str:
 
     oai_tree = get_oai_envelope()
     oai_tree.append(get_response_date_element())

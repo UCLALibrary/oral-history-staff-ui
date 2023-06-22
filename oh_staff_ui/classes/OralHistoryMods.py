@@ -233,15 +233,13 @@ class OralHistoryMods(MODSv34):
             self.related_items.append(ri)
 
     def write_mods_record(self):
-        ark_ns = self.get_ark_no_slash(self._item.ark)
-
         p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods")
         p.mkdir(exist_ok=True, parents=True)
 
-        with open(f"{p}/{ark_ns}-mods.xml", "wb") as mods_file:
+        with open(f"{p}/{self._item.ark_ns}-mods.xml", "wb") as mods_file:
             mods_file.write(self.serializeDocument(pretty=True))
             logger.info(
-                f"Wrote MODS for item id: {self._item.id} to file: {ark_ns}-mods.xml"
+                f"Wrote MODS for item id: {self._item.id} to file: {self._item.ark_ns}-mods.xml"
             )
 
     def add_oai_envelope(self) -> etree.Element:

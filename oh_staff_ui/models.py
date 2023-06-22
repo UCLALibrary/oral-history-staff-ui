@@ -76,6 +76,10 @@ class ProjectItem(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def ark_ns(self) -> str:
+        return self.ark.replace("/", "-")
+
     class Meta:
         indexes = [
             models.Index(fields=["ark"]),

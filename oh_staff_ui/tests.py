@@ -49,6 +49,11 @@ from oh_staff_ui.models import (
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
 from oh_staff_ui.classes.OralHistoryMods import OralHistoryMods
+from oh_staff_ui.views_utils import (
+    get_listrecords_oai,
+    get_record_oai,
+    get_bad_arg_error_xml,
+)
 
 
 class MediaFileTestCase(TestCase):
@@ -1321,6 +1326,23 @@ class ModsTestCase(TestCase):
         # Verify file exists
         p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods/{ark_ns}-mods.xml")
         self.assertTrue(p.is_file())
+
+    def test_bad_getrecord_request(self):
+        bad_response = get_bad_arg_error_xml("GetRecordWithoutIdentifier")
+        self.assertTrue(b'<error code="badArgument"/>' in bad_response)
+
+    def test_getrecord_request(self):
+        id_to_check = self.series_item.ark
+        response = get_record_oai(id_to_check)
+        id_tag = f'identifier="{id_to_check}"'
+
+        self.assertTrue(bytes(id_tag, "utf-8") in response)
+
+    def test_listrecords_request(self):
+        response = get_listrecords_oai("ListRecords")
+        self.assertTrue(
+            b'<request metadataPrefix="mods" verb="ListRecords">' in response
+        )
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
