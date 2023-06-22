@@ -205,22 +205,18 @@ def oai(request: HttpRequest) -> HttpResponse:
         ark = request.GET.get("identifier")
 
         if verb not in ("GetRecord", "ListRecords"):
-            raise Exception
+            raise ValueError
 
-        print(ark)
         if verb == "GetRecord":
             if ark:
                 xml_content = get_record_oai(ark)
             else:
-                print("blah")
                 xml_content = get_bad_arg_error_xml(verb)
 
         elif verb == "ListRecords":
             xml_content = get_listrecords_oai("ListRecords")
 
-        # xml_content=""
-
         return HttpResponse(xml_content, content_type="text/xml")
 
-    except Exception as e:
+    except ValueError:
         return HttpResponseBadRequest()

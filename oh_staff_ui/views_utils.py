@@ -471,8 +471,10 @@ def run_process_file_command(
     # To be safe, explicitly close this one when done.
     connection.close()
 
+
 def get_record_oai(ark: str = None) -> str:
     return get_listrecords_oai("GetRecord", ark)
+
 
 def get_listrecords_oai(verb: str, ark: str = None) -> str:
 
@@ -494,11 +496,6 @@ def wrap_oai_content(xml_element, verb: str, ark: str) -> str:
     oai_tree = get_oai_envelope()
     oai_tree.append(get_response_date_element())
     oai_tree.append(get_request_element(verb, ark))
-
-    # if ark_ns:
-    #    e_req.set("identifier", ark_ns)
-
-    # oai_tree.append(e_req)
     oai_tree.append(xml_element)
 
     return etree.tostring(oai_tree)
