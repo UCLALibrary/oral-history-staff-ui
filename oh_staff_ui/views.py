@@ -25,6 +25,7 @@ from oh_staff_ui.views_utils import (
     save_sequence_data,
     get_listrecords_oai,
     get_record_oai,
+    get_bad_arg_error_xml,
 )
 
 logger = logging.getLogger(__name__)
@@ -206,11 +207,18 @@ def oai(request: HttpRequest) -> HttpResponse:
         if verb not in ("GetRecord", "ListRecords"):
             raise Exception
 
+        print(ark)
         if verb == "GetRecord":
-            xml_content = get_record_oai(ark)
+            if ark:
+                xml_content = get_record_oai(ark)
+            else:
+                print("blah")
+                xml_content = get_bad_arg_error_xml(verb)
 
         elif verb == "ListRecords":
             xml_content = get_listrecords_oai("ListRecords")
+
+        # xml_content=""
 
         return HttpResponse(xml_content, content_type="text/xml")
 

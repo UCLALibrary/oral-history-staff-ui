@@ -1,6 +1,5 @@
 import logging
 from django.conf import settings
-from datetime import datetime
 from pathlib import Path
 from lxml import etree
 from eulxml import xmlmap
@@ -234,7 +233,7 @@ class OralHistoryMods(MODSv34):
             self.related_items.append(ri)
 
     def write_mods_record(self):
-        ark_ns = self._item.ark.replace("/", "-")
+        ark_ns = self.get_ark_no_slash(self._item.ark)
 
         p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods")
         p.mkdir(exist_ok=True, parents=True)
@@ -244,31 +243,29 @@ class OralHistoryMods(MODSv34):
             logger.info(
                 f"Wrote MODS for item id: {self._item.id} to file: {ark_ns}-mods.xml"
             )
-    
-    def add_oai_envelope(self):
 
-        ark_ns = self._item.ark.replace("/", "-")
+    def add_oai_envelope(self) -> etree.Element:
 
-        rec = etree.Element("record")
-        h = etree.Element("header")
+        record_el = etree.Element("record")
+        header_el = etree.Element("header")
 
-        i = etree.Element("identifier")
-        i.text = ark_ns
-        
-        ds = etree.Element("datestamp")
-        ds.text = self._item.create_date.strftime('%Y-%m-%d')
-        
-        h.append(i)
-        h.append(ds)
-        rec.append(h)
+        id_el = etree.Element("identifier")
+        id_el.text = self._item.ark
 
-        md = etree.Element("metadata")
-        md.append(self.node)
-        rec.append(md)
+        date_el = etree.Element("datestamp")
+        date_el.text = self._item.create_date.strftime("%Y-%m-%d")
 
-        return rec
+        header_el.append(id_el)
+        header_el.append(date_el)
+        record_el.append(header_el)
 
-# Extended classes to supply some additional attributes not in stock library that we use
+        metadata_el = etree.Element("metadata")
+        metadata_el.append(self.node)
+        record_el.append(metadata_el)
+
+        return record_el
+
+    # Extended classes to supply some additional attributes not in stock library that we use
 
 
 class LocationOH(mods.Location):

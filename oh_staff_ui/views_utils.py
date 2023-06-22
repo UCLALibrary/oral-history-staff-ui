@@ -471,13 +471,14 @@ def run_process_file_command(
     # To be safe, explicitly close this one when done.
     connection.close()
 
+def get_record_oai(ark: str = None) -> str:
+    return get_listrecords_oai("GetRecord", ark)
 
 def get_listrecords_oai(verb: str, ark: str = None) -> str:
 
     pi_set = ProjectItem.objects.filter(status__status__iexact="completed")
 
     if ark:
-        ark = ark.replace("-", "/")
         pi_set = pi_set.filter(ark=ark)
 
     verb_element = etree.Element(verb)
@@ -488,12 +489,22 @@ def get_listrecords_oai(verb: str, ark: str = None) -> str:
     return wrap_oai_content(verb_element, verb, ark)
 
 
-def get_record_oai(ark: str = None) -> str:
-    return get_listrecords_oai("GetRecord", ark)
+def wrap_oai_content(xml_element, verb: str, ark: str) -> str:
+
+    oai_tree = get_oai_envelope()
+    oai_tree.append(get_response_date_element())
+    oai_tree.append(get_request_element(verb, ark))
+
+    # if ark_ns:
+    #    e_req.set("identifier", ark_ns)
+
+    # oai_tree.append(e_req)
+    oai_tree.append(xml_element)
+
+    return etree.tostring(oai_tree)
 
 
-def wrap_oai_content(xml_element, verb: str, ark_ns: str) -> str:
-
+def get_oai_envelope() -> etree.Element:
     oai_envelope = """
             <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" 
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
@@ -501,19 +512,40 @@ def wrap_oai_content(xml_element, verb: str, ark_ns: str) -> str:
                 http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd" />
             """
     oai_tree = etree.fromstring(oai_envelope)
-    d = datetime.now()
 
-    etree.SubElement(oai_tree, "responseDate").text = d.strftime("%Y-%m-%dT%H:%M:%SZ")
+    return oai_tree
 
-    req = f"""<request metadataPrefix="mods" 
-                verb="{verb}">{reverse("oai")}
-                </request>"""
+
+def get_response_date_element() -> etree.Element:
+
+    date_el = etree.Element("responseDate")
+    date_el.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    return date_el
+
+
+def get_request_element(verb: str, ark: str = None) -> etree.Element:
+
+    req = f"""<request metadataPrefix="mods">{reverse("oai")}</request>"""
 
     e_req = etree.fromstring(req)
-    if ark_ns:
-        e_req.set("identifier", ark_ns)
+    e_req.set("verb", verb)
 
-    oai_tree.append(e_req)
-    oai_tree.append(xml_element)
+    if ark:
+        e_req.set("identifier", ark)
 
-    return etree.tostring(oai_tree)
+    return e_req
+
+
+def get_bad_arg_error_xml(verb: str) -> str:
+    oai_envelope = get_oai_envelope()
+
+    oai_envelope.append(get_response_date_element())
+    oai_envelope.append(get_request_element(verb))
+
+    error_str = f"""<error code="badArgument"/>"""
+    error_elem = etree.fromstring(error_str)
+
+    oai_envelope.append(error_elem)
+
+    return etree.tostring(oai_envelope)
