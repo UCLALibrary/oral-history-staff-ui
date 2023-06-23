@@ -207,14 +207,16 @@ def oai(request: HttpRequest) -> HttpResponse:
         if verb not in ("GetRecord", "ListRecords"):
             raise ValueError
 
+        req_url = request.build_absolute_uri("?")
+
         if verb == "GetRecord":
             if ark:
-                xml_content = get_record_oai(ark)
+                xml_content = get_record_oai(ark, req_url=req_url)
             else:
                 xml_content = get_bad_arg_error_xml(verb)
 
         elif verb == "ListRecords":
-            xml_content = get_listrecords_oai("ListRecords")
+            xml_content = get_listrecords_oai("ListRecords", req_url=req_url)
 
         return HttpResponse(xml_content, content_type="text/xml")
 

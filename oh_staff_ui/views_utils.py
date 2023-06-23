@@ -472,11 +472,11 @@ def run_process_file_command(
     connection.close()
 
 
-def get_record_oai(ark: str = None) -> str:
-    return get_listrecords_oai("GetRecord", ark)
+def get_record_oai(ark: str = None, req_url: str = None) -> str:
+    return get_listrecords_oai("GetRecord", ark, req_url)
 
 
-def get_listrecords_oai(verb: str, ark: str = None) -> str:
+def get_listrecords_oai(verb: str, ark: str = None, req_url: str = None) -> str:
 
     pi_set = ProjectItem.objects.filter(status__status__iexact="completed")
 
@@ -486,16 +486,18 @@ def get_listrecords_oai(verb: str, ark: str = None) -> str:
     verb_element = etree.Element(verb)
 
     for pi in pi_set:
-        verb_element.append(OralHistoryMods(pi).add_oai_envelope())
+        verb_element.append(add_oai_envelope_to_mods(OralHistoryMods(pi)))
 
-    return wrap_oai_content(verb_element, verb, ark)
+    return wrap_oai_content(verb_element, verb, ark, req_url)
 
 
-def wrap_oai_content(xml_element: etree.Element, verb: str, ark: str) -> str:
+def wrap_oai_content(
+    xml_element: etree.Element, verb: str, ark: str, req_url: str
+) -> str:
 
     oai_tree = get_oai_envelope()
     oai_tree.append(get_response_date_element())
-    oai_tree.append(get_request_element(verb, ark))
+    oai_tree.append(get_request_element(verb, ark, req_url))
     oai_tree.append(xml_element)
 
     return etree.tostring(oai_tree)
@@ -521,9 +523,11 @@ def get_response_date_element() -> etree.Element:
     return date_el
 
 
-def get_request_element(verb: str, ark: str = None) -> etree.Element:
+def get_request_element(
+    verb: str, ark: str = None, req_url: str = None
+) -> etree.Element:
 
-    req = f"""<request metadataPrefix="mods">{reverse("oai")}</request>"""
+    req = f"""<request metadataPrefix="mods">{req_url}</request>"""
 
     e_req = etree.fromstring(req)
     e_req.set("verb", verb)
@@ -546,3 +550,25 @@ def get_bad_arg_error_xml(verb: str) -> str:
     oai_envelope.append(error_elem)
 
     return etree.tostring(oai_envelope)
+
+
+def add_oai_envelope_to_mods(ohmods: OralHistoryMods) -> etree.Element:
+
+    record_el = etree.Element("record")
+    header_el = etree.Element("header")
+
+    id_el = etree.Element("identifier")
+    id_el.text = ohmods._item.ark
+
+    date_el = etree.Element("datestamp")
+    date_el.text = ohmods._item.create_date.strftime("%Y-%m-%d")
+
+    header_el.append(id_el)
+    header_el.append(date_el)
+    record_el.append(header_el)
+
+    metadata_el = etree.Element("metadata")
+    metadata_el.append(ohmods.node)
+    record_el.append(metadata_el)
+
+    return record_el
