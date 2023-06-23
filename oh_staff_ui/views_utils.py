@@ -538,11 +538,11 @@ def get_request_element(
     return e_req
 
 
-def get_bad_arg_error_xml(verb: str) -> str:
+def get_bad_arg_error_xml(verb: str, req_url: str = None) -> str:
     oai_envelope = get_oai_envelope()
 
     oai_envelope.append(get_response_date_element())
-    oai_envelope.append(get_request_element(verb))
+    oai_envelope.append(get_request_element(verb, req_url=req_url))
 
     error_str = f"""<error code="badArgument"/>"""
     error_elem = etree.fromstring(error_str)

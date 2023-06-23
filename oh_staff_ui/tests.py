@@ -1184,7 +1184,7 @@ class ModsTestCase(TestCase):
         ohmods = self.get_mods_from_interview_item()
 
         ohmods_from_string = load_xmlobject_from_string(
-            ohmods.serializeDocument(), mods.MODS
+            ohmods.serializeDocument(), mods.MODSv34
         )
 
         self.assertEqual(ohmods_from_string.is_valid(), True)
@@ -1197,7 +1197,7 @@ class ModsTestCase(TestCase):
         ohmods = self.get_mods_from_interview_item()
 
         ohmods_from_string = load_xmlobject_from_string(
-            ohmods.serializeDocument(), mods.MODS
+            ohmods.serializeDocument(), mods.MODSv34
         )
 
         # Assert MODS still valid as read from string

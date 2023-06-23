@@ -213,7 +213,7 @@ def oai(request: HttpRequest) -> HttpResponse:
             if ark:
                 xml_content = get_record_oai(ark, req_url=req_url)
             else:
-                xml_content = get_bad_arg_error_xml(verb)
+                xml_content = get_bad_arg_error_xml(verb, req_url)
 
         elif verb == "ListRecords":
             xml_content = get_listrecords_oai("ListRecords", req_url=req_url)

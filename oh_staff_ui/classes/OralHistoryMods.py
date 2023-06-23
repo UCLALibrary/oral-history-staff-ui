@@ -242,28 +242,8 @@ class OralHistoryMods(MODSv34):
                 f"Wrote MODS for item id: {self._item.id} to file: {self._item.ark_ns}-mods.xml"
             )
 
-    def add_oai_envelope(self) -> etree.Element:
 
-        record_el = etree.Element("record")
-        header_el = etree.Element("header")
-
-        id_el = etree.Element("identifier")
-        id_el.text = self._item.ark
-
-        date_el = etree.Element("datestamp")
-        date_el.text = self._item.create_date.strftime("%Y-%m-%d")
-
-        header_el.append(id_el)
-        header_el.append(date_el)
-        record_el.append(header_el)
-
-        metadata_el = etree.Element("metadata")
-        metadata_el.append(self.node)
-        record_el.append(metadata_el)
-
-        return record_el
-
-    # Extended classes to supply some additional attributes not in stock library that we use
+# Extended classes to supply some additional attributes not in stock library that we use
 
 
 class LocationOH(mods.Location):
