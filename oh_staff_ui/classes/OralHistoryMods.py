@@ -1,7 +1,6 @@
 import logging
 from django.conf import settings
 from pathlib import Path
-from lxml import etree
 from eulxml import xmlmap
 from eulxml.xmlmap import mods
 from eulxml.xmlmap.mods import MODSv34

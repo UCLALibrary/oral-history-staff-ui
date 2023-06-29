@@ -50,8 +50,7 @@ from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
 from oh_staff_ui.classes.OralHistoryMods import OralHistoryMods
 from oh_staff_ui.views_utils import (
-    get_listrecords_oai,
-    get_record_oai,
+    get_records_oai,
     get_bad_arg_error_xml,
 )
 
@@ -1333,13 +1332,13 @@ class ModsTestCase(TestCase):
 
     def test_getrecord_request(self):
         id_to_check = self.series_item.ark
-        response = get_record_oai(id_to_check)
+        response = get_records_oai(id_to_check)
         id_tag = f'identifier="{id_to_check}"'
 
         self.assertTrue(bytes(id_tag, "utf-8") in response)
 
     def test_listrecords_request(self):
-        response = get_listrecords_oai("ListRecords")
+        response = get_records_oai("ListRecords")
         self.assertTrue(
             b'<request metadataPrefix="mods" verb="ListRecords">' in response
         )

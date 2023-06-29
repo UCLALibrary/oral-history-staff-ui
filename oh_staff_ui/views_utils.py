@@ -10,7 +10,6 @@ from django.core.management import call_command
 from django.db.models import CharField, Model, Q, QuerySet
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
-from django.urls import reverse
 from django.utils import timezone
 from oh_staff_ui.forms import (
     AltIdForm,
@@ -472,11 +471,7 @@ def run_process_file_command(
     connection.close()
 
 
-def get_record_oai(ark: str = None, req_url: str = None) -> str:
-    return get_listrecords_oai("GetRecord", ark, req_url)
-
-
-def get_listrecords_oai(verb: str, ark: str = None, req_url: str = None) -> str:
+def get_records_oai(verb: str, ark: str = None, req_url: str = None) -> str:
 
     pi_set = ProjectItem.objects.filter(status__status__iexact="completed")
 
@@ -539,13 +534,19 @@ def get_request_element(
 
 
 def get_bad_arg_error_xml(verb: str, req_url: str = None) -> str:
+    """If a missing or bad argument is submitted with a request, OAI best practice is to
+    return an OAI error response rather than returning a HTTP error code.
+
+    http://www.openarchives.org/OAI/openarchivesprotocol.html#ErrorConditions
+
+    """
+
     oai_envelope = get_oai_envelope()
 
     oai_envelope.append(get_response_date_element())
     oai_envelope.append(get_request_element(verb, req_url=req_url))
 
-    error_str = f"""<error code="badArgument"/>"""
-    error_elem = etree.fromstring(error_str)
+    error_elem = etree.fromstring('<error code="badArgument"/>')
 
     oai_envelope.append(error_elem)
 

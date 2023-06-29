@@ -23,8 +23,7 @@ from oh_staff_ui.views_utils import (
     run_process_file_command,
     save_all_item_data,
     save_sequence_data,
-    get_listrecords_oai,
-    get_record_oai,
+    get_records_oai,
     get_bad_arg_error_xml,
 )
 
@@ -211,12 +210,12 @@ def oai(request: HttpRequest) -> HttpResponse:
 
         if verb == "GetRecord":
             if ark:
-                xml_content = get_record_oai(ark, req_url=req_url)
+                xml_content = get_records_oai(verb, ark, req_url)
             else:
                 xml_content = get_bad_arg_error_xml(verb, req_url)
 
         elif verb == "ListRecords":
-            xml_content = get_listrecords_oai("ListRecords", req_url=req_url)
+            xml_content = get_records_oai("ListRecords", req_url=req_url)
 
         return HttpResponse(xml_content, content_type="text/xml")
 
