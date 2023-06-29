@@ -1304,7 +1304,7 @@ class ModsTestCase(TestCase):
         bad_response = get_bad_arg_error_xml("GetRecordWithoutIdentifier")
         self.assertTrue(b'<error code="badArgument"/>' in bad_response)
 
-    def test_bad_getrecord_request(self):
+    def test_bad_verb_request(self):
         bad_response = get_bad_verb_error_xml("BadVerb")
         self.assertTrue(b'<error code="badVerb"/>' in bad_response)
 

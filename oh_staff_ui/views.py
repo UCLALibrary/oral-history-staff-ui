@@ -7,7 +7,6 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest  # for code completion
 from django.http.response import HttpResponse  # for code completion
-from django.http.response import HttpResponseBadRequest
 from oh_staff_ui.forms import (
     FileUploadForm,
     ProjectItemForm,
