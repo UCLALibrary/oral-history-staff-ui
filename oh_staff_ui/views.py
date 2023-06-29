@@ -22,6 +22,9 @@ from oh_staff_ui.views_utils import (
     run_process_file_command,
     save_all_item_data,
     save_sequence_data,
+    get_records_oai,
+    get_bad_arg_error_xml,
+    get_bad_verb_error_xml,
 )
 
 logger = logging.getLogger(__name__)
@@ -192,3 +195,25 @@ def order_files(request: HttpRequest, item_id: int) -> HttpResponse:
 def browse(request: HttpRequest) -> HttpResponse:
     context = {"relatives": get_all_series_and_interviews()}
     return render(request, "oh_staff_ui/browse.html", context)
+
+
+def oai(request: HttpRequest) -> HttpResponse:
+
+    # Verb is required, ark is optional
+    verb = request.GET["verb"]
+    ark = request.GET.get("identifier")
+    req_url = request.build_absolute_uri("?")
+
+    if verb not in ("GetRecord", "ListRecords"):
+        xml_content = get_bad_verb_error_xml(verb, req_url)
+
+    if verb == "GetRecord":
+        if ark:
+            xml_content = get_records_oai(verb, ark, req_url)
+        else:
+            xml_content = get_bad_arg_error_xml(verb, req_url)
+
+    elif verb == "ListRecords":
+        xml_content = get_records_oai("ListRecords", req_url=req_url)
+
+    return HttpResponse(xml_content, content_type="text/xml")

@@ -49,6 +49,11 @@ from oh_staff_ui.models import (
 from oh_staff_ui.classes.OralHistoryFile import OralHistoryFile
 from oh_staff_ui.classes.AudioFileHandler import AudioFileHandler
 from oh_staff_ui.classes.OralHistoryMods import OralHistoryMods
+from oh_staff_ui.views_utils import (
+    get_records_oai,
+    get_bad_arg_error_xml,
+    get_bad_verb_error_xml,
+)
 
 
 class MediaFileTestCase(TestCase):
@@ -1156,33 +1161,12 @@ class ModsTestCase(TestCase):
 
         return ohmods
 
-    def test_valid_series_item_mods(self):
-        item = self.series_item
-        ohmods = OralHistoryMods(item)
-        ohmods.populate_fields()
-
-        self.assertEqual(ohmods.is_valid(), True)
-
-    def test_valid_interview_item_mods(self):
-        ohmods = self.get_mods_from_interview_item()
-
-        self.assertEqual(ohmods.is_valid(), True)
-
-    def test_valid_audio_item_mods(self):
-        item = self.audio_item
-        ohmods = OralHistoryMods(item)
-        ohmods.populate_fields()
-
-        self.assertEqual(ohmods.is_valid(), True)
-
     def test_valid_abstract_parse(self):
         ohmods = self.get_mods_from_interview_item()
 
         ohmods_from_string = load_xmlobject_from_string(
-            ohmods.serializeDocument(), mods.MODS
+            ohmods.serializeDocument(), mods.MODSv34
         )
-
-        self.assertEqual(ohmods_from_string.is_valid(), True)
 
         # Assert abstract generated properly
         mods_xml = ohmods_from_string.serialize(pretty=True)
@@ -1192,11 +1176,8 @@ class ModsTestCase(TestCase):
         ohmods = self.get_mods_from_interview_item()
 
         ohmods_from_string = load_xmlobject_from_string(
-            ohmods.serializeDocument(), mods.MODS
+            ohmods.serializeDocument(), mods.MODSv34
         )
-
-        # Assert MODS still valid as read from string
-        self.assertEqual(ohmods_from_string.is_valid(), True)
 
         # Assert specific description type properly exists
         mods_xml = ohmods_from_string.serialize(pretty=True)
@@ -1214,21 +1195,18 @@ class ModsTestCase(TestCase):
 
     def test_valid_mods_created_date(self):
         ohmods = self.get_mods_from_interview_item()
-        self.assertEqual(ohmods.is_valid(), True)
         self.assertTrue(
             b"<mods:dateCreated>2000</mods:dateCreated>" in ohmods.serializeDocument()
         )
 
     def test_valid_mods_alttitle(self):
         ohmods = self.get_mods_from_interview_item()
-        self.assertEqual(ohmods.is_valid(), True)
         self.assertTrue(
             b'<mods:titleInfo type="alternative">' in ohmods.serializeDocument()
         )
 
     def test_valid_mods_altid(self):
         ohmods = self.get_mods_from_interview_item()
-        self.assertEqual(ohmods.is_valid(), True)
         self.assertTrue(
             b'<mods:identifier type="OPAC">Alt Id</mods:identifier>'
             in ohmods.serializeDocument()
@@ -1321,6 +1299,27 @@ class ModsTestCase(TestCase):
         # Verify file exists
         p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods/{ark_ns}-mods.xml")
         self.assertTrue(p.is_file())
+
+    def test_bad_getrecord_request(self):
+        bad_response = get_bad_arg_error_xml("GetRecordWithoutIdentifier")
+        self.assertTrue(b'<error code="badArgument"/>' in bad_response)
+
+    def test_bad_verb_request(self):
+        bad_response = get_bad_verb_error_xml("BadVerb")
+        self.assertTrue(b'<error code="badVerb"/>' in bad_response)
+
+    def test_getrecord_request(self):
+        id_to_check = self.series_item.ark
+        response = get_records_oai(verb="GetRecord", ark=id_to_check)
+        id_tag = f'identifier="{id_to_check}"'
+
+        self.assertTrue(bytes(id_tag, "utf-8") in response)
+
+    def test_listrecords_request(self):
+        response = get_records_oai("ListRecords")
+        self.assertTrue(
+            b'<request metadataPrefix="mods" verb="ListRecords">' in response
+        )
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):

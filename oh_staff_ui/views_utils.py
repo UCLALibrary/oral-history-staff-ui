@@ -1,5 +1,7 @@
 import logging
 from django.db import connection
+from datetime import datetime
+from lxml import etree
 import requests
 import uuid
 from django.conf import settings
@@ -41,6 +43,7 @@ from oh_staff_ui.models import (
     ItemResourceUsage,
     ItemSubjectUsage,
 )
+from oh_staff_ui.classes.OralHistoryMods import OralHistoryMods
 
 logger = logging.getLogger(__name__)
 
@@ -466,3 +469,127 @@ def run_process_file_command(
     # testing confirms this, though it does close after 30 seconds or so.
     # To be safe, explicitly close this one when done.
     connection.close()
+
+
+def get_records_oai(verb: str, ark: str = None, req_url: str = None) -> str:
+
+    pi_set = ProjectItem.objects.filter(status__status__iexact="completed")
+
+    if ark:
+        pi_set = pi_set.filter(ark=ark)
+
+    verb_element = etree.Element(verb)
+
+    for pi in pi_set:
+        verb_element.append(add_oai_envelope_to_mods(OralHistoryMods(pi)))
+
+    return wrap_oai_content(verb_element, verb, ark, req_url)
+
+
+def wrap_oai_content(
+    xml_element: etree.Element, verb: str, ark: str, req_url: str
+) -> str:
+
+    oai_tree = get_oai_envelope()
+    oai_tree.append(get_response_date_element())
+    oai_tree.append(get_request_element(verb, ark, req_url))
+    oai_tree.append(xml_element)
+
+    return etree.tostring(oai_tree)
+
+
+def get_oai_envelope() -> etree.Element:
+    oai_envelope = """
+            <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" 
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ 
+                http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd" />
+            """
+    oai_tree = etree.fromstring(oai_envelope)
+
+    return oai_tree
+
+
+def get_response_date_element() -> etree.Element:
+
+    date_el = etree.Element("responseDate")
+    date_el.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    return date_el
+
+
+def get_request_element(
+    verb: str, ark: str = None, req_url: str = None
+) -> etree.Element:
+
+    req = f"""<request metadataPrefix="mods">{req_url}</request>"""
+
+    e_req = etree.fromstring(req)
+    e_req.set("verb", verb)
+
+    if ark:
+        e_req.set("identifier", ark)
+
+    return e_req
+
+
+def get_bad_arg_error_xml(verb: str, req_url: str = None) -> str:
+    """If a missing or bad argument is submitted with a request, OAI best practice is to
+    return an OAI error response rather than returning a HTTP error code.
+
+    http://www.openarchives.org/OAI/openarchivesprotocol.html#ErrorConditions
+
+    """
+    error_elem = etree.fromstring('<error code="badArgument"/>')
+
+    return wrap_oai_error(verb, error_elem, req_url)
+
+
+def get_bad_verb_error_xml(verb: str, req_url: str = None) -> str:
+    """If a missing or bad verb is submitted with a request, OAI best practice is to
+    return an OAI error response rather than returning a HTTP error code.
+
+    http://www.openarchives.org/OAI/openarchivesprotocol.html#ErrorConditions
+
+    """
+    error_elem = etree.fromstring('<error code="badVerb"/>')
+
+    return wrap_oai_error(verb, error_elem, req_url)
+
+
+def wrap_oai_error(verb: str, error_elem: etree.Element, req_url: str = None) -> str:
+    """OAI best practice is to return an OAI error response rather than returning a
+    HTTP error code in certain cases.
+
+    http://www.openarchives.org/OAI/openarchivesprotocol.html#ErrorConditions
+
+    """
+    oai_envelope = get_oai_envelope()
+
+    oai_envelope.append(get_response_date_element())
+    oai_envelope.append(get_request_element(verb, req_url=req_url))
+    oai_envelope.append(error_elem)
+
+    return etree.tostring(oai_envelope)
+
+
+def add_oai_envelope_to_mods(ohmods: OralHistoryMods) -> etree.Element:
+
+    record_el = etree.Element("record")
+    header_el = etree.Element("header")
+
+    id_el = etree.Element("identifier")
+    id_el.text = ohmods._item.ark
+
+    date_el = etree.Element("datestamp")
+    date_el.text = ohmods._item.create_date.strftime("%Y-%m-%d")
+
+    header_el.append(id_el)
+    header_el.append(date_el)
+    record_el.append(header_el)
+
+    metadata_el = etree.Element("metadata")
+    metadata_el.append(ohmods.node)
+    record_el.append(metadata_el)
+
+    return record_el

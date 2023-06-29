@@ -17,4 +17,8 @@ urlpatterns = [
     path("upload_file/<int:item_id>", views.upload_file, name="upload_file"),
     path("order_files/<int:item_id>", views.order_files, name="order_files"),
     path("browse/", views.browse, name="browse"),
+    # To follow OAI practice, a query parameter combination is requred of either:
+    # verb=GetRecord and identifier={ark_value}
+    # verb=ListRecords
+    path("oai/", views.oai, name="oai"),
 ]
