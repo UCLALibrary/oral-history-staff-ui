@@ -540,14 +540,34 @@ def get_bad_arg_error_xml(verb: str, req_url: str = None) -> str:
     http://www.openarchives.org/OAI/openarchivesprotocol.html#ErrorConditions
 
     """
+    error_elem = etree.fromstring('<error code="badArgument"/>')
 
+    return wrap_oai_error(verb, error_elem, req_url)
+
+
+def get_bad_verb_error_xml(verb: str, req_url: str = None) -> str:
+    """If a missing or bad verb is submitted with a request, OAI best practice is to
+    return an OAI error response rather than returning a HTTP error code.
+
+    http://www.openarchives.org/OAI/openarchivesprotocol.html#ErrorConditions
+
+    """
+    error_elem = etree.fromstring('<error code="badVerb"/>')
+
+    return wrap_oai_error(verb, error_elem, req_url)
+
+
+def wrap_oai_error(verb: str, error_elem: etree.Element, req_url: str = None) -> str:
+    """OAI best practice is to return an OAI error response rather than returning a
+    HTTP error code in certain cases.
+
+    http://www.openarchives.org/OAI/openarchivesprotocol.html#ErrorConditions
+
+    """
     oai_envelope = get_oai_envelope()
 
     oai_envelope.append(get_response_date_element())
     oai_envelope.append(get_request_element(verb, req_url=req_url))
-
-    error_elem = etree.fromstring('<error code="badArgument"/>')
-
     oai_envelope.append(error_elem)
 
     return etree.tostring(oai_envelope)
