@@ -66,8 +66,8 @@ django:
       argocd.argoproj.io/sync-wave: "-3"
     env:
       # Application database used by django
-      db_password: "/systems/prodsoftwaredev/oh-staff/db_password"
-      django_secret_key: "/systems/prodsoftwaredev/oh-staff/django_secret_key"
+      db_password: "/systems/prodrke01/oh-staff/db_password"
+      django_secret_key: "/systems/prodrke01/oh-staff/django_secret_key"
 
 # PersistentVolume and PersistentVolumeClaim parameters
 persistentVolumes:
