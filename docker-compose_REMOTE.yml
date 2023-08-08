@@ -9,6 +9,9 @@ services:
       # - .docker-compose_db.env
       # Info for connection to production database via ssh tunnel
       - .docker-compose_secrets.env
+    environment:
+      # Force the environment to be production, when connecting from Docker in this way.
+      - DJANGO_RUN_ENV=prod
     ports: 
       # Variables here must be set in environment, or in .env - not in any env_file
       - "8000:8000"

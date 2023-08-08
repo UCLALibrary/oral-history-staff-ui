@@ -244,7 +244,7 @@ class DescriptionForm(forms.Form):
     )
     value = forms.CharField(
         required=True,
-        max_length=1024,
+        max_length=8000,
         widget=forms.Textarea(attrs={"cols": 98, "rows": 3}),
     )
 

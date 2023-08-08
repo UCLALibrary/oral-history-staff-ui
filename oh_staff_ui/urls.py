@@ -21,4 +21,5 @@ urlpatterns = [
     # verb=GetRecord and identifier={ark_value}
     # verb=ListRecords
     path("oai/", views.oai, name="oai"),
+    path("release_notes/", views.release_notes, name="release_notes"),
 ]

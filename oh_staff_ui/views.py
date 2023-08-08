@@ -198,7 +198,6 @@ def browse(request: HttpRequest) -> HttpResponse:
 
 
 def oai(request: HttpRequest) -> HttpResponse:
-
     # Verb is required, ark is optional
     verb = request.GET["verb"]
     ark = request.GET.get("identifier")
@@ -217,3 +216,7 @@ def oai(request: HttpRequest) -> HttpResponse:
         xml_content = get_records_oai("ListRecords", req_url=req_url)
 
     return HttpResponse(xml_content, content_type="text/xml")
+
+
+def release_notes(request: HttpRequest) -> HttpResponse:
+    return render(request, "oh_staff_ui/release_notes.html")
