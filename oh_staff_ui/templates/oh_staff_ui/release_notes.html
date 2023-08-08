@@ -1,0 +1,30 @@
+{% extends 'oh_staff_ui/base.html' %}
+
+{% block content %}
+<h3>Release Notes</h3>
+<hr/>
+
+<h4>1.0.2</h4>
+<p><i>August 8, 2023</i></p>
+<ul>
+    <li>Increased Description form field limit to 8000 characters, matching database limit.</li>
+    <li>Changed local configuration to prevent fixtures from loading when connecting from Docker to production database.</li>
+    <li>Added release notes.</li>
+</ul>
+
+<h4>1.0.1</h4>
+<p><i>June 29, 2023</i></p>
+<ul>
+    <li>Deployed OAI changes to allow harvesting for public site.</li>
+</ul>
+
+
+<h4>1.0.0</h4>
+<p><i>June 12, 2023</i></p>
+<ul>
+    <li>
+        First production release.
+    </li>
+</ul>
+
+{% endblock %}

@@ -278,3 +278,12 @@ $ docker-exec exec django python manage.py shell
 (1, {'oh_staff_ui.MediaFile': 1})
 ```
 Deleting a `MediaFile` object does _*not*_ currently delete any `FileField` object associated with it, so it's necessary to do a `file.delete()` first.
+
+#### Preparing a release
+
+Our deployment system is triggered by changes to the Helm chart.  Typically, this is done by incrementing `image:tag` (on or near line 9) in `charts/prod-ohstaff-values.yaml`.  We use a simple [semantic versioning](https://semver.org/) system:
+* Bug fixes: update patch level (e.g., `v1.0.1` to `v1.0.2`)
+* Backward compatible functionality changes: update minor level (e.g., `v1.0.1` to `v1.1.0`)
+* Breaking changes: update major level (e.g., `v1.0.1` to `v2.0.0`)
+
+In addition to updating version in the Helm chart, update the Release Notes in `oh_staff_ui/templates/oh_staff_ui/release_notes.html`.  Put the latest changes first, following the established format.
