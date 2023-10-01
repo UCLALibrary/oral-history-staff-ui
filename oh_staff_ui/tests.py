@@ -164,6 +164,10 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(MediaFile.objects.count(), 2)
         # Confirm master is parent of submaster.
         self.assertEqual(master.media_file, submaster.parent)
+        # Confirm submaster has correct file type.
+        self.assertEqual(
+            submaster.file_type, MediaFileType.objects.get(file_code="audio_submaster")
+        )
 
     def test_duplicate_files_not_allowed(self):
         file1 = self.create_master_audio_file()
