@@ -98,7 +98,7 @@ class AudioFileHandler(BaseFileHandler):
             submaster_file = OralHistoryFile(
                 item_id=self._master_file.item.id,
                 file_name=submaster_file_name,
-                file_type=MediaFileType.objects.get(file_code="audio_master"),
+                file_type=MediaFileType.objects.get(file_code="audio_submaster"),
                 file_use="submaster",
                 request=self._master_file.request,
             )
