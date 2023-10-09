@@ -30,7 +30,7 @@ class OralHistoryMods(MODSv34):
         self.populate_fields()
 
     def populate_fields(self):
-        self._populate_alttitle()
+        self._populate_titles()
         self._populate_create_date()
         self._populate_description()
         self._populate_format()
@@ -40,18 +40,16 @@ class OralHistoryMods(MODSv34):
         self._populate_relation()
         self._populate_rights()
         self._populate_subjects()
-        self._populate_title()
         self._populate_constituent_audio()
         self._populate_narrator_image()
         self._populate_interview_content()
         self._populate_series_content()
 
-    def _populate_title(self):
-        self.title = self._item.title
+    def _populate_titles(self):
+        # create_title_info() should not be called, otherwise an empty duplicate title
+        # container will be created, overwriting previous titles
+        self.title_info_list.append(mods.TitleInfo(title=self._item.title))
 
-    def _populate_alttitle(self):
-        # All alternate titles are assigned mods type of "alternate", no matter the database assignment
-        self.create_title_info()
         alt_titles = AltTitle.objects.filter(item=self._item)
         for alt_title in alt_titles:
             self.title_info_list.append(

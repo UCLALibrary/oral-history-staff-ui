@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: uclalibrary/oral-history-staff-ui
-  tag: v1.0.3
+  tag: v1.0.4
   pullPolicy: Always
 
 nameOverride: ""
@@ -26,13 +26,13 @@ ingress:
     cert-manager.io/cluster-issuer: sectigo-acme-clusterissuer
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: 'oh-staff.library.ucla.edu'
+    - host: "oh-staff.library.ucla.edu"
       paths:
         - "/"
   tls:
-  - secretName: oh-staff-tls
-    hosts:
-      - oh-staff.library.ucla.edu
+    - secretName: oh-staff-tls
+      hosts:
+        - oh-staff.library.ucla.edu
 
 django:
   env:
@@ -62,7 +62,7 @@ django:
 
   externalSecrets:
     enabled: "true"
-    annotations: 
+    annotations:
       argocd.argoproj.io/sync-wave: "-3"
     env:
       # Application database used by django
