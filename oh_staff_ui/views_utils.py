@@ -472,8 +472,10 @@ def run_process_file_command(
 
 
 def get_records_oai(verb: str, ark: str = None, req_url: str = None) -> str:
-
-    pi_set = ProjectItem.objects.filter(status__status__iexact="completed")
+    # Only items with these statuses should be published via OAI.
+    pi_set = ProjectItem.objects.filter(
+        status__status__in=["Completed", "Completed with minimal metadata"]
+    )
 
     if ark:
         pi_set = pi_set.filter(ark=ark)
@@ -489,7 +491,6 @@ def get_records_oai(verb: str, ark: str = None, req_url: str = None) -> str:
 def wrap_oai_content(
     xml_element: etree.Element, verb: str, ark: str, req_url: str
 ) -> str:
-
     oai_tree = get_oai_envelope()
     oai_tree.append(get_response_date_element())
     oai_tree.append(get_request_element(verb, ark, req_url))
@@ -500,9 +501,9 @@ def wrap_oai_content(
 
 def get_oai_envelope() -> etree.Element:
     oai_envelope = """
-            <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" 
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ 
+            <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
                 http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd" />
             """
     oai_tree = etree.fromstring(oai_envelope)
@@ -511,7 +512,6 @@ def get_oai_envelope() -> etree.Element:
 
 
 def get_response_date_element() -> etree.Element:
-
     date_el = etree.Element("responseDate")
     date_el.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -521,7 +521,6 @@ def get_response_date_element() -> etree.Element:
 def get_request_element(
     verb: str, ark: str = None, req_url: str = None
 ) -> etree.Element:
-
     req = f"""<request metadataPrefix="mods">{req_url}</request>"""
 
     e_req = etree.fromstring(req)
@@ -574,7 +573,6 @@ def wrap_oai_error(verb: str, error_elem: etree.Element, req_url: str = None) ->
 
 
 def add_oai_envelope_to_mods(ohmods: OralHistoryMods) -> etree.Element:
-
     record_el = etree.Element("record")
     header_el = etree.Element("header")
 
