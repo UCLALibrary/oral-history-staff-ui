@@ -279,6 +279,59 @@ $ docker-exec exec django python manage.py shell
 ```
 Deleting a `MediaFile` object does _*not*_ currently delete any `FileField` object associated with it, so it's necessary to do a `file.delete()` first.
 
+#### OAI Provider details
+
+A barebones OAI Provider is publically available at [/oai](http://127.0.0.1:8000/oai). 
+Only MODS output is supported, Dublin Core is not available.
+
+Two verbs are supported:
+
+* `GetRecord` - Given an ark, will return information about the item related to that ark, a single record.
+* `ListRecords` - No arguments are required, all qualified records will be returned, without pagination.
+
+The implementation details are located in the `oh_staff_ui\classes\OralHistoryMods.py` class.
+The `populate_fields()` method contains the methods called for each element in the MODS record.
+
+If an item contains the following subjects, the subject value is not included in the MODS subject output:
+* `Arts, Literature, Music, and Film`
+* `Donated Oral Histories`
+* `Latinas and Latinos in Music`
+* `Latinas and Latinos in Politics`
+* `Mexican American Civil Rights`
+
+Descriptions of following type are *not* included in the MODS Description element:
+* `adminnote`
+* `tableOfContents`
+
+If a Description is of type `abstract` an `Abstract` MODS element is created for this data, not a Description element.
+
+The human readable label for the Description field can be different than the internal Description type, the mapping is as follows:
+
+| Description Type    | Display Label                          |
+| --------------------|----------------------------------------|
+| biographicalnote    | Biographical Information               |
+| interviewerhistory  | Interviewer Background and Preparation |
+| personpresent       | Persons Present                        |
+| place               | Place Conducted                        |
+| processinterview    | Processing of Interview                |
+| supportingdocuments | Supporting Documents                   |
+
+The Location element contains information associated with the file location (url) of files associated with an item.
+This also has some label mapping to be aware of based on the internal `file_code`:
+
+| File Code              | Display Label                          |
+| -----------------------|----------------------------------------|
+| pdf_master             | Interview Full Transcript (PDF)        |
+| text_master_transcript (file ends with `.html`) | Interview Full Transcript  (Printable Version)|
+| text_master_transcript (all other cases) | Interview Full Transcript  (TEI/P5 XML)
+| text_master_biography  | Interviewee Biography                  |
+| text_master_interview_history | Interview History               |
+| pdf_master_appendix    | Appendix to Interview                  |
+| text_master_appendix   | Appendix to Interview                  |
+| pdf_master_resume      | Narrator's Resume                      |
+
+  
+
 #### Preparing a release
 
 Our deployment system is triggered by changes to the Helm chart.  Typically, this is done by incrementing `image:tag` (on or near line 9) in `charts/prod-ohstaff-values.yaml`.  We use a simple [semantic versioning](https://semver.org/) system:
