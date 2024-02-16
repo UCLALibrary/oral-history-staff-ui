@@ -1,3 +1,4 @@
+from lxml import etree
 from pathlib import Path
 from django.conf import settings
 from django.core.files import File
@@ -30,6 +31,7 @@ from oh_staff_ui.models import (
     ItemNameUsage,
     ItemPublisherUsage,
     ItemResourceUsage,
+    ItemStatus,
     ItemSubjectUsage,
     ItemType,
     Format,
@@ -1152,18 +1154,64 @@ class ModsTestCase(TestCase):
         return self.get_mods_from_item_type(type="series")
 
     def get_mods_from_item_type(self, type: str = "interview") -> OralHistoryMods:
-        item = self.interview_item
+        # For MODS tests, ensure test items have a status which allows
+        # full MODS generation.  Other tests may have changed item status, which
+        # can break other tests due to use of persistent class items.
+        self.save_interview_item_with_status("Completed")
+        self.save_audio_item_with_status("Completed")
 
+        item = self.interview_item
         if type == "series":
             item = self.series_item
-
         if type == "audio":
             item = self.audio_item
-
         ohmods = OralHistoryMods(item)
         ohmods.populate_fields()
-
         return ohmods
+
+    # Utility methods to save items with specifc status, for OAI feed testing
+    def save_interview_item_with_status(self, status: str):
+        interview = self.interview_item
+        interview.status = ItemStatus.objects.get(status=status)
+        interview.save()
+
+    def save_audio_item_with_status(self, status: str):
+        audio = self.audio_item
+        audio.status = ItemStatus.objects.get(status=status)
+        audio.save()
+
+    # Utility methods to get specific data from OAI feed
+    def get_oai_record_count(self) -> int:
+        response = get_records_oai("ListRecords")
+        root = etree.fromstring(response)
+        # Default namespace is "http://www.openarchives.org/OAI/2.0/";
+        # record elements are in that default namespace, 2 levels down.
+        records = root.findall(".//record", namespaces=root.nsmap)
+        return len(records)
+
+    def get_oai_interview_related_titles(self) -> list:
+        # This is buried waaaaaay down there....
+        response = get_records_oai("ListRecords")
+        root = etree.fromstring(response)
+        nsmap = root.nsmap
+        # Add mods to namespace dictionary, since it gets used later but is not
+        # defined at the root level...
+        nsmap["mods"] = "http://www.loc.gov/mods/v3"
+        # Default namespace is "http://www.openarchives.org/OAI/2.0/";
+        # record elements are in that default namespace, 2 levels down.
+        # This test feed has interview as first record; get metadata element
+        # from that first record.
+        metadata = root.find(".//record/metadata", namespaces=nsmap)
+        # Get mods container, one level inside metadata; it uses the mods namespace.
+        mods = metadata.find("./mods:mods", namespaces=nsmap)
+        # Get related item(s), one level inside mods
+        related_items = mods.findall("./mods:relatedItem", namespaces=nsmap)
+        # Finally, get the titleInfo/title text from each related item for this interview
+        titles = [
+            item.find("./mods:titleInfo/mods:title", namespaces=nsmap).text
+            for item in related_items
+        ]
+        return titles
 
     def test_valid_abstract_parse(self):
         ohmods = self.get_mods_from_interview_item()
@@ -1324,6 +1372,45 @@ class ModsTestCase(TestCase):
         self.assertTrue(
             b'<request metadataPrefix="mods" verb="ListRecords">' in response
         )
+
+    def test_completed_interviews_are_included(self):
+        # Confirm the OAI feed includes Completed interview item.
+        # This is the only item, so feed contains 1 record.
+        self.save_interview_item_with_status("Completed")
+        record_count = self.get_oai_record_count()
+        self.assertEqual(record_count, 1)
+
+    def test_sealed_interviews_are_excluded(self):
+        # Confirm the OAI feed does not include Sealed interview item.
+        self.save_interview_item_with_status("Sealed")
+        record_count = self.get_oai_record_count()
+        self.assertEqual(record_count, 0)
+
+    def test_completed_audio_items_are_included(self):
+        # Confirm the OAI feed includes both interview and audio item
+        # (by design, feed includes records for both, though they are parent/child).
+        self.save_interview_item_with_status("Completed")
+        self.save_audio_item_with_status("Completed")
+        record_count = self.get_oai_record_count()
+        self.assertEqual(record_count, 2)
+
+    def test_sealed_audio_items_are_excluded(self):
+        # Confirm the OAI feed has only 1 item, the Completed interview.
+        self.save_interview_item_with_status("Completed")
+        self.save_audio_item_with_status("Sealed")
+        record_count = self.get_oai_record_count()
+        self.assertEqual(record_count, 1)
+
+    def test_sealed_audio_metadata_is_excluded(self):
+        # Confirm that Completed interview items in the OAI feed
+        # do not include metadata for Sealed audio items related to them.
+        self.save_interview_item_with_status("Completed")
+        self.save_audio_item_with_status("Sealed")
+        related_titles = self.get_oai_interview_related_titles()
+        # Interview items can have any number of related items (audio and series);
+        # in our test data, the Sealed audio item has title "Fake audio".
+        # That title should not be present, since that item has been Sealed.
+        self.assertNotIn("Fake audio", related_titles)
 
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
