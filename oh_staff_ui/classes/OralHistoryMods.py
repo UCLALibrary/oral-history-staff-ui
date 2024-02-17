@@ -156,8 +156,11 @@ class OralHistoryMods(MODSv34):
             self.origin_info.created.append(mods.DateCreated(date=date))
 
     def _populate_constituent_audio(self):
-        # For each child of the item, get submaster audio MediaFile
-        for child in ProjectItem.objects.filter(parent=self._item).order_by("sequence"):
+        # For each Completed child of the item, get submaster audio MediaFile
+        for child in ProjectItem.objects.filter(
+            parent=self._item,
+            status__status__in=["Completed", "Completed with minimal metadata"],
+        ).order_by("sequence"):
             for audiofile in MediaFile.objects.filter(
                 item=child, file_type__file_code="audio_submaster"
             ):
