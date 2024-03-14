@@ -1142,6 +1142,13 @@ class ModsTestCase(TestCase):
             original_file_name="FAKE_TIMED_LOG",
             file="oh_static/text/submasters/fake-abcdef-2-master.xml",
         )
+        MediaFile.objects.create(
+            created_by=cls.user,
+            file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
+            item=cls.audio_item,
+            original_file_name="FAKE_TEI_TIMED_LOG",
+            file="oh_static/text/submasters/fake-abcdef-2-master-tei.xml",
+        )
 
     # Utility methods to return MODS specific to item type
     def get_mods_from_audio_item(self):
@@ -1342,6 +1349,17 @@ class ModsTestCase(TestCase):
         self.assertTrue(
             b'<mods:relatedItem type="series">' not in ohmods.serializeDocument()
         )
+
+    def test_timed_log_attribute_is_added(self):
+        # If an item contains a TEI/XML transcript, it should have a usage attribute with value "timed_log"
+        if MediaFile(
+            item=self.audio_item,
+            file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
+        ):
+            ohmods = self.get_mods_from_audio_item()
+            self.assertTrue(
+                b'<mods:url usage="timed log">' in ohmods.serializeDocument()
+            )
 
     def test_writing_single_mods(self):
         ohmods = self.get_mods_from_interview_item()
