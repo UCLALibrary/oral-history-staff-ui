@@ -210,14 +210,22 @@ class OralHistoryMods(MODSv34):
         ).order_by("sequence"):
             if f.file_url != "":
                 label = fc_to_label[f.file_type.file_code]
+                usage = ""
 
                 if f.file_type.file_code == "text_master_transcript":
                     if f.file_name_only.endswith(".html"):
                         label = f"{label} (Printable Version)"
                     else:
                         label = f"{label} (TEI/P5 XML)"
+                        usage = "timed log"
 
-                self.locations.append(LocationOH(url=f.file_url, label=label))
+                # If our MediaFile is TEI/P5 XML, a usage attribute is populated and should be included
+                if usage:
+                    self.locations.append(
+                        LocationOH(url=f.file_url, label=label, usage=usage)
+                    )
+                else:
+                    self.locations.append(LocationOH(url=f.file_url, label=label))
 
     def _populate_series_content(self):
         p = self._item.parent
