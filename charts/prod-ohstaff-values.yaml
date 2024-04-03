@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: uclalibrary/oral-history-staff-ui
-  tag: v1.0.8
+  tag: v1.0.9
   pullPolicy: Always
 
 nameOverride: ""
@@ -40,8 +40,10 @@ django:
     debug: "false"
     # DEBUG, INFO, WARNING, ERROR, CRITICAL
     log_level: "INFO"
+    # Public and private host names (for internal OAI harvesting)
     allowed_hosts:
       - oh-staff.library.ucla.edu
+      - oral-history-staff-ui-oh-staff.oh-staffprod.svc.cluster.local
     csrf_trusted_origins:
       - https://oh-staff.library.ucla.edu
     ark_minter: "http://noid.library.ucla.edu/noidu_zz8+?mint+1"
