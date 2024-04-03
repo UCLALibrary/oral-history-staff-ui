@@ -33,10 +33,8 @@ django:
     run_env: "prod"
     debug: "false"
     log_level: ""
-    allowed_hosts: []
-    #  - localhost
-    #  - 127.0.0.1
-    #  - [::1]
+    # Comma-separated list of hostnames for allowed_hosts
+    allowed_hosts: ""
     csrf_trusted_origins: []
     ark_minter: ""
     db_backend: ""
