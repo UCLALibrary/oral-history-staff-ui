@@ -36,7 +36,7 @@ spec:
               port: http
               httpHeaders:
                 - name: Host
-                  value: {{ range .Values.django.env.allowed_hosts }}{{ . }}{{ end }}
+                  value: {{ (split "," .Values.django.env.allowed_hosts)._0 }}
             initialDelaySeconds: 10
             timeoutSeconds: 10
           readinessProbe:
@@ -45,7 +45,7 @@ spec:
               port: http
               httpHeaders:
                 - name: Host
-                  value: {{ range .Values.django.env.allowed_hosts }}{{ . }}{{ end }}
+                  value: {{ (split "," .Values.django.env.allowed_hosts)._0 }}
             initialDelaySeconds: 10
             timeoutSeconds: 10
           resources:
