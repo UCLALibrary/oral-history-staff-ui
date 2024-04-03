@@ -40,10 +40,8 @@ django:
     debug: "false"
     # DEBUG, INFO, WARNING, ERROR, CRITICAL
     log_level: "INFO"
-    # Public and private host names (for internal OAI harvesting)
-    allowed_hosts:
-      - oh-staff.library.ucla.edu
-      - oral-history-staff-ui-oh-staff.oh-staffprod.svc.cluster.local
+    # Comma-separated list of Public and private host names (for internal OAI harvesting)
+    allowed_hosts: oh-staff.library.ucla.edu,oral-history-staff-ui-oh-staff.oh-staffprod.svc.cluster.local
     csrf_trusted_origins:
       - https://oh-staff.library.ucla.edu
     ark_minter: "http://noid.library.ucla.edu/noidu_zz8+?mint+1"
