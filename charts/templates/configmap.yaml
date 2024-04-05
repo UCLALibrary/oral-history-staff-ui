@@ -22,4 +22,4 @@ data:
   DJANGO_OH_MASTERSLZ: {{ .Values.django.env.oh_masterslz }}
   DJANGO_OH_STATIC: {{ .Values.django.env.oh_static }}
   DJANGO_OH_WOWZA: {{ .Values.django.env.oh_wowza }}
-  
+  DJANGO_OH_PUBLIC_SITE: {{ .Values.django.env.oh_public_site }}
