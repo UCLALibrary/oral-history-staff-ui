@@ -1,5 +1,4 @@
 import logging
-import urllib.parse
 
 from django.db import connection
 from datetime import datetime
@@ -228,7 +227,7 @@ def get_public_site_url(item: ProjectItem) -> str:
         return None
 
     if item.type.type == "Series":
-        return f"{settings.OH_PUBLIC_SITE}/?f%5Bseries_facet%5D%5B%5D={urllib.parse.quote_plus(item.title)}"
+        return f"{settings.OH_PUBLIC_SITE}/?f[series_facet][]={item.title}"
     elif item.type.type == "Interview":
         return f"{settings.OH_PUBLIC_SITE}/catalog/{item.ark.replace('/', '-')}"
     else:
