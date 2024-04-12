@@ -47,6 +47,9 @@
             {% if item.type.type == "Interview" %}
                |   <a href="{% url 'order_files' item.id %}">Configure file order</a>
             {% endif %}
+            {% if public_site_url %}
+                | <a href="{{public_site_url}}">View on public site</a>
+            {% endif %}
         </td>
     </tr>
 </table>

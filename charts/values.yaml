@@ -50,6 +50,7 @@ django:
     oh_masterslz: ""
     oh_static: ""
     oh_wowza: ""
+    oh_public_site: ""
 
   externalSecrets:
     enabled: "false"

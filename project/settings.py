@@ -210,6 +210,8 @@ OH_WOWZA = os.getenv("DJANGO_OH_WOWZA")
 # Static files
 OH_STATIC = os.getenv("DJANGO_OH_STATIC")
 
+OH_PUBLIC_SITE = os.getenv("DJANGO_OH_PUBLIC_SITE")
+
 # Image conversion settings
 IMAGE_SETTINGS = {
     "submaster_long_dimension": 750,

@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: uclalibrary/oral-history-staff-ui
-  tag: v1.0.9
+  tag: v1.0.10
   pullPolicy: Always
 
 nameOverride: ""
@@ -59,6 +59,7 @@ django:
     oh_masterslz: "oh_lz"
     oh_static: "oh_static"
     oh_wowza: "oh_wowza"
+    oh_public_site: "https://oralhistory.library.ucla.edu"
 
   externalSecrets:
     enabled: "true"

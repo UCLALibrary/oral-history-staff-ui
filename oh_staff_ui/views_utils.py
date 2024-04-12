@@ -1,4 +1,5 @@
 import logging
+
 from django.db import connection
 from datetime import datetime
 from lxml import etree
@@ -214,7 +215,23 @@ def get_edit_item_context(item_id: int) -> dict:
         "resource_formset": resource_formset,
         "subject_formset": subject_formset,
         "relatives": relatives,
+        "public_site_url": get_public_site_url(item),
     }
+
+
+def get_public_site_url(item: ProjectItem) -> str:
+    if not (
+        settings.OH_PUBLIC_SITE
+        and item.status.status in ("Completed", "Completed with minimal metadata")
+    ):
+        return None
+
+    if item.type.type == "Series":
+        return f"{settings.OH_PUBLIC_SITE}/?f[series_facet][]={item.title}"
+    elif item.type.type == "Interview":
+        return f"{settings.OH_PUBLIC_SITE}/catalog/{item.ark.replace('/', '-')}"
+    else:
+        return None
 
 
 def get_metadata_formset(
