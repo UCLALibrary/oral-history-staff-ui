@@ -35,7 +35,7 @@ class TestGetPublicSiteUrl(SimpleTestCase):
                 )
                 self.assertEqual(
                     get_public_site_url(item),
-                    f"https://oralhistory.library.ucla.edu/catalog/123-2",
+                    "https://oralhistory.library.ucla.edu/catalog/123-2",
                 )
 
     def test_other_types(self):
