@@ -1,6 +1,8 @@
 name: Build for Docker Hub Oral History Staff UI
 on: 
   push:
+    paths-ignore:
+      - 'charts/**'
     branches:
       - main
   workflow_dispatch:
