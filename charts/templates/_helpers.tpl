@@ -60,6 +60,9 @@ Deployment Volume Configuration
 - name: "ohmasters"
   persistentVolumeClaim:
     claimName: {{ include "oh-staff.fullname" . }}-pvc-ohmasters
+- name: "ohmasterslz"
+  persistentVolumeClaim:
+    claimName: {{ include "oh-staff.fullname" . }}-pvc-ohmasterslz
 - name: "ohwowza"
   persistentVolumeClaim:
     claimName: {{ include "oh-staff.fullname" . }}-pvc-ohwowza

@@ -56,6 +56,7 @@ django:
     # Where Django looks for uploaded files
     oh_media_root: "/media"
     # Relative paths within oh_media_root, used by Django
+    oh_masters: "oh_masters"
     oh_masterslz: "oh_lz"
     oh_static: "oh_static"
     oh_wowza: "oh_wowza"
@@ -78,6 +79,11 @@ persistentVolumes:
     server: "lib-partners.in.library.ucla.edu"
     path: "/OralHistory"
   ohmasters:
+    storage: "7Ti"
+    access: "ReadWriteMany"
+    server: "dlp.in.library.ucla.edu"
+    path: "/masters/nfs_mount/oralhistory"
+  ohmasterslz:
     storage: "1.1Ti"
     access: "ReadWriteMany"
     server: "dlp.in.library.ucla.edu"
@@ -104,6 +110,8 @@ volumeMounts:
   - name: "ohsource"
     mountPath: "/media/oh_source"
   - name: "ohmasters"
+    mountPath: "/media/oh_masters"
+  - name: "ohmasterslz"
     mountPath: "/media/oh_lz"
   - name: "ohwowza"
     mountPath: "/media/oh_wowza"
