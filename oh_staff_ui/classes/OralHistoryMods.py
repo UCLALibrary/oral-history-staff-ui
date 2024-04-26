@@ -177,12 +177,12 @@ class OralHistoryMods(MODSv34):
             ri.toc = TableOfContents(text=toc.value)
 
         for ts in MediaFile.objects.filter(
-            item=pi, file_type__file_code="text_master_index"
+            item=pi, file_type__file_code="text_master_transcript"
         ):
-            if ts.file_url != "":
-                ri.locations.append(
-                    LocationOH(url=ts.file_url, usage="primary display")
-                )
+            if ts.file_url != "" and ts.file_url.endswith(".xml"):
+                # Due to legacy design the text_master_transcript can have 2 file types
+                # associated with it, we only want to show xml (TEI), and ignore html files
+                ri.locations.append(LocationOH(url=ts.file_url, usage="timed log"))
 
         return ri
 
@@ -191,7 +191,7 @@ class OralHistoryMods(MODSv34):
             item=self._item, file_type__file_code="image_submaster"
         ).order_by("sequence"):
             self.locations.append(
-                LocationOH(url=img.file_url, label="Image of Narrator")
+                LocationOH(url=img.file_url, label="Image of Interviewee")
             )
 
     def _populate_interview_content(self):

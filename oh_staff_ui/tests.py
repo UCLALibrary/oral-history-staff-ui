@@ -1322,7 +1322,7 @@ class ModsTestCase(TestCase):
     def test_valid_mods_image(self):
         ohmods = self.get_mods_from_interview_item()
         self.assertTrue(
-            b'<mods:location displayLabel="Image of Narrator">'
+            b'<mods:location displayLabel="Image of Interviewee">'
             in ohmods.serializeDocument()
         )
 
