@@ -1177,6 +1177,11 @@ class ModsTestCase(TestCase):
         return ohmods
 
     # Utility methods to save items with specifc status, for OAI feed testing
+    def save_series_item_with_status(self, status: str):
+        series = self.series_item
+        series.status = ItemStatus.objects.get(status=status)
+        series.save()
+
     def save_interview_item_with_status(self, status: str):
         interview = self.interview_item
         interview.status = ItemStatus.objects.get(status=status)
@@ -1403,6 +1408,21 @@ class ModsTestCase(TestCase):
         self.save_interview_item_with_status("Sealed")
         record_count = self.get_oai_record_count()
         self.assertEqual(record_count, 0)
+
+    def test_series_records_NOT_included(self):
+        # Confirm the OAI feed does not include series as primary records.
+        self.save_series_item_with_status("Completed")
+        self.save_interview_item_with_status("Completed")
+        record_count = self.get_oai_record_count()
+        self.assertEqual(record_count, 1)
+
+    def test_series_as_related_title(self):
+        # Confirm the OAI feed includes series as related titles to interviews.
+        self.save_series_item_with_status("Completed")
+        self.save_interview_item_with_status("Completed")
+
+        related_titles = self.get_oai_interview_related_titles()
+        self.assertIn("Fake series", related_titles)
 
     def test_completed_audio_items_are_included(self):
         # Confirm the OAI feed includes both interview and audio item

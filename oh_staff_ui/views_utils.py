@@ -492,7 +492,7 @@ def get_records_oai(verb: str, ark: str = None, req_url: str = None) -> str:
     # Only items with these statuses should be published via OAI.
     pi_set = ProjectItem.objects.filter(
         status__status__in=["Completed", "Completed with minimal metadata"]
-    )
+    ).exclude(type__type__iexact="Series")
 
     if ark:
         pi_set = pi_set.filter(ark=ark)
