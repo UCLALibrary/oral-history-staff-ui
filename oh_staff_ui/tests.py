@@ -1409,7 +1409,7 @@ class ModsTestCase(TestCase):
         record_count = self.get_oai_record_count()
         self.assertEqual(record_count, 0)
 
-    def test_series_records_NOT_included(self):
+    def test_series_records_are_excluded(self):
         # Confirm the OAI feed does not include series as primary records.
         self.save_series_item_with_status("Completed")
         self.save_interview_item_with_status("Completed")
