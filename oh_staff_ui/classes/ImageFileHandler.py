@@ -95,6 +95,8 @@ class ImageFileHandler(BaseFileHandler):
             with Image.open(input_name) as master_image:
                 new_sizes = self._get_new_image_dimensions(master_image.size, max_size)
                 derivative_image = master_image.resize(new_sizes)
+                if derivative_type == "thumbnail":
+                    derivative_image = self._make_square_thumbnail(derivative_image)
                 # Ordinary jpg does not support transparency, so convert if needed.
                 if derivative_image.mode in ("RGBA", "P"):
                     derivative_image = derivative_image.convert("RGB")
@@ -127,3 +129,17 @@ class ImageFileHandler(BaseFileHandler):
         scale_factor = max(current_sizes) / max_size
         new_sizes = tuple(int(dimension / scale_factor) for dimension in current_sizes)
         return new_sizes
+
+    def _make_square_thumbnail(self, thumbnail_image: Image.Image) -> Image.Image:
+        """Create a square thumbnail from a rectangular image, with black padding.
+        To be used after image is resized to thumbnail size.
+
+        Arguments:
+        thumbnail_image: image resized such that the longest side is the thumbnail size.
+        Returns: the square thumbnail.
+        """
+        x, y = thumbnail_image.size
+        size = max(x, y)
+        square_thumbnail = Image.new("RGB", (size, size), color="black")
+        square_thumbnail.paste(thumbnail_image, (int((size - x) / 2), int((size - y) / 2)))
+        return square_thumbnail
