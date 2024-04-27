@@ -41,7 +41,7 @@ class OralHistoryMods(MODSv34):
         self._populate_rights()
         self._populate_subjects()
         self._populate_constituent_audio()
-        self._populate_narrator_image()
+        self._populate_interviewee_image()
         self._populate_interview_content()
         self._populate_series_content()
 
@@ -186,7 +186,7 @@ class OralHistoryMods(MODSv34):
 
         return ri
 
-    def _populate_narrator_image(self):
+    def _populate_interviewee_image(self):
         for img in MediaFile.objects.filter(
             item=self._item, file_type__file_code="image_submaster"
         ).order_by("sequence"):

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from lxml import etree
 from pathlib import Path
 from django.conf import settings
@@ -1150,6 +1151,12 @@ class ModsTestCase(TestCase):
             file="oh_static/text/submasters/fake-abcdef-2-master-tei.xml",
         )
 
+    # Utility methods to pretty print xml
+    def prettify_xml(self, xml: str) -> str:
+        root = etree.fromstring(xml.serializeDocument())
+        pretty_xml = etree.tostring(root, pretty_print=True, encoding="unicode")
+        return pretty_xml
+
     # Utility methods to return MODS specific to item type
     def get_mods_from_audio_item(self):
         return self.get_mods_from_item_type(type="audio")
@@ -1365,6 +1372,34 @@ class ModsTestCase(TestCase):
             self.assertTrue(
                 b'<mods:url usage="timed log">' in ohmods.serializeDocument()
             )
+
+    def test_absence_of_timed_log_with_text_master_index(self):
+        # If an item does not contain a file_code of text_master_transcript, mods:url[@usage="timed log"] should not be present
+
+        # Delete MediaFile associated with "text_master_transcript" file_code
+        media_file = MediaFile.objects.get(
+            item__id=self.audio_item.id, file_type__file_code="text_master_transcript"
+        )
+        media_file.delete()
+
+        ohmods = self.get_mods_from_audio_item()
+
+        # At this point we should only have "text_master_index" file_code MediaFile
+        if MediaFile.objects.get(
+            item__id=self.audio_item.id, file_type__file_code="text_master_index"
+        ):
+            self.assertFalse(
+                b'<mods:url usage="timed log">' in ohmods.serializeDocument()
+            )
+
+        # Add "text_master_transcript" back in case future tests rely on it
+        MediaFile.objects.create(
+            created_by=self.user,
+            file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
+            item=self.audio_item,
+            original_file_name="FAKE_TEI_TIMED_LOG",
+            file="oh_static/text/submasters/fake-abcdef-2-master-tei.xml",
+        )
 
     def test_writing_single_mods(self):
         ohmods = self.get_mods_from_interview_item()
