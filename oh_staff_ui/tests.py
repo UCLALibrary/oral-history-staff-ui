@@ -1,4 +1,3 @@
-from copy import deepcopy
 from lxml import etree
 from pathlib import Path
 from django.conf import settings
@@ -1363,7 +1362,8 @@ class ModsTestCase(TestCase):
         )
 
     def test_timed_log_attribute_is_added(self):
-        # If an item contains a TEI/XML transcript, it should have a usage attribute with value "timed_log"
+        # If an item contains a TEI/XML transcript, it should have a usage attribute
+        # with value "timed_log"
         if MediaFile(
             item=self.audio_item,
             file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
@@ -1374,7 +1374,8 @@ class ModsTestCase(TestCase):
             )
 
     def test_absence_of_timed_log_with_text_master_index(self):
-        # If an item does not contain a file_code of text_master_transcript, mods:url[@usage="timed log"] should not be present
+        # If an item does not contain a file_code of text_master_transcript,
+        # mods:url[@usage="timed log"] should not be present.
 
         # Delete MediaFile associated with "text_master_transcript" file_code
         media_file = MediaFile.objects.get(
