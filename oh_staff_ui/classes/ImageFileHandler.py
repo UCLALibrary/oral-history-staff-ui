@@ -138,8 +138,8 @@ class ImageFileHandler(BaseFileHandler):
         thumbnail_image: image resized such that the longest side is the thumbnail size.
         Returns: the square thumbnail.
         """
-        x, y = thumbnail_image.size
-        size = max(x, y)
+        width, height = thumbnail_image.size
+        size = max(width, height)
         square_thumbnail = Image.new("RGB", (size, size), color="black")
-        square_thumbnail.paste(thumbnail_image, (int((size - x) / 2), int((size - y) / 2)))
+        square_thumbnail.paste(thumbnail_image, (int((size - width) / 2), int((size - height) / 2)))
         return square_thumbnail
