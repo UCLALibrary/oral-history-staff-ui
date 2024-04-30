@@ -1,5 +1,6 @@
 from lxml import etree
 from pathlib import Path
+from PIL import Image
 from django.conf import settings
 from django.core.files import File
 from django.core.management.base import CommandError
@@ -265,6 +266,17 @@ class MediaFileTestCase(TestCase):
         self.assertEqual(new_path.exists(), True)
         # Confirm master is parent of submaster.
         self.assertEqual(master.media_file, submaster.parent)
+
+    def test_thumbnail_image_size(self):
+        master = self.create_master_image_file()
+        handler = ImageFileHandler(master)
+        handler.process_files()
+        file_type = MediaFileType.objects.get(file_code="image_thumbnail")
+        thumbnail = MediaFile.objects.get(parent=master.media_file, file_type=file_type)
+        # Confirm that the thumbnail is square, and is of the size specified in settings.
+        thumbnail_size = settings.IMAGE_SETTINGS["thumbnail_long_dimension"]
+        with Image.open(self.get_full_path(thumbnail.file.name)) as img:
+            self.assertEqual(img.size, (thumbnail_size, thumbnail_size))
 
     def test_master_general_file_is_added(self):
         master = self.create_master_general_file()
