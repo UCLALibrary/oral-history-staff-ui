@@ -499,7 +499,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "oh_lz/audio/masters")
+        self.assertEqual(ohf.target_dir, "oh_masters/audio/masters")
 
     def test_get_target_dir_submaster_audio(self):
         file_type = MediaFileType.objects.get(file_code="audio_submaster")
@@ -521,7 +521,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "oh_lz/masters")
+        self.assertEqual(ohf.target_dir, "oh_masters/masters")
 
     def test_get_target_dir_submaster_image(self):
         file_type = MediaFileType.objects.get(file_code="image_submaster")
@@ -554,7 +554,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "oh_lz/pdf/masters")
+        self.assertEqual(ohf.target_dir, "oh_masters/pdf/masters")
 
     def test_get_target_dir_submaster_pdf(self):
         file_type = MediaFileType.objects.get(file_code="pdf_master_legal_agreement")
@@ -576,7 +576,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEqual(ohf.target_dir, "oh_lz/text/masters")
+        self.assertEqual(ohf.target_dir, "oh_masters/text/masters")
 
     def test_get_target_dir_submaster_text(self):
         file_type = MediaFileType.objects.get(file_code="text_master_transcript")
@@ -631,7 +631,7 @@ class MediaFileTestCase(TestCase):
         handler.process_files()
         self.assertEqual(
             master.media_file.file.name,
-            "oh_lz/audio/masters/fake-abcdef-1-master.wav",
+            "oh_masters/audio/masters/fake-abcdef-1-master.wav",
         )
 
     def test_file_url_master_is_empty(self):
@@ -641,7 +641,7 @@ class MediaFileTestCase(TestCase):
             file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
             item=self.item,
             original_file_name="FAKE",
-            file="oh_lz/text/masters/fake-abcdef-1-master.xml",
+            file="oh_masters/text/masters/fake-abcdef-1-master.xml",
         )
         self.assertEqual(mf.file_url, "")
 

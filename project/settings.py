@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+
 import os
 from pathlib import Path
 
@@ -203,8 +204,8 @@ MEDIA_ROOT = os.getenv("DJANGO_OH_MEDIA_ROOT")
 # Users select files to upload from here.
 # Values supplied are *relative* to MEDIA_ROOT.
 OH_FILE_SOURCE = os.getenv("DJANGO_OH_FILE_SOURCE")
-# Masters "shadow landing zone"
-OH_MASTERSLZ = os.getenv("DJANGO_OH_MASTERSLZ")
+# Master files
+OH_MASTERS = os.getenv("DJANGO_OH_MASTERS")
 # Wowza
 OH_WOWZA = os.getenv("DJANGO_OH_WOWZA")
 # Static files

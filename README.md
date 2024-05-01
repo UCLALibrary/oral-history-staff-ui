@@ -207,7 +207,7 @@ In the local development environment, samples files for testing are in the `samp
 
 As files are processed locally, they go into subdirectories of `MEDIA_ROOT` - for developers, `/tmp/media_dev` **in the container**. 
 The top-level subdirectories are defined via environment variables:
-* `DJANGO_OH_MASTERSLZ`
+* `DJANGO_OH_MASTERS`
 * `DJANGO_OH_WOWZA`
 * `DJANGO_OH_STATIC`
 
@@ -228,7 +228,7 @@ $ docker-compose exec django bash -c "tree /tmp/media_dev"
 Example, after uploading 1 of each type of file, showing masters and derivatives:
 ```
 /tmp/media_dev
-├── oh_lz
+├── oh_masters
 │   ├── audio
 │   │   └── masters
 │   │       └── fake-bdef357512-1-master.wav

@@ -48,7 +48,6 @@ django:
     target_port: ""
     oh_media_root: ""
     oh_masters: ""
-    oh_masterslz: ""
     oh_static: ""
     oh_wowza: ""
     oh_public_site: ""
@@ -71,11 +70,6 @@ persistentVolumes:
     server: ""
     path: ""
   ohmasters:
-    storage: ""
-    access: ""
-    server: ""
-    path: ""
-  ohmasterslz:
     storage: ""
     access: ""
     server: ""
