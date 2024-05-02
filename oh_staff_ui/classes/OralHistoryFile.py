@@ -142,7 +142,7 @@ class OralHistoryFile:
 
     def _get_base_dir(self, file_use: str, content_type: str) -> str:
         if file_use == "master":
-            base_dir = settings.OH_MASTERSLZ
+            base_dir = settings.OH_MASTERS
         elif file_use == "submaster":
             if content_type == "audio":
                 base_dir = settings.OH_WOWZA
