@@ -111,5 +111,8 @@ class Command(BaseCommand):
                 file_type__file_code="image_master"
             ).order_by("id")
 
+        master_image_count = master_images.count()
+        logger.info(f"Found {master_image_count} master images to reprocess")
+
         delete_existing_derivative_images(master_images)
         reprocess_derivative_images(master_images)
