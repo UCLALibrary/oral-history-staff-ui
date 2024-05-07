@@ -86,7 +86,9 @@ The container runs via `docker_scripts/entrypoint.sh`, which
    ```
 7. Connect to the running application via browser
 
-   [Application](http://127.0.0.1:8000) and [Admin](http://127.0.0.1:8000/admin)
+   * [Application](http://127.0.0.1:8000) and [Admin](http://127.0.0.1:8000/admin)
+     * Username: `dev_admin`
+     * Password: `dev_admin`
 
 8. Edit code locally.  All changes are immediately available in the running container, but if a restart is needed:
 
