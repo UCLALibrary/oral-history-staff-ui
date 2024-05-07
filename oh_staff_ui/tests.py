@@ -1,3 +1,4 @@
+from shutil import rmtree
 from lxml import etree
 from pathlib import Path
 from PIL import Image
@@ -6,7 +7,7 @@ from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.http import HttpRequest
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.contrib.auth.models import User
 from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
@@ -634,7 +635,8 @@ class MediaFileTestCase(TestCase):
             "oh_masters/audio/masters/fake-abcdef-1-master.wav",
         )
 
-    def test_file_url_master_is_empty(self):
+    @override_settings(RUN_ENV="prod")
+    def test_file_url_master(self):
         # Create minimal MediaFile object directly, with realistic file path.
         mf = MediaFile.objects.create(
             created_by=self.user,
@@ -643,8 +645,11 @@ class MediaFileTestCase(TestCase):
             original_file_name="FAKE",
             file="oh_masters/text/masters/fake-abcdef-1-master.xml",
         )
-        self.assertEqual(mf.file_url, "")
+        self.assertEqual(
+            mf.file_url, "/media/oh_masters/text/masters/fake-abcdef-1-master.xml"
+        )
 
+    @override_settings(RUN_ENV="prod")
     def test_file_url_audio_submaster(self):
         # Create minimal MediaFile object directly, with realistic file path.
         mf = MediaFile.objects.create(
@@ -660,6 +665,7 @@ class MediaFileTestCase(TestCase):
             "fake-abcdef-1-submaster.mp3/playlist.m3u8",
         )
 
+    @override_settings(RUN_ENV="prod")
     def test_file_url_static_submaster(self):
         # Create minimal MediaFile object directly, with realistic file path.
         mf = MediaFile.objects.create(
@@ -674,6 +680,7 @@ class MediaFileTestCase(TestCase):
             "https://static.library.ucla.edu/oralhistory/text/submasters/fake-abcdef-1-master.xml",
         )
 
+    @override_settings(RUN_ENV="prod")
     def test_file_url_static_thumbnail(self):
         # Create minimal MediaFile object directly, with realistic file path.
         mf = MediaFile.objects.create(
@@ -1162,6 +1169,13 @@ class ModsTestCase(TestCase):
             file="oh_static/text/submasters/fake-abcdef-2-master-tei.xml",
         )
 
+    @classmethod
+    def tearDownClass(cls):
+        # Remove test mods folder and file(s) created by test_writing_single_mods()
+        p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods/")
+        rmtree(p)
+        super().tearDownClass()
+
     # Utility methods to pretty print xml
     def prettify_xml(self, xml: str) -> str:
         root = etree.fromstring(xml.serializeDocument())
@@ -1325,6 +1339,8 @@ class ModsTestCase(TestCase):
             not in ohmods.serializeDocument()
         )
 
+    @override_settings(RUN_ENV="prod")
+    # Real URLs are set only when not in dev mode
     def test_valid_related_audio_item(self):
         ohmods = self.get_mods_from_interview_item()
         self.assertTrue(
