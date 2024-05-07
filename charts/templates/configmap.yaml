@@ -22,5 +22,6 @@ data:
   DJANGO_OH_MASTERS: {{ .Values.django.env.oh_masters }}
   DJANGO_OH_STATIC: {{ .Values.django.env.oh_static }}
   DJANGO_OH_WOWZA: {{ .Values.django.env.oh_wowza }}
+  DJANGO_OH_STATIC_URL_PREFIX: {{ .Values.django.env.oh_static_url_prefix }}
+  DJANGO_OH_WOWZA_URL_PREFIX: {{ .Values.django.env.oh_wowza_url_prefix }}
   DJANGO_OH_PUBLIC_SITE: {{ .Values.django.env.oh_public_site }}
-  

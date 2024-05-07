@@ -50,6 +50,8 @@ django:
     oh_masters: ""
     oh_static: ""
     oh_wowza: ""
+    oh_static_url_prefix: ""
+    oh_wowza_url_prefix: ""
     oh_public_site: ""
 
   externalSecrets:
