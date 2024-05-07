@@ -52,7 +52,7 @@ def process_file(
 def get_mock_request() -> HttpRequest:
     """Get mock request with generic user info for command-line processing."""
     mock_request = HttpRequest()
-    mock_request.user = User.objects.get(username="oralhistory")
+    mock_request.user = User.objects.get(username="oralhistory data entry")
     return mock_request
 
 

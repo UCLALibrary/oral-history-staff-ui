@@ -539,26 +539,28 @@ class MediaFile(models.Model):
     @property
     def file_url(self) -> str:
         # Calculate URL for a file, based on its path.  URLs are *not* stored in the database.
-        # Only meaningful for production files, not in development environment.
-
-        # Skip masters for now, until policy is resolved.
         file_name = self.file.name
-        if "/masters/" in file_name:
-            file_url = ""
-        # Non-audio submasters & thumbnails
-        elif file_name.startswith("oh_static/"):
-            file_url = file_name.replace(
-                "oh_static/", "https://static.library.ucla.edu/oralhistory/"
-            )
-        # Audio submasters
-        elif file_name.startswith("oh_wowza/"):
-            file_url = file_name.replace(
-                "oh_wowza/",
-                "https://wowza.library.ucla.edu/dlp/definst/mp3:oralhistory/",
-            )
-            file_url += "/playlist.m3u8"
+        if settings.RUN_ENV == "dev":
+            # In the local dev environment, serve all media files directly.
+            # This will work only for locally-created/stored files.
+            file_url = settings.MEDIA_URL + file_name
         else:
-            file_url = ""
+            if file_name.startswith("oh_masters/"):
+                # Access to master files is rarely needed;
+                # OK to serve directly from media file system.
+                file_url = settings.MEDIA_URL + file_name
+            # Non-audio submasters & thumbnails
+            elif file_name.startswith("oh_static/"):
+                file_url = file_name.replace(
+                    "oh_static/", settings.OH_STATIC_URL_PREFIX
+                )
+            # Audio submasters
+            elif file_name.startswith("oh_wowza/"):
+                file_url = file_name.replace("oh_wowza/", settings.OH_WOWZA_URL_PREFIX)
+                # Add the playlist suffix Wowza requires.
+                file_url += "/playlist.m3u8"
+            else:
+                file_url = ""
         return file_url
 
 
