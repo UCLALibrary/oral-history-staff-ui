@@ -198,6 +198,10 @@ LOGIN_REDIRECT_URL = "/"
 # ARK minter
 ARK_MINTER = os.getenv("DJANGO_ARK_MINTER")
 
+# URL base for files served from MEDIA_ROOT;
+# this is the same in all environments.
+MEDIA_URL = "/media/"
+
 # Directories for uploaded files and their derivatives.
 MEDIA_ROOT = os.getenv("DJANGO_OH_MEDIA_ROOT")
 
@@ -208,9 +212,18 @@ OH_FILE_SOURCE = os.getenv("DJANGO_OH_FILE_SOURCE")
 OH_MASTERS = os.getenv("DJANGO_OH_MASTERS")
 # Wowza
 OH_WOWZA = os.getenv("DJANGO_OH_WOWZA")
-# Static files
+# Static files (in the UCLA scope, not related to
+# Django's STATICFILES etc.)
 OH_STATIC = os.getenv("DJANGO_OH_STATIC")
 
+# TODO: 20240503 add these URL_PREFIX variables to Helm chart.
+# URL prefix for non-audio submasters (mainly jpg/pdf/xml)
+# handled by UCLA's main static file server.
+OH_STATIC_URL_PREFIX = os.getenv("DJANGO_OH_STATIC_URL_PREFIX")
+# URL prefix for audio submasters
+OH_WOWZA_URL_PREFIX = os.getenv("DJANGO_OH_WOWZA_URL_PREFIX")
+
+# URL for linking to public interface.
 OH_PUBLIC_SITE = os.getenv("DJANGO_OH_PUBLIC_SITE")
 
 # Image conversion settings
