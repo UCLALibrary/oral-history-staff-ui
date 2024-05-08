@@ -1568,12 +1568,11 @@ class reprocessDerivativeImagesTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # Use QAD data for fake user and fake items.
-        user = User.objects.create_user("tester")
-        # Get mock request with generic user info for command-line processing.
+        cls.user = User.objects.create_user("tester")
         cls.mock_request = HttpRequest()
-        cls.mock_request.user = User.objects.get(username=user.username)
+        cls.mock_request.user = User.objects.get(username=cls.user.username)
 
+    def create_master_and_derivatives(self, user, mock_request):
         item = ProjectItem.objects.create(
             ark="fake/abcdef",
             created_by=user,
@@ -1581,54 +1580,92 @@ class reprocessDerivativeImagesTestCase(TestCase):
             title="Fake title",
             type=ItemType.objects.get(type="Audio"),
         )
-        # load a fake image file
-        image_file = MediaFile.objects.create(
-            created_by=user,
-            file_type=MediaFileType.objects.get(file_code="image_master"),
-            item=item,
-            original_file_name="FAKE",
-            file="samples/tall_sample.tif",
-        )
-        # create OralHistoryFile instance
-        oh_file = OralHistoryFile(
+        file_type = MediaFileType.objects.get(file_code="image_master")
+        master_image_file = OralHistoryFile(
             item.id,
-            file_name="samples/tall_sample.tif",
-            file_type=MediaFileType.objects.get(file_code="image_master"),
-            file_use="master",
-            request=cls.mock_request,
+            "samples/sample_marbles.tif",
+            file_type,
+            "master",
+            mock_request,
         )
 
-        # process the image file to get derivative images
-        handler = ImageFileHandler(oh_file)
+        handler = ImageFileHandler(master_image_file)
         handler.process_files()
+
         # get created date from derivative images, so we can check if they are updated
-        cls.thumbnail_create_date = MediaFile.objects.get(
+        thumbnail_create_date = MediaFile.objects.get(
             item=item, file_type__file_code="image_thumbnail"
         ).create_date
-        cls.submaster_created_date = MediaFile.objects.get(
+        submaster_create_date = MediaFile.objects.get(
             item=item, file_type__file_code="image_submaster"
         ).create_date
-        cls.item = item
 
-    def test_reprocess_derivative_images(self):
+        return item, thumbnail_create_date, submaster_create_date
+
+    def test_delete_existing_derivative_images(self):
+        self.item, self.thumbnail_created_date, self.submaster_created_date = (
+            self.create_master_and_derivatives(self.user, self.mock_request)
+        )
+
+        # check that the thumbnail and submaster images are created
+        self.assertTrue(MediaFile.objects.filter(item=self.item).count() == 3)
+
+        # check that the thumbnail and submaster images exist on disk
+        thumbnail_path = thumbnail_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
+        )
+        submaster_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
+        )
+        self.assertTrue(thumbnail_path.is_file())
+        self.assertTrue(submaster_path.is_file())
+
         # get queryset with our fake image file
         image_file_qset = MediaFile.objects.filter(
-            item=self.item, file_type__file_code="image_thumbnail"
+            item=self.item, file_type__file_code="image_master"
         )
-        image_file = image_file_qset.first()
+        # delete derivative images
+        delete_existing_derivative_images(image_file_qset)
+        # check that the thumbnail and submaster images are deleted
+        self.assertFalse(
+            MediaFile.objects.filter(
+                item=self.item, file_type__file_code="image_thumbnail"
+            ).exists()
+        )
+        self.assertFalse(
+            MediaFile.objects.filter(
+                item=self.item, file_type__file_code="image_submaster"
+            ).exists()
+        )
+        # check that the files on disk are deleted
+        self.assertFalse(thumbnail_path.is_file())
+        self.assertFalse(submaster_path.is_file())
+
+    def test_reprocess_derivative_images(self):
+        self.item, self.thumbnail_created_date, self.submaster_created_date = (
+            self.create_master_and_derivatives(self.user, self.mock_request)
+        )
+        # get queryset with our fake master file
+        image_file_qset = MediaFile.objects.filter(
+            item=self.item, file_type__file_code="image_master"
+        )
+        # delete the existing derivative images
+        delete_existing_derivative_images(image_file_qset)
         # reprocess the image file
         reprocess_derivative_images(image_file_qset, self.mock_request)
 
         # check that we now have a single thumbnail and submaster image
         self.assertTrue(
-            MediaFile.objects.get(
+            MediaFile.objects.filter(
                 item=self.item, file_type__file_code="image_thumbnail"
-            ).exists()
+            ).count()
+            == 1
         )
         self.assertTrue(
-            MediaFile.objects.get(
+            MediaFile.objects.filter(
                 item=self.item, file_type__file_code="image_submaster"
-            ).exists()
+            ).count()
+            == 1
         )
 
         # check that the created date of the derivative images has been updated
@@ -1642,42 +1679,26 @@ class reprocessDerivativeImagesTestCase(TestCase):
         self.assertNotEqual(self.submaster_created_date, submaster_create_date_updated)
 
         # check that the files on disk exist using Path
-        thumbnail_path = Path(f"{settings.MEDIA_ROOT}/{image_file.file}")
+        thumbnail_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
+        )
         submaster_path = Path(
-            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-submaster.jpg"
+            f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
         )
         self.assertTrue(thumbnail_path.is_file())
         self.assertTrue(submaster_path.is_file())
 
-    def test_delete_existing_derivative_images(self):
-        # get queryset with our fake image file
-        image_file_qset = MediaFile.objects.filter(
-            item=self.item, file_type__file_code="image_thumbnail"
+    def tearDown(self) -> None:
+        # remove the files created by the test
+        thumbnail_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
         )
-        image_file = image_file_qset.first()
-        # delete the image file
-        delete_existing_derivative_images(image_file_qset)
-        # check that the thumbnail and submaster images are deleted
-        self.assertFalse(
-            MediaFile.objects.filter(
-                item=self.item, file_type__file_code="image_thumbnail"
-            ).exists()
-        )
-        self.assertFalse(
-            MediaFile.objects.filter(
-                item=self.item, file_type__file_code="image_submaster"
-            ).exists()
-        )
-        # check that the files on disk are deleted using Path
-        thumbnail_path = Path(f"{settings.MEDIA_ROOT}/{image_file.file}")
         submaster_path = Path(
-            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-submaster.jpg"
+            f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
         )
-        self.assertFalse(thumbnail_path.is_file())
-        self.assertFalse(submaster_path.is_file())
+        thumbnail_path.unlink(missing_ok=True)
+        submaster_path.unlink(missing_ok=True)
+        # remove MediaFile objects created by the test
+        MediaFile.objects.filter(item=self.item).delete()
 
-    def tearDown(self):
-        # remove master image MediaFile and file on disk
-
-        self.item.delete()
-        super().tearDown()
+        return super().tearDown()
