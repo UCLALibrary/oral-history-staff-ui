@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 from . import views
 
@@ -23,3 +25,8 @@ urlpatterns = [
     path("oai/", views.oai, name="oai"),
     path("release_notes/", views.release_notes, name="release_notes"),
 ]
+
+# Enable serving media files.  In local dev environment, this is all files;
+# in production, this applies only to master files, which are rarely accessed
+# and can't practically be served in any other way.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
