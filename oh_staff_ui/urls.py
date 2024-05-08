@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.conf.urls.static import static
-from django.urls import path
+from django.views.static import serve
+from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
@@ -19,14 +19,11 @@ urlpatterns = [
     path("upload_file/<int:item_id>", views.upload_file, name="upload_file"),
     path("order_files/<int:item_id>", views.order_files, name="order_files"),
     path("browse/", views.browse, name="browse"),
+    # Allow access to download media files via built-in view django.views.static.serve()
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
     # To follow OAI practice, a query parameter combination is requred of either:
     # verb=GetRecord and identifier={ark_value}
     # verb=ListRecords
     path("oai/", views.oai, name="oai"),
     path("release_notes/", views.release_notes, name="release_notes"),
 ]
-
-# Enable serving media files.  In local dev environment, this is all files;
-# in production, this applies only to master files, which are rarely accessed
-# and can't practically be served in any other way.
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
