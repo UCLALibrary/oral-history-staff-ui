@@ -1,3 +1,4 @@
+from shutil import rmtree
 from lxml import etree
 from pathlib import Path
 from PIL import Image
@@ -6,7 +7,7 @@ from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.http import HttpRequest
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.contrib.auth.models import User
 from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
@@ -56,6 +57,10 @@ from oh_staff_ui.views_utils import (
     get_records_oai,
     get_bad_arg_error_xml,
     get_bad_verb_error_xml,
+)
+from oh_staff_ui.management.commands.reprocess_derivative_images import (
+    reprocess_derivative_images,
+    delete_existing_derivative_images,
 )
 
 
@@ -634,7 +639,8 @@ class MediaFileTestCase(TestCase):
             "oh_masters/audio/masters/fake-abcdef-1-master.wav",
         )
 
-    def test_file_url_master_is_empty(self):
+    @override_settings(RUN_ENV="prod")
+    def test_file_url_master(self):
         # Create minimal MediaFile object directly, with realistic file path.
         mf = MediaFile.objects.create(
             created_by=self.user,
@@ -643,8 +649,11 @@ class MediaFileTestCase(TestCase):
             original_file_name="FAKE",
             file="oh_masters/text/masters/fake-abcdef-1-master.xml",
         )
-        self.assertEqual(mf.file_url, "")
+        self.assertEqual(
+            mf.file_url, "/media/oh_masters/text/masters/fake-abcdef-1-master.xml"
+        )
 
+    @override_settings(RUN_ENV="prod")
     def test_file_url_audio_submaster(self):
         # Create minimal MediaFile object directly, with realistic file path.
         mf = MediaFile.objects.create(
@@ -660,6 +669,7 @@ class MediaFileTestCase(TestCase):
             "fake-abcdef-1-submaster.mp3/playlist.m3u8",
         )
 
+    @override_settings(RUN_ENV="prod")
     def test_file_url_static_submaster(self):
         # Create minimal MediaFile object directly, with realistic file path.
         mf = MediaFile.objects.create(
@@ -674,6 +684,7 @@ class MediaFileTestCase(TestCase):
             "https://static.library.ucla.edu/oralhistory/text/submasters/fake-abcdef-1-master.xml",
         )
 
+    @override_settings(RUN_ENV="prod")
     def test_file_url_static_thumbnail(self):
         # Create minimal MediaFile object directly, with realistic file path.
         mf = MediaFile.objects.create(
@@ -1162,6 +1173,13 @@ class ModsTestCase(TestCase):
             file="oh_static/text/submasters/fake-abcdef-2-master-tei.xml",
         )
 
+    @classmethod
+    def tearDownClass(cls):
+        # Remove test mods folder and file(s) created by test_writing_single_mods()
+        p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods/")
+        rmtree(p)
+        super().tearDownClass()
+
     # Utility methods to pretty print xml
     def prettify_xml(self, xml: str) -> str:
         root = etree.fromstring(xml.serializeDocument())
@@ -1325,6 +1343,8 @@ class ModsTestCase(TestCase):
             not in ohmods.serializeDocument()
         )
 
+    @override_settings(RUN_ENV="prod")
+    # Real URLs are set only when not in dev mode
     def test_valid_related_audio_item(self):
         ohmods = self.get_mods_from_interview_item()
         self.assertTrue(
@@ -1535,3 +1555,129 @@ class FileMetadataMigrationTestCase(SimpleTestCase):
             "https://testing/oralhistory/21198-zz00094qtd-3-submaster.mp3/playlist.m3u8",
         )
         self.assertEqual(full_file_name, "oh_wowza/21198-zz00094qtd-3-submaster.mp3")
+
+
+class reprocessDerivativeImagesTestCase(TestCase):
+    # Load the lookup tables needed for these tests.
+    fixtures = [
+        "item-status-data.json",
+        "item-type-data.json",
+        "authority-source-data.json",
+        "media-file-type-data.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        # Use QAD data for fake user and fake items.
+        user = User.objects.create_user("tester")
+        # Get mock request with generic user info for command-line processing.
+        cls.mock_request = HttpRequest()
+        cls.mock_request.user = User.objects.get(username=user.username)
+
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=user,
+            last_modified_by=user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        # load a fake image file
+        image_file = MediaFile.objects.create(
+            created_by=user,
+            file_type=MediaFileType.objects.get(file_code="image_master"),
+            item=item,
+            original_file_name="FAKE",
+            file="samples/tall_sample.tif",
+        )
+        # create OralHistoryFile instance
+        oh_file = OralHistoryFile(
+            item.id,
+            file_name="samples/tall_sample.tif",
+            file_type=MediaFileType.objects.get(file_code="image_master"),
+            file_use="master",
+            request=cls.mock_request,
+        )
+
+        # process the image file to get derivative images
+        handler = ImageFileHandler(oh_file)
+        handler.process_files()
+        # get created date from derivative images, so we can check if they are updated
+        cls.thumbnail_create_date = MediaFile.objects.get(
+            item=item, file_type__file_code="image_thumbnail"
+        ).create_date
+        cls.submaster_created_date = MediaFile.objects.get(
+            item=item, file_type__file_code="image_submaster"
+        ).create_date
+        cls.item = item
+
+    def test_reprocess_derivative_images(self):
+        # get queryset with our fake image file
+        image_file_qset = MediaFile.objects.filter(
+            item=self.item, file_type__file_code="image_thumbnail"
+        )
+        image_file = image_file_qset.first()
+        # reprocess the image file
+        reprocess_derivative_images(image_file_qset, self.mock_request)
+
+        # check that we now have a single thumbnail and submaster image
+        self.assertTrue(
+            MediaFile.objects.get(
+                item=self.item, file_type__file_code="image_thumbnail"
+            ).exists()
+        )
+        self.assertTrue(
+            MediaFile.objects.get(
+                item=self.item, file_type__file_code="image_submaster"
+            ).exists()
+        )
+
+        # check that the created date of the derivative images has been updated
+        thumbnail_create_date_updated = MediaFile.objects.get(
+            item=self.item, file_type__file_code="image_thumbnail"
+        ).create_date
+        submaster_create_date_updated = MediaFile.objects.get(
+            item=self.item, file_type__file_code="image_submaster"
+        ).create_date
+        self.assertNotEqual(self.thumbnail_created_date, thumbnail_create_date_updated)
+        self.assertNotEqual(self.submaster_created_date, submaster_create_date_updated)
+
+        # check that the files on disk exist using Path
+        thumbnail_path = Path(f"{settings.MEDIA_ROOT}/{image_file.file}")
+        submaster_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-submaster.jpg"
+        )
+        self.assertTrue(thumbnail_path.is_file())
+        self.assertTrue(submaster_path.is_file())
+
+    def test_delete_existing_derivative_images(self):
+        # get queryset with our fake image file
+        image_file_qset = MediaFile.objects.filter(
+            item=self.item, file_type__file_code="image_thumbnail"
+        )
+        image_file = image_file_qset.first()
+        # delete the image file
+        delete_existing_derivative_images(image_file_qset)
+        # check that the thumbnail and submaster images are deleted
+        self.assertFalse(
+            MediaFile.objects.filter(
+                item=self.item, file_type__file_code="image_thumbnail"
+            ).exists()
+        )
+        self.assertFalse(
+            MediaFile.objects.filter(
+                item=self.item, file_type__file_code="image_submaster"
+            ).exists()
+        )
+        # check that the files on disk are deleted using Path
+        thumbnail_path = Path(f"{settings.MEDIA_ROOT}/{image_file.file}")
+        submaster_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-submaster.jpg"
+        )
+        self.assertFalse(thumbnail_path.is_file())
+        self.assertFalse(submaster_path.is_file())
+
+    def tearDown(self):
+        # remove master image MediaFile and file on disk
+
+        self.item.delete()
+        super().tearDown()
