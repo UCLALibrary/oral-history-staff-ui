@@ -20,8 +20,9 @@ def reprocess_derivative_images(master_images: QuerySet, request: HttpRequest) -
     """Reprocess all derivative images from masters."""
     try:
         for master_image in master_images:
-            logger.info(f"Processing master image {master_image.file.name}.")
-            # Get id of newly created MediaFile to use as parent for derivative(s)
+            logger.info(
+                f"Recreating derivatives for master image {master_image.file.name}."
+            )
             master_id = master_image.id
             # Create an OHF for the master file so we can use ImageFileHandler
             master_file = OralHistoryFile(
@@ -63,6 +64,16 @@ def reprocess_derivative_images(master_images: QuerySet, request: HttpRequest) -
     except (CommandError, ValueError) as ex:
         logger.error(ex)
         raise
+    finally:
+        # Delete the temporary files;
+        # don't throw FileNotFoundError if for some reason it doesn't exist.
+        try:
+            Path(submaster_file_name).unlink(missing_ok=True)
+            Path(thumbnail_file_name).unlink(missing_ok=True)
+        except UnboundLocalError:
+            # Swallow this, which happens when derivative creation fails
+            # so file_name variable is not defined.
+            pass
 
 
 def delete_existing_derivative_images(master_images: QuerySet) -> None:
@@ -92,15 +103,17 @@ def delete_existing_derivative_images(master_images: QuerySet) -> None:
                         mf.delete()
                         logger.info(f"Deleted MediaFile {mediafile_id} from database.")
                     else:
-                        logger.error(
-                            f"Failed to delete {file_name} from file system. Exiting."
+                        raise CommandError(
+                            f"Failed to delete {file_name} from file system."
                         )
-                        return
+
                 else:
-                    logger.error(
-                        f"File {file_name} does not exist in the file system. Exiting."
+                    logger.info(
+                        f"File {file_name}, for MediaFile {mediafile_id}, "
+                        "does not exist in the file system."
                     )
-                    return
+                    mf.delete()
+                    logger.info(f"Deleted MediaFile {mediafile_id} from database.")
 
             logger.info(
                 f"Finished deleting existing derivative images for project item {project_item}."
@@ -124,21 +137,20 @@ class Command(BaseCommand):
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
             "--project_item_id",
-            type=int,
-            help="ID of ProjectItem to reprocess derivative images for",
-            required=False,
+            type=str,
+            help="ID of ProjectItem to reprocess derivative images for, or 'ALL' to reprocess all.",
+            required=True,
         )
 
     def handle(self, *args, **options) -> None:
-        if options["project_item_id"]:
-            master_images = MediaFile.objects.filter(
-                item__id=options["project_item_id"],
-                file_type__file_code="image_master",
-            ).order_by("id")
-
-        else:
+        if options["project_item_id"] == "ALL":
             master_images = MediaFile.objects.filter(
                 file_type__file_code="image_master"
+            ).order_by("id")
+        else:
+            master_images = MediaFile.objects.filter(
+                item__id=int(options["project_item_id"]),
+                file_type__file_code="image_master",
             ).order_by("id")
 
         master_image_count = master_images.count()

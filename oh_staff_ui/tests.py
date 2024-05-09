@@ -1557,12 +1557,11 @@ class FileMetadataMigrationTestCase(SimpleTestCase):
         self.assertEqual(full_file_name, "oh_wowza/21198-zz00094qtd-3-submaster.mp3")
 
 
-class reprocessDerivativeImagesTestCase(TestCase):
+class ReprocessDerivativeImagesTestCase(TestCase):
     # Load the lookup tables needed for these tests.
     fixtures = [
         "item-status-data.json",
         "item-type-data.json",
-        "authority-source-data.json",
         "media-file-type-data.json",
     ]
 
@@ -1690,15 +1689,11 @@ class reprocessDerivativeImagesTestCase(TestCase):
 
     def tearDown(self) -> None:
         # remove the files created by the test
-        thumbnail_path = Path(
-            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
-        )
-        submaster_path = Path(
-            f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
-        )
-        thumbnail_path.unlink(missing_ok=True)
-        submaster_path.unlink(missing_ok=True)
+        thumbnail_path = Path(f"{settings.MEDIA_ROOT}/oh_static/nails/")
+        submaster_path = Path(f"{settings.MEDIA_ROOT}/oh_static/submasters/")
+        master_path = Path(f"{settings.MEDIA_ROOT}/oh_masters/masters/")
+        rmtree(thumbnail_path)
+        rmtree(submaster_path)
+        rmtree(master_path)
         # remove MediaFile objects created by the test
         MediaFile.objects.filter(item=self.item).delete()
-
-        return super().tearDown()
