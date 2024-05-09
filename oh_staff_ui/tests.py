@@ -7,7 +7,7 @@ from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.http import HttpRequest
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings, Client
 from django.contrib.auth.models import User
 from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
@@ -86,6 +86,9 @@ class MediaFileTestCase(TestCase):
         # Get mock request with generic user info for command-line processing.
         cls.mock_request = HttpRequest()
         cls.mock_request.user = User.objects.get(username=cls.user.username)
+        # Add a Django client for testing web requests for media files.
+        cls.client = Client()
+        cls.client.force_login(user=cls.user)
 
     def get_full_path(self, relative_path: str) -> Path:
         # MediaFile.file.name contains a path relative to MEDIA_ROOT;
@@ -223,7 +226,7 @@ class MediaFileTestCase(TestCase):
         try:
             handler.process_files()
         except CommandError:
-            self.assertEquals(MediaFileError.objects.count(), 1)
+            self.assertEqual(MediaFileError.objects.count(), 1)
 
     def test_master_image_file_is_added(self):
         master = self.create_master_image_file()
@@ -699,10 +702,20 @@ class MediaFileTestCase(TestCase):
             "https://static.library.ucla.edu/oralhistory/nails/fake-abcdef-1-thumbnail.jpg",
         )
 
+    @override_settings(RUN_ENV="prod", DEBUG=False)
+    def test_master_file_can_be_served_prod(self):
+        # Confirm master files are web-accessible in production.
+        master = self.create_master_general_file()
+        handler = GeneralFileHandler(master)
+        handler.process_files()
+        url = master.media_file.file_url
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_file_size_file_exists(self):
         # Uses real file samples/sample.xml
         file = self.create_master_general_file()
-        self.assertEquals(file.file_size, 902)
+        self.assertEqual(file.file_size, 902)
 
     def test_file_size_file_does_not_exist(self):
         # Uses non-existent file
@@ -714,7 +727,7 @@ class MediaFileTestCase(TestCase):
             file_use="master",
             request=self.mock_request,
         )
-        self.assertEquals(file.file_size, 0)
+        self.assertEqual(file.file_size, 0)
 
     def tearDown(self):
         # If new files aren't deleted, Django will create next file with random-ish name.
@@ -943,7 +956,7 @@ class ProjectItemFormTestCase(TestCase):
         }
         form = ProjectItemForm(request.POST, parent_item=self.series_item)
         # Check that form validation succeeded.
-        self.assertEquals({}, form.errors)
+        self.assertEqual({}, form.errors)
 
     def test_next_sequence_non_file_item(self):
         # Test that the form displays 1 for sequence for non-file
@@ -961,7 +974,7 @@ class ProjectItemFormTestCase(TestCase):
                 }
             )
             form_type_field = form.fields["sequence"]
-            self.assertEquals(form_type_field.initial, 1)
+            self.assertEqual(form_type_field.initial, 1)
 
     def test_next_sequence_file_item(self):
         # Test that the form displays 3 for sequence for the next
@@ -973,7 +986,7 @@ class ProjectItemFormTestCase(TestCase):
             }
         )
         form_type_field = form.fields["sequence"]
-        self.assertEquals(form_type_field.initial, 3)
+        self.assertEqual(form_type_field.initial, 3)
 
 
 class ModsTestCase(TestCase):
