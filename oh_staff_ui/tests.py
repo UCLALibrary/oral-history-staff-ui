@@ -1701,12 +1701,11 @@ class ReprocessDerivativeImagesTestCase(TestCase):
         self.assertTrue(submaster_path.is_file())
 
     def tearDown(self) -> None:
-        # remove the files created by the test
-        thumbnail_path = Path(f"{settings.MEDIA_ROOT}/oh_static/nails/")
-        submaster_path = Path(f"{settings.MEDIA_ROOT}/oh_static/submasters/")
-        master_path = Path(f"{settings.MEDIA_ROOT}/oh_masters/masters/")
-        rmtree(thumbnail_path)
-        rmtree(submaster_path)
-        rmtree(master_path)
-        # remove MediaFile objects created by the test
-        MediaFile.objects.filter(item=self.item).delete()
+        media_files = MediaFile.objects.filter(item=self.item)
+        # delete files on disk first
+        for mf in media_files:
+            if mf.file:
+                mf.file.delete()
+        # delete MediaFile objects starting with the parent - CASCADE will delete children
+        for parent_mf in media_files.filter(parent__isnull=True):
+            parent_mf.delete()

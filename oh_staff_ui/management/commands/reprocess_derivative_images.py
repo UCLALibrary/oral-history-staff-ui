@@ -82,7 +82,8 @@ def delete_existing_derivative_images(master_images: QuerySet) -> None:
         for master_image in master_images:
             project_item = master_image.item
             logger.info(
-                f"Deleting existing derivative images for project item {project_item}."
+                f"Deleting existing derivative images for project item {project_item} "
+                f"(ID {project_item.id})."
             )
             files_to_delete = MediaFile.objects.filter(
                 item=project_item,
@@ -116,7 +117,8 @@ def delete_existing_derivative_images(master_images: QuerySet) -> None:
                     logger.info(f"Deleted MediaFile {mediafile_id} from database.")
 
             logger.info(
-                f"Finished deleting existing derivative images for project item {project_item}."
+                f"Finished deleting existing derivative images for project item {project_item} "
+                f"(ID {project_item.id})."
             )
 
     except (CommandError, ValueError) as ex:
