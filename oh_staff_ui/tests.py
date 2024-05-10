@@ -58,6 +58,10 @@ from oh_staff_ui.views_utils import (
     get_bad_arg_error_xml,
     get_bad_verb_error_xml,
 )
+from oh_staff_ui.management.commands.reprocess_derivative_images import (
+    reprocess_derivative_images,
+    delete_existing_derivative_images,
+)
 
 
 class MediaFileTestCase(TestCase):
@@ -1564,3 +1568,144 @@ class FileMetadataMigrationTestCase(SimpleTestCase):
             "https://testing/oralhistory/21198-zz00094qtd-3-submaster.mp3/playlist.m3u8",
         )
         self.assertEqual(full_file_name, "oh_wowza/21198-zz00094qtd-3-submaster.mp3")
+
+
+class ReprocessDerivativeImagesTestCase(TestCase):
+    # Load the lookup tables needed for these tests.
+    fixtures = [
+        "item-status-data.json",
+        "item-type-data.json",
+        "media-file-type-data.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user("tester")
+        cls.mock_request = HttpRequest()
+        cls.mock_request.user = User.objects.get(username=cls.user.username)
+
+    def create_master_and_derivatives(self, user, mock_request):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=user,
+            last_modified_by=user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        file_type = MediaFileType.objects.get(file_code="image_master")
+        master_image_file = OralHistoryFile(
+            item.id,
+            "samples/sample_marbles.tif",
+            file_type,
+            "master",
+            mock_request,
+        )
+
+        handler = ImageFileHandler(master_image_file)
+        handler.process_files()
+
+        # get created date from derivative images, so we can check if they are updated
+        thumbnail_create_date = MediaFile.objects.get(
+            item=item, file_type__file_code="image_thumbnail"
+        ).create_date
+        submaster_create_date = MediaFile.objects.get(
+            item=item, file_type__file_code="image_submaster"
+        ).create_date
+
+        return item, thumbnail_create_date, submaster_create_date
+
+    def test_delete_existing_derivative_images(self):
+        self.item, self.thumbnail_created_date, self.submaster_created_date = (
+            self.create_master_and_derivatives(self.user, self.mock_request)
+        )
+
+        # check that the thumbnail and submaster images are created
+        self.assertTrue(MediaFile.objects.filter(item=self.item).count() == 3)
+
+        # check that the thumbnail and submaster images exist on disk
+        thumbnail_path = thumbnail_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
+        )
+        submaster_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
+        )
+        self.assertTrue(thumbnail_path.is_file())
+        self.assertTrue(submaster_path.is_file())
+
+        # get queryset with our fake image file
+        image_file_qset = MediaFile.objects.filter(
+            item=self.item, file_type__file_code="image_master"
+        )
+        # delete derivative images
+        delete_existing_derivative_images(image_file_qset)
+        # check that the thumbnail and submaster images are deleted
+        self.assertFalse(
+            MediaFile.objects.filter(
+                item=self.item, file_type__file_code="image_thumbnail"
+            ).exists()
+        )
+        self.assertFalse(
+            MediaFile.objects.filter(
+                item=self.item, file_type__file_code="image_submaster"
+            ).exists()
+        )
+        # check that the files on disk are deleted
+        self.assertFalse(thumbnail_path.is_file())
+        self.assertFalse(submaster_path.is_file())
+
+    def test_reprocess_derivative_images(self):
+        self.item, self.thumbnail_created_date, self.submaster_created_date = (
+            self.create_master_and_derivatives(self.user, self.mock_request)
+        )
+        # get queryset with our fake master file
+        image_file_qset = MediaFile.objects.filter(
+            item=self.item, file_type__file_code="image_master"
+        )
+        # delete the existing derivative images
+        delete_existing_derivative_images(image_file_qset)
+        # reprocess the image file
+        reprocess_derivative_images(image_file_qset, self.mock_request)
+
+        # check that we now have a single thumbnail and submaster image
+        self.assertTrue(
+            MediaFile.objects.filter(
+                item=self.item, file_type__file_code="image_thumbnail"
+            ).count()
+            == 1
+        )
+        self.assertTrue(
+            MediaFile.objects.filter(
+                item=self.item, file_type__file_code="image_submaster"
+            ).count()
+            == 1
+        )
+
+        # check that the created date of the derivative images has been updated
+        thumbnail_create_date_updated = MediaFile.objects.get(
+            item=self.item, file_type__file_code="image_thumbnail"
+        ).create_date
+        submaster_create_date_updated = MediaFile.objects.get(
+            item=self.item, file_type__file_code="image_submaster"
+        ).create_date
+        self.assertNotEqual(self.thumbnail_created_date, thumbnail_create_date_updated)
+        self.assertNotEqual(self.submaster_created_date, submaster_create_date_updated)
+
+        # check that the files on disk exist using Path
+        thumbnail_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
+        )
+        submaster_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
+        )
+        self.assertTrue(thumbnail_path.is_file())
+        self.assertTrue(submaster_path.is_file())
+
+    def tearDown(self) -> None:
+        media_files = MediaFile.objects.filter(item=self.item)
+        # delete files on disk first
+        for mf in media_files:
+            if mf.file:
+                mf.file.delete()
+        # delete MediaFile objects starting with the parent - CASCADE will delete children
+        for parent_mf in media_files.filter(parent__isnull=True):
+            parent_mf.delete()

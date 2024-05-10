@@ -132,7 +132,9 @@ def show_log(request, line_count: int = 200) -> HttpResponse:
 @login_required
 def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
     item = ProjectItem.objects.get(pk=item_id)
-    files = MediaFile.objects.filter(item=item)
+    files = MediaFile.objects.filter(item=item).order_by(
+        "sequence", "file_type__file_code"
+    )
     file_errors = MediaFileError.objects.filter(item=item).order_by("create_date")
     if request.method == "POST":
         # Pass item_id and request to submitted form to help with validation.
