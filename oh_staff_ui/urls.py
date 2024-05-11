@@ -17,6 +17,7 @@ urlpatterns = [
     path("logs/", views.show_log, name="show_log"),
     path("logs/<int:line_count>", views.show_log, name="show_log"),
     path("upload_file/<int:item_id>", views.upload_file, name="upload_file"),
+    path("delete_file/<int:file_id>", views.delete_file, name="delete_file"),
     path("order_files/<int:item_id>", views.order_files, name="order_files"),
     path("browse/", views.browse, name="browse"),
     # Allow access to download media files via built-in view django.views.static.serve()

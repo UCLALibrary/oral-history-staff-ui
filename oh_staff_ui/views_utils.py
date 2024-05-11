@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.management import call_command
 from django.db.models import CharField, Model, Q, QuerySet
+from django.contrib.auth.models import User
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
@@ -608,3 +609,7 @@ def add_oai_envelope_to_mods(ohmods: OralHistoryMods) -> etree.Element:
     record_el.append(metadata_el)
 
     return record_el
+
+
+def user_in_oh_staff_group(user: User) -> bool:
+    return user.groups.filter(name="Oral History Staff").exists()
