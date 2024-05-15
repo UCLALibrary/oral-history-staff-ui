@@ -1,5 +1,5 @@
 import logging
-from PIL import Image
+from PIL import ExifTags, Image, UnidentifiedImageError
 from pathlib import Path
 from django.conf import settings
 from django.core.management.base import CommandError
@@ -94,7 +94,29 @@ class ImageFileHandler(BaseFileHandler):
         try:
             with Image.open(input_name) as master_image:
                 new_sizes = self._get_new_image_dimensions(master_image.size, max_size)
-                derivative_image = master_image.resize(new_sizes)
+                orientation = self._get_orientation(master_image)
+                # PIL.ImageOps.exif_transpose() should work with TIFFs... but does not seem to.
+                # For now, using Image.rotate instead, handling only specific orientations which
+                # can be fixed just by simple rotation. All other cases are ignored.
+                # https://reference.aspose.com/imaging/net/aspose.imaging.exif.enums/exiforientation/
+                # Rotation is counter-clockwise by number of degrees given;
+                # must expand, at least for 90/270 degree rotation, to avoid cropping.
+                # Master image is NOT changed.
+                if orientation == 3:
+                    # Bottom right. Rotated by 180 degrees.
+                    derivative_image = master_image.rotate(180, expand=True)
+                elif orientation == 6:
+                    # Right top. Rotated by 90 degrees clockwise.
+                    derivative_image = master_image.rotate(90, expand=True)
+                elif orientation == 8:
+                    # Left bottom. Rotated by 90 degrees counterclockwise.
+                    derivative_image = master_image.rotate(270, expand=True)
+                else:
+                    # No rotation, just initialize derivative_image from the master.
+                    derivative_image = master_image.copy()
+
+                # Resizing and other changes.
+                derivative_image = derivative_image.resize(new_sizes)
                 if derivative_type == "thumbnail":
                     derivative_image = self._make_square_thumbnail(derivative_image)
                 # Ordinary jpg does not support transparency, so convert if needed.
@@ -141,5 +163,22 @@ class ImageFileHandler(BaseFileHandler):
         width, height = thumbnail_image.size
         size = max(width, height)
         square_thumbnail = Image.new("RGB", (size, size), color="black")
-        square_thumbnail.paste(thumbnail_image, (int((size - width) / 2), int((size - height) / 2)))
+        square_thumbnail.paste(
+            thumbnail_image, (int((size - width) / 2), int((size - height) / 2))
+        )
         return square_thumbnail
+
+    def _get_orientation(self, image: Image.Image) -> int | None:
+        """Obtain the image orientation from its EXIF data.
+
+        Arguments:
+        image: the image to check.
+        Returns: the integer value from EXIF data, or None.
+        """
+        try:
+            exif = image.getexif()
+            return exif.get(ExifTags.Base.Orientation)
+        except UnidentifiedImageError:
+            logger.error(
+                f"Unable to get orientation: Unidentified image {image.filename}"
+            )
