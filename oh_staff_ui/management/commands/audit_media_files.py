@@ -64,31 +64,33 @@ class Command(BaseCommand):
         """
         # Build this once, as it will be used many times.
         media_root = settings.MEDIA_ROOT + "/"
-        for path in Path(media_root).rglob("*"):
-            # rglob returns directory and file names; we only want files.
-            if path.is_file():
-                # MediaFile file.name does not have MEDIA_ROOT prefix,
-                # so remove it from disk file name.
-                disk_file_path = str(path).replace(media_root, "")
-                disk_file_size = path.stat().st_size
-                media_files = MediaFile.objects.filter(file=disk_file_path)
-                media_file_count = len(media_files)
+        # Check only these top-level directories in media_root.
+        for file_dir in [settings.OH_MASTERS, settings.OH_STATIC, settings.OH_WOWZA]:
+            for path in Path(media_root + file_dir + "/").rglob("*"):
+                # rglob returns directory and file names; we only want files.
+                if path.is_file():
+                    # MediaFile file.name does not have MEDIA_ROOT prefix,
+                    # so remove it from disk file name.
+                    disk_file_path = str(path).replace(media_root, "")
+                    disk_file_size = path.stat().st_size
+                    media_files = MediaFile.objects.filter(file=disk_file_path)
+                    media_file_count = len(media_files)
 
-                if media_file_count == 0:
-                    # File not found in database.
-                    db_file_size = None
-                    db_file_path = "NOT FOUND"
-                    item_id = None
-                    logger.warning(
-                        f"DB MISSING:\t{db_file_path}\t{disk_file_path}\t"
-                        f"{db_file_size}\t{disk_file_size}\t{item_id}"
-                    )
-                elif media_file_count > 1:
-                    # Shouldn't happen due to custom MediaFile.save()...
-                    # but check for file found multiple times in database.
-                    # Some/all/none may actually be right, so report all.
-                    for mf in media_files:
+                    if media_file_count == 0:
+                        # File not found in database.
+                        db_file_size = None
+                        db_file_path = "NOT FOUND"
+                        item_id = None
                         logger.warning(
-                            f"MULTIPLE:\t{mf.file.name}\t{disk_file_path}\t"
-                            f"{mf.file_size}\t{disk_file_size}\t{mf.item_id}"
+                            f"DB MISSING:\t{db_file_path}\t{disk_file_path}\t"
+                            f"{db_file_size}\t{disk_file_size}\t{item_id}"
                         )
+                    elif media_file_count > 1:
+                        # Shouldn't happen due to custom MediaFile.save()...
+                        # but check for file found multiple times in database.
+                        # Some/all/none may actually be right, so report all.
+                        for mf in media_files:
+                            logger.warning(
+                                f"MULTIPLE:\t{mf.file.name}\t{disk_file_path}\t"
+                                f"{mf.file_size}\t{disk_file_size}\t{mf.item_id}"
+                            )
