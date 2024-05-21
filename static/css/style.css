@@ -71,6 +71,9 @@ other than TableOfContents (value = "3") */
   border: 1px solid;
   vertical-align: top;
 }
+.header-metadata th {
+  padding-right: 10px;
+}
 
 ul.tree {
   margin-top: -10px;
@@ -118,12 +121,17 @@ caption {
   top: 50%;
   left: 50%;
   width: 800px;
-  height: 150px;
-  margin-top: -75px;
+  height: auto;
+  min-height: 150px;
+  margin-top: -100px;
   margin-left: -400px;
   padding: 20px;
   border: 1px solid black;
   background-color: #d0d0d7;
   text-align: center;
   z-index: 1;
+}
+
+.confirm-delete-popup ul {
+  list-style-type: none;
 }
