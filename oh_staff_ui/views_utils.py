@@ -5,6 +5,7 @@ from datetime import datetime
 from lxml import etree
 import requests
 import uuid
+from pathlib import Path
 from django.conf import settings
 from django.contrib import messages
 from django.core.management import call_command
@@ -35,6 +36,7 @@ from oh_staff_ui.models import (
     Date,
     Description,
     Format,
+    MediaFile,
     Name,
     ProjectItem,
     Subject,
@@ -613,3 +615,36 @@ def add_oai_envelope_to_mods(ohmods: OralHistoryMods) -> etree.Element:
 
 def user_in_oh_staff_group(user: User) -> bool:
     return user.groups.filter(name="Oral History Staff").exists()
+
+
+def delete_file_and_children(media_file: MediaFile) -> None:
+    # if file has child files, delete them first
+    children = list(MediaFile.objects.filter(parent=media_file))
+    for child in children:
+        # first delete file from file system
+        if child.file:
+            delete_file_from_filesystem(child.file.name)
+        else:
+            logger.warning(f"File {child.file_name} does not exist on the file system.")
+        child.delete()
+    # then delete the file (and its file from file system)
+    if media_file.file:
+        delete_file_from_filesystem(media_file.file.name)
+    else:
+        logger.warning(
+            f"File {media_file.file_name} does not exist on the file system."
+        )
+    media_file.delete()
+
+
+def delete_file_from_filesystem(file_name: str) -> None:
+    file_path = Path(settings.MEDIA_ROOT).joinpath(file_name)
+    if not file_path.exists():
+        logger.info(f"File {file_name} does not exist on the file system.")
+    else:
+        try:
+            file_path.unlink()
+            logger.info(f"Deleted {file_name} from file system.")
+        except Exception as ex:
+            logger.error(f"Failed to delete {file_name} from file system: {ex}")
+    return

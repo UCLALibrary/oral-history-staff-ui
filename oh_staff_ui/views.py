@@ -14,6 +14,7 @@ from oh_staff_ui.forms import (
 )
 from oh_staff_ui.models import MediaFile, MediaFileError, ProjectItem
 from oh_staff_ui.views_utils import (
+    delete_file_and_children,
     get_ark,
     get_edit_item_context,
     get_all_series_and_interviews,
@@ -136,6 +137,9 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
     files = MediaFile.objects.filter(item=item).order_by(
         "sequence", "file_type__file_code"
     )
+    # get the child (derivative) files for each file
+    for file in files:
+        file.children = list(MediaFile.objects.filter(parent=file))
     file_errors = MediaFileError.objects.filter(item=item).order_by("create_date")
     staff_status = user_in_oh_staff_group(request.user)
     if request.method == "POST":
@@ -188,14 +192,9 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
 
 @login_required
 def delete_file(request: HttpRequest, file_id: int) -> HttpResponse:
-    file = MediaFile.objects.get(pk=file_id)
-    item_id = file.item.pk
-    # TODO: actually delete the file from the file system as well as the database.
-    if file.file:
-        file.file.delete()
-    else:
-        logger.warning(f"File {file.file_name} does not exist on the file system.")
-    file.delete()
+    media_file = MediaFile.objects.get(pk=file_id)
+    item_id = media_file.item.pk
+    delete_file_and_children(media_file)
     return redirect("upload_file", item_id=item_id)
 
 
