@@ -624,12 +624,14 @@ def delete_file_and_children(media_file: MediaFile) -> None:
         # first delete file from file system
         if child.file:
             delete_file_from_filesystem(child.file.name)
+            child.file.delete()
         else:
             logger.warning(f"File {child.file_name} does not exist on the file system.")
         child.delete()
     # then delete the file (and its file from file system)
     if media_file.file:
         delete_file_from_filesystem(media_file.file.name)
+        media_file.file.delete()
     else:
         logger.warning(
             f"File {media_file.file_name} does not exist on the file system."
