@@ -137,7 +137,8 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
     files = MediaFile.objects.filter(item=item).order_by(
         "sequence", "file_type__file_code"
     )
-    # get the child (derivative) files for each file
+    # add "children" attribute to each file to hold its derivatives
+    # this is used in the template to display child files before deletion
     for file in files:
         file.children = list(MediaFile.objects.filter(parent=file))
     file_errors = MediaFileError.objects.filter(item=item).order_by("create_date")

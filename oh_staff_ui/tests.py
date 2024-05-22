@@ -58,7 +58,6 @@ from oh_staff_ui.views_utils import (
     get_bad_arg_error_xml,
     get_bad_verb_error_xml,
     delete_file_and_children,
-    delete_file_from_filesystem,
 )
 from oh_staff_ui.management.commands.reprocess_derivative_images import (
     reprocess_derivative_images,
