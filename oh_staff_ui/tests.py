@@ -1778,7 +1778,7 @@ class FileDeletionTestCase(TestCase):
             item=self.item, file_type__file_code="image_master"
         )
         # delete Master and derivative files
-        delete_file_and_children(image_mediafile)
+        delete_file_and_children(image_mediafile, self.user)
 
         # check that all 3 MediaFiles are deleted
         self.assertFalse(MediaFile.objects.filter(item=self.item).exists())
@@ -1813,7 +1813,7 @@ class FileDeletionTestCase(TestCase):
             item=self.item, file_type__file_code="image_submaster"
         )
         # delete files
-        delete_file_and_children(submaster_mediafile)
+        delete_file_and_children(submaster_mediafile, self.user)
 
         # check that master and thumbnail files are still there (in DB and on disk)
         self.assertTrue(MediaFile.objects.filter(item=self.item).count() == 2)

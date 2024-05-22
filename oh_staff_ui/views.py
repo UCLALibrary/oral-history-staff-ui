@@ -195,7 +195,7 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
 def delete_file(request: HttpRequest, file_id: int) -> HttpResponse:
     media_file = MediaFile.objects.get(pk=file_id)
     item_id = media_file.item.pk
-    delete_file_and_children(media_file)
+    delete_file_and_children(media_file, request.user)
     return redirect("upload_file", item_id=item_id)
 
 
