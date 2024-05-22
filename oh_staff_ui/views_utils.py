@@ -635,7 +635,7 @@ def delete_file(media_file: MediaFile, user: User) -> None:
         media_file.file.delete()
     else:
         logger.warning(
-            f"File {media_file.file.name} does not exist on the file system."
+            f"File {file_name} does not exist on the file system; deleting media object anyhow."
         )
     logger.info(f"File {file_name} deleted by user {user}.")
     media_file.delete()
