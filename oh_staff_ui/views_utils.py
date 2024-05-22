@@ -5,10 +5,12 @@ from datetime import datetime
 from lxml import etree
 import requests
 import uuid
+from pathlib import Path
 from django.conf import settings
 from django.contrib import messages
 from django.core.management import call_command
 from django.db.models import CharField, Model, Q, QuerySet
+from django.contrib.auth.models import User
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
 from django.utils import timezone
@@ -34,6 +36,7 @@ from oh_staff_ui.models import (
     Date,
     Description,
     Format,
+    MediaFile,
     Name,
     ProjectItem,
     Subject,
@@ -608,3 +611,31 @@ def add_oai_envelope_to_mods(ohmods: OralHistoryMods) -> etree.Element:
     record_el.append(metadata_el)
 
     return record_el
+
+
+def user_in_oh_staff_group(user: User) -> bool:
+    return user.groups.filter(name="Oral History Staff").exists()
+
+
+def delete_file_and_children(media_file: MediaFile, user: User) -> None:
+    # if file has child files, delete them first
+    children = MediaFile.objects.filter(parent=media_file)
+    for child in children:
+        delete_file(child, user)
+    # now delete the parent file
+    delete_file(media_file, user)
+
+
+def delete_file(media_file: MediaFile, user: User) -> None:
+    # first delete file from file system
+    # check for file existence with Path before attempting to delete
+    file_name = media_file.file.name
+    file_path = Path(settings.MEDIA_ROOT).joinpath(file_name)
+    if file_path.exists():
+        media_file.file.delete()
+    else:
+        logger.warning(
+            f"File {file_name} does not exist on the file system; deleting media object anyhow."
+        )
+    logger.info(f"File {file_name} deleted by user {user}.")
+    media_file.delete()

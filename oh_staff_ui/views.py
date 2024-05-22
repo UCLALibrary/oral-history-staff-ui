@@ -14,6 +14,7 @@ from oh_staff_ui.forms import (
 )
 from oh_staff_ui.models import MediaFile, MediaFileError, ProjectItem
 from oh_staff_ui.views_utils import (
+    delete_file_and_children,
     get_ark,
     get_edit_item_context,
     get_all_series_and_interviews,
@@ -25,6 +26,7 @@ from oh_staff_ui.views_utils import (
     get_records_oai,
     get_bad_arg_error_xml,
     get_bad_verb_error_xml,
+    user_in_oh_staff_group,
 )
 
 logger = logging.getLogger(__name__)
@@ -135,7 +137,12 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
     files = MediaFile.objects.filter(item=item).order_by(
         "sequence", "file_type__file_code"
     )
+    # add "children" attribute to each file to hold its derivatives
+    # this is used in the template to display child files before deletion
+    for file in files:
+        file.children = list(MediaFile.objects.filter(parent=file))
     file_errors = MediaFileError.objects.filter(item=item).order_by("create_date")
+    staff_status = user_in_oh_staff_group(request.user)
     if request.method == "POST":
         # Pass item_id and request to submitted form to help with validation.
         form = FileUploadForm(request.POST, item_id=item_id, request=request)
@@ -174,8 +181,22 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
             return redirect("upload_file", item_id=item_id)
     else:
         form = FileUploadForm()
-    context = {"item": item, "files": files, "file_errors": file_errors, "form": form}
+    context = {
+        "staff_status": staff_status,
+        "item": item,
+        "files": files,
+        "file_errors": file_errors,
+        "form": form,
+    }
     return render(request, "oh_staff_ui/upload_file.html", context)
+
+
+@login_required
+def delete_file(request: HttpRequest, file_id: int) -> HttpResponse:
+    media_file = MediaFile.objects.get(pk=file_id)
+    item_id = media_file.item.pk
+    delete_file_and_children(media_file, request.user)
+    return redirect("upload_file", item_id=item_id)
 
 
 @login_required

@@ -57,6 +57,7 @@ from oh_staff_ui.views_utils import (
     get_records_oai,
     get_bad_arg_error_xml,
     get_bad_verb_error_xml,
+    delete_file_and_children,
 )
 from oh_staff_ui.management.commands.reprocess_derivative_images import (
     reprocess_derivative_images,
@@ -1699,6 +1700,133 @@ class ReprocessDerivativeImagesTestCase(TestCase):
         )
         self.assertTrue(thumbnail_path.is_file())
         self.assertTrue(submaster_path.is_file())
+
+    def tearDown(self) -> None:
+        media_files = MediaFile.objects.filter(item=self.item)
+        # delete files on disk first
+        for mf in media_files:
+            if mf.file:
+                mf.file.delete()
+        # delete MediaFile objects starting with the parent - CASCADE will delete children
+        for parent_mf in media_files.filter(parent__isnull=True):
+            parent_mf.delete()
+
+
+class FileDeletionTestCase(TestCase):
+    fixtures = [
+        "item-status-data.json",
+        "item-type-data.json",
+        "media-file-type-data.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user("tester")
+        cls.mock_request = HttpRequest()
+        cls.mock_request.user = User.objects.get(username=cls.user.username)
+
+    def create_master_and_derivatives(self, user, mock_request):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=user,
+            last_modified_by=user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        file_type = MediaFileType.objects.get(file_code="image_master")
+        master_image_file = OralHistoryFile(
+            item.id,
+            "samples/sample_marbles.tif",
+            file_type,
+            "master",
+            mock_request,
+        )
+
+        handler = ImageFileHandler(master_image_file)
+        handler.process_files()
+
+        # get created date from derivative images, so we can check if they are updated
+        thumbnail_create_date = MediaFile.objects.get(
+            item=item, file_type__file_code="image_thumbnail"
+        ).create_date
+        submaster_create_date = MediaFile.objects.get(
+            item=item, file_type__file_code="image_submaster"
+        ).create_date
+
+        return item, thumbnail_create_date, submaster_create_date
+
+    def test_delete_file_and_children(self):
+        self.item, self.thumbnail_created_date, self.submaster_created_date = (
+            self.create_master_and_derivatives(self.user, self.mock_request)
+        )
+
+        # check that the thumbnail and submaster images are created
+        self.assertTrue(MediaFile.objects.filter(item=self.item).count() == 3)
+
+        # check that the thumbnail and submaster images exist on disk
+        thumbnail_path = thumbnail_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
+        )
+        submaster_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
+        )
+        self.assertTrue(thumbnail_path.is_file())
+        self.assertTrue(submaster_path.is_file())
+
+        # get our master Mediafile
+        image_mediafile = MediaFile.objects.get(
+            item=self.item, file_type__file_code="image_master"
+        )
+        # delete Master and derivative files
+        delete_file_and_children(image_mediafile, self.user)
+
+        # check that all 3 MediaFiles are deleted
+        self.assertFalse(MediaFile.objects.filter(item=self.item).exists())
+        # check that the files on disk are deleted
+        self.assertFalse(thumbnail_path.is_file())
+        self.assertFalse(submaster_path.is_file())
+
+    def test_delete_file_and_children_no_children(self):
+        self.item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=self.user,
+            last_modified_by=self.user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        file_type = MediaFileType.objects.get(file_code="image_master")
+        master_image_file = OralHistoryFile(
+            self.item.id,
+            "samples/sample_marbles.tif",
+            file_type,
+            "master",
+            self.mock_request,
+        )
+
+        handler = ImageFileHandler(master_image_file)
+        handler.process_files()
+
+        # check that the thumbnail and submaster images are created
+        self.assertTrue(MediaFile.objects.filter(item=self.item).count() == 3)
+
+        submaster_mediafile = MediaFile.objects.get(
+            item=self.item, file_type__file_code="image_submaster"
+        )
+        # delete files
+        delete_file_and_children(submaster_mediafile, self.user)
+
+        # check that master and thumbnail files are still there (in DB and on disk)
+        self.assertTrue(MediaFile.objects.filter(item=self.item).count() == 2)
+        thumbnail_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/nails/fake-abcdef-1-thumbnail.jpg"
+        )
+        self.assertTrue(thumbnail_path.is_file())
+
+        # check that the submaster file is deleted
+        submaster_path = Path(
+            f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
+        )
+        self.assertFalse(submaster_path.is_file())
 
     def tearDown(self) -> None:
         media_files = MediaFile.objects.filter(item=self.item)
