@@ -617,24 +617,25 @@ def user_in_oh_staff_group(user: User) -> bool:
     return user.groups.filter(name="Oral History Staff").exists()
 
 
-def delete_file_and_children(media_file: MediaFile) -> None:
+def delete_file_and_children(media_file: MediaFile, user: User) -> None:
     # if file has child files, delete them first
     children = MediaFile.objects.filter(parent=media_file)
     for child in children:
-        # first delete file from file system
-        # check for file existence with Path before attempting to delete
-        child_file_path = Path(settings.MEDIA_ROOT).joinpath(child.file.name)
-        if child_file_path.exists():
-            child.file.delete()
-        else:
-            logger.warning(f"File {child.file.name} does not exist on the file system.")
-        child.delete()
+        delete_file(child, user)
     # now delete the parent file
-    parent_file_path = Path(settings.MEDIA_ROOT).joinpath(media_file.file.name)
-    if parent_file_path.exists():
+    delete_file(media_file, user)
+
+
+def delete_file(media_file: MediaFile, user: User) -> None:
+    # first delete file from file system
+    # check for file existence with Path before attempting to delete
+    file_name = media_file.file.name
+    file_path = Path(settings.MEDIA_ROOT).joinpath(file_name)
+    if file_path.exists():
         media_file.file.delete()
     else:
         logger.warning(
             f"File {media_file.file.name} does not exist on the file system."
         )
+    logger.info(f"File {file_name} deleted by user {user}.")
     media_file.delete()
