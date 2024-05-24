@@ -137,8 +137,10 @@ def show_log(request, line_count: int = 200) -> HttpResponse:
 @login_required
 def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
     item = ProjectItem.objects.get(pk=item_id)
+    # Sort for display: file_code works for images & audio, file(name)
+    # breaks the tie for pdf & text, since oh_masters -> oh_submasters.
     files = MediaFile.objects.filter(item=item).order_by(
-        "sequence", "file_type__file_code"
+        "sequence", "file_type__file_code", "file"
     )
     # add "children" attribute to each file to hold its derivatives
     # this is used in the template to display child files before deletion
