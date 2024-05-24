@@ -702,8 +702,9 @@ class MediaFileTestCase(TestCase):
         )
 
     @override_settings(RUN_ENV="prod", DEBUG=False)
-    def test_master_file_can_be_served_prod(self):
-        # Confirm master files are web-accessible in production.
+    def test_file_is_served_prod(self):
+        # Confirm media files are web-accessible in production mode,
+        # where DEBUG=False.
         master = self.create_master_general_file()
         handler = GeneralFileHandler(master)
         handler.process_files()
@@ -711,6 +712,17 @@ class MediaFileTestCase(TestCase):
         self.client.force_login(self.user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_media_file_is_not_served_without_login(self):
+        # Confirm media files are not web-accessible to anonymous users.
+        master = self.create_master_general_file()
+        handler = GeneralFileHandler(master)
+        handler.process_files()
+        url = master.media_file.file_url
+        response = self.client.get(url)
+        # Login is required, so request is redirected
+        expected_url = f"/accounts/login/?next=/media/{master.media_file.file.name}"
+        self.assertRedirects(response, expected_url=expected_url)
 
     def test_file_size_file_exists(self):
         # Uses real file samples/sample.xml

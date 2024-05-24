@@ -1,6 +1,7 @@
 import logging
 from threading import Thread
 from requests.exceptions import HTTPError
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.management.base import CommandError
@@ -8,6 +9,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest  # for code completion
 from django.http.response import HttpResponse  # for code completion
+from django.views.static import serve
 from oh_staff_ui.forms import (
     FileUploadForm,
     ProjectItemForm,
@@ -205,6 +207,16 @@ def delete_file(request: HttpRequest, file_id: int) -> HttpResponse:
             f"Unauthorized attempt to delete {media_file.file} ({file_id}) by {request.user}"
         )
         raise PermissionDenied
+
+
+@login_required
+def serve_media_file(request: HttpRequest, path: str) -> HttpResponse:
+    # Wrap django.views.static.serve view, which normally is in urls.py,
+    # so that login requirement is enforced.
+    # The path parameter comes from re_path in urls.py.
+    # django.views.static.serve is a view, so returns HttpResponse already;
+    # we just pass it on.
+    return serve(request, path=path, document_root=settings.MEDIA_ROOT)
 
 
 @login_required
