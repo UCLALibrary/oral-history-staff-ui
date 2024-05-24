@@ -8,7 +8,7 @@ from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.http import HttpRequest
-from django.test import SimpleTestCase, TestCase, override_settings, Client
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.contrib.auth.models import User, Group
 from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
@@ -88,9 +88,6 @@ class MediaFileTestCase(TestCase):
         # Get mock request with generic user info for command-line processing.
         cls.mock_request = HttpRequest()
         cls.mock_request.user = User.objects.get(username=cls.user.username)
-        # Add a Django client for testing web requests for media files.
-        cls.client = Client()
-        cls.client.force_login(user=cls.user)
 
     def get_full_path(self, relative_path: str) -> Path:
         # MediaFile.file.name contains a path relative to MEDIA_ROOT;
@@ -711,6 +708,7 @@ class MediaFileTestCase(TestCase):
         handler = GeneralFileHandler(master)
         handler.process_files()
         url = master.media_file.file_url
+        self.client.force_login(self.user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
