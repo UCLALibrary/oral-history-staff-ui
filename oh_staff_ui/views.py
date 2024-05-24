@@ -2,6 +2,7 @@ import logging
 from threading import Thread
 from requests.exceptions import HTTPError
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.core.management.base import CommandError
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
@@ -195,8 +196,15 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
 def delete_file(request: HttpRequest, file_id: int) -> HttpResponse:
     media_file = MediaFile.objects.get(pk=file_id)
     item_id = media_file.item.pk
-    delete_file_and_children(media_file, request.user)
-    return redirect("upload_file", item_id=item_id)
+    # Ensure only authorized users can execute this.
+    if user_in_oh_staff_group(request.user):
+        delete_file_and_children(media_file, request.user)
+        return redirect("upload_file", item_id=item_id)
+    else:
+        logger.warning(
+            f"Unauthorized attempt to delete {media_file.file} ({file_id}) by {request.user}"
+        )
+        raise PermissionDenied
 
 
 @login_required
