@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.views.static import serve
 from django.urls import path, re_path
 from . import views
 
@@ -20,8 +18,8 @@ urlpatterns = [
     path("delete_file/<int:file_id>", views.delete_file, name="delete_file"),
     path("order_files/<int:item_id>", views.order_files, name="order_files"),
     path("browse/", views.browse, name="browse"),
-    # Allow access to download media files via built-in view django.views.static.serve()
-    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    # Allow staff access to download media files
+    re_path(r"^media/(?P<path>.*)$", views.serve_media_file, name="serve_media_file"),
     # To follow OAI practice, a query parameter combination is requred of either:
     # verb=GetRecord and identifier={ark_value}
     # verb=ListRecords

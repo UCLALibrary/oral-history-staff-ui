@@ -1,12 +1,15 @@
 import logging
 from threading import Thread
 from requests.exceptions import HTTPError
+from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.core.management.base import CommandError
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest  # for code completion
 from django.http.response import HttpResponse  # for code completion
+from django.views.static import serve
 from oh_staff_ui.forms import (
     FileUploadForm,
     ProjectItemForm,
@@ -134,8 +137,10 @@ def show_log(request, line_count: int = 200) -> HttpResponse:
 @login_required
 def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
     item = ProjectItem.objects.get(pk=item_id)
+    # Sort for display: file_code works for images & audio, file(name)
+    # breaks the tie for pdf & text, since oh_masters -> oh_submasters.
     files = MediaFile.objects.filter(item=item).order_by(
-        "sequence", "file_type__file_code"
+        "sequence", "file_type__file_code", "file"
     )
     # add "children" attribute to each file to hold its derivatives
     # this is used in the template to display child files before deletion
@@ -195,8 +200,25 @@ def upload_file(request: HttpRequest, item_id: int) -> HttpResponse:
 def delete_file(request: HttpRequest, file_id: int) -> HttpResponse:
     media_file = MediaFile.objects.get(pk=file_id)
     item_id = media_file.item.pk
-    delete_file_and_children(media_file, request.user)
-    return redirect("upload_file", item_id=item_id)
+    # Ensure only authorized users can execute this.
+    if user_in_oh_staff_group(request.user):
+        delete_file_and_children(media_file, request.user)
+        return redirect("upload_file", item_id=item_id)
+    else:
+        logger.warning(
+            f"Unauthorized attempt to delete {media_file.file} ({file_id}) by {request.user}"
+        )
+        raise PermissionDenied
+
+
+@login_required
+def serve_media_file(request: HttpRequest, path: str) -> HttpResponse:
+    # Wrap django.views.static.serve view, which normally is in urls.py,
+    # so that login requirement is enforced.
+    # The path parameter comes from re_path in urls.py.
+    # django.views.static.serve is a view, so returns HttpResponse already;
+    # we just pass it on.
+    return serve(request, path=path, document_root=settings.MEDIA_ROOT)
 
 
 @login_required

@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from shutil import rmtree
 from lxml import etree
 from pathlib import Path
@@ -7,8 +8,8 @@ from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.http import HttpRequest
-from django.test import SimpleTestCase, TestCase, override_settings, Client
-from django.contrib.auth.models import User
+from django.test import SimpleTestCase, TestCase, override_settings
+from django.contrib.auth.models import User, Group
 from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
 from oh_staff_ui.classes.ImageFileHandler import ImageFileHandler
@@ -87,9 +88,6 @@ class MediaFileTestCase(TestCase):
         # Get mock request with generic user info for command-line processing.
         cls.mock_request = HttpRequest()
         cls.mock_request.user = User.objects.get(username=cls.user.username)
-        # Add a Django client for testing web requests for media files.
-        cls.client = Client()
-        cls.client.force_login(user=cls.user)
 
     def get_full_path(self, relative_path: str) -> Path:
         # MediaFile.file.name contains a path relative to MEDIA_ROOT;
@@ -704,14 +702,27 @@ class MediaFileTestCase(TestCase):
         )
 
     @override_settings(RUN_ENV="prod", DEBUG=False)
-    def test_master_file_can_be_served_prod(self):
-        # Confirm master files are web-accessible in production.
+    def test_file_is_served_prod(self):
+        # Confirm media files are web-accessible in production mode,
+        # where DEBUG=False.
+        master = self.create_master_general_file()
+        handler = GeneralFileHandler(master)
+        handler.process_files()
+        url = master.media_file.file_url
+        self.client.force_login(self.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_media_file_is_not_served_without_login(self):
+        # Confirm media files are not web-accessible to anonymous users.
         master = self.create_master_general_file()
         handler = GeneralFileHandler(master)
         handler.process_files()
         url = master.media_file.file_url
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        # Login is required, so request is redirected
+        expected_url = f"/accounts/login/?next=/media/{master.media_file.file.name}"
+        self.assertRedirects(response, expected_url=expected_url)
 
     def test_file_size_file_exists(self):
         # Uses real file samples/sample.xml
@@ -1725,7 +1736,7 @@ class FileDeletionTestCase(TestCase):
         cls.mock_request = HttpRequest()
         cls.mock_request.user = User.objects.get(username=cls.user.username)
 
-    def create_master_and_derivatives(self, user, mock_request):
+    def create_master_and_derivatives(self, user, mock_request) -> ProjectItem:
         item = ProjectItem.objects.create(
             ark="fake/abcdef",
             created_by=user,
@@ -1745,20 +1756,10 @@ class FileDeletionTestCase(TestCase):
         handler = ImageFileHandler(master_image_file)
         handler.process_files()
 
-        # get created date from derivative images, so we can check if they are updated
-        thumbnail_create_date = MediaFile.objects.get(
-            item=item, file_type__file_code="image_thumbnail"
-        ).create_date
-        submaster_create_date = MediaFile.objects.get(
-            item=item, file_type__file_code="image_submaster"
-        ).create_date
-
-        return item, thumbnail_create_date, submaster_create_date
+        return item
 
     def test_delete_file_and_children(self):
-        self.item, self.thumbnail_created_date, self.submaster_created_date = (
-            self.create_master_and_derivatives(self.user, self.mock_request)
-        )
+        self.item = self.create_master_and_derivatives(self.user, self.mock_request)
 
         # check that the thumbnail and submaster images are created
         self.assertTrue(MediaFile.objects.filter(item=self.item).count() == 3)
@@ -1787,24 +1788,7 @@ class FileDeletionTestCase(TestCase):
         self.assertFalse(submaster_path.is_file())
 
     def test_delete_file_and_children_no_children(self):
-        self.item = ProjectItem.objects.create(
-            ark="fake/abcdef",
-            created_by=self.user,
-            last_modified_by=self.user,
-            title="Fake title",
-            type=ItemType.objects.get(type="Audio"),
-        )
-        file_type = MediaFileType.objects.get(file_code="image_master")
-        master_image_file = OralHistoryFile(
-            self.item.id,
-            "samples/sample_marbles.tif",
-            file_type,
-            "master",
-            self.mock_request,
-        )
-
-        handler = ImageFileHandler(master_image_file)
-        handler.process_files()
+        self.item = self.create_master_and_derivatives(self.user, self.mock_request)
 
         # check that the thumbnail and submaster images are created
         self.assertTrue(MediaFile.objects.filter(item=self.item).count() == 3)
@@ -1812,7 +1796,7 @@ class FileDeletionTestCase(TestCase):
         submaster_mediafile = MediaFile.objects.get(
             item=self.item, file_type__file_code="image_submaster"
         )
-        # delete files
+        # delete submaster only
         delete_file_and_children(submaster_mediafile, self.user)
 
         # check that master and thumbnail files are still there (in DB and on disk)
@@ -1827,6 +1811,33 @@ class FileDeletionTestCase(TestCase):
             f"{settings.MEDIA_ROOT}/oh_static/submasters/fake-abcdef-1-submaster.jpg"
         )
         self.assertFalse(submaster_path.is_file())
+
+    def test_unauthorized_user_cannot_delete_files_via_view(self):
+        self.item = self.create_master_and_derivatives(self.user, self.mock_request)
+        file_id = MediaFile.objects.last().id
+        url = f"/delete_file/{file_id}"
+        # Default user created in setUpTestData() does not have the necessary permission.
+        self.client.force_login(self.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+
+    def test_authorized_user_can_delete_files_via_view(self):
+        self.item = self.create_master_and_derivatives(self.user, self.mock_request)
+        file_id = MediaFile.objects.last().id
+        url = f"/delete_file/{file_id}"
+        # Default user created in setUpTestData() does not have the necessary permission,
+        # so create new one and the necessary group.
+        auth_user = User.objects.create_user("auth_tester")
+        authorized_group, created = Group.objects.get_or_create(
+            name="Oral History Staff"
+        )
+        auth_user.groups.add(authorized_group)
+        self.client.force_login(auth_user)
+        # Successful deletion redirects to the upload_file view of the associated
+        # project item.
+        expected_url = f"/upload_file/{self.item.id}"
+        response = self.client.get(url)
+        self.assertRedirects(response, expected_url=expected_url)
 
     def tearDown(self) -> None:
         media_files = MediaFile.objects.filter(item=self.item)
