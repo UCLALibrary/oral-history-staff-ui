@@ -651,16 +651,13 @@ def delete_file(media_file: MediaFile, user: User) -> None:
 
 
 def delete_projectitem(project_item: ProjectItem, user: User) -> None:
-    # first check if item has child ProjectItems and block deletion if so
-    children = ProjectItem.objects.filter(parent=project_item)
+    # check if item has child ProjectItems or MediaFiles, and block deletion if so
+    children, media_files = get_item_dependencies(project_item)
     if children:
         logger.error(
             f"Item {project_item.title} has child items and cannot be deleted."
         )
         return
-    # then check if there are any MediaFiles associated with the item
-    # if so, block deletion
-    media_files = MediaFile.objects.filter(item=project_item)
     if media_files:
         logger.error(
             f"Item {project_item.title} has associated MediaFiles and cannot be deleted."
