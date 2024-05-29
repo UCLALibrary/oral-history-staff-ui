@@ -18,6 +18,7 @@ from oh_staff_ui.forms import (
 from oh_staff_ui.models import MediaFile, MediaFileError, ProjectItem
 from oh_staff_ui.views_utils import (
     delete_file_and_children,
+    delete_projectitem,
     get_ark,
     get_edit_item_context,
     get_all_series_and_interviews,
@@ -90,7 +91,7 @@ def add_item(request: HttpRequest, parent_id: int | None = None) -> HttpResponse
 def edit_item(request: HttpRequest, item_id: int) -> HttpResponse:
     if request.method == "POST":
         save_all_item_data(item_id, request)
-    context = get_edit_item_context(item_id)
+    context = get_edit_item_context(item_id, request.user)
     return render(request, "oh_staff_ui/edit_item.html", context)
 
 
@@ -207,6 +208,29 @@ def delete_file(request: HttpRequest, file_id: int) -> HttpResponse:
     else:
         logger.warning(
             f"Unauthorized attempt to delete {media_file.file} ({file_id}) by {request.user}"
+        )
+        raise PermissionDenied
+
+
+@login_required
+def delete_item(request: HttpRequest, item_id: int) -> HttpResponse:
+    item = ProjectItem.objects.get(pk=item_id)
+    # if item is a child, remember parent for redirect
+    if item.parent:
+        parent_id = item.parent.pk
+    else:
+        parent_id = None
+    # Ensure only authorized users can execute this.
+    if user_in_oh_staff_group(request.user):
+        delete_projectitem(item, request.user)
+        # if item was a child, return to parent
+        if parent_id:
+            return redirect("edit_item", item_id=parent_id)
+        # otherwise return to item search
+        return redirect("item_search")
+    else:
+        logger.warning(
+            f"Unauthorized attempt to delete item {item.title} ({item_id}) by {request.user}"
         )
         raise PermissionDenied
 

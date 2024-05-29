@@ -103,14 +103,24 @@ if (window.location.href.endsWith("add_item/")) {
   }
 }
 
-function showConfirmDeletePopup(fileID) {
+function showFileConfirmDeletePopup(fileID) {
   fullID = "confirm-delete-popup-" + fileID;
   document.getElementById(fullID).style.display = "block";
   // set focus to "Cancel" button
   document.getElementById("cancel-" + fileID).focus();
 }
 
-function hideConfirmDeletePopup(fileID) {
+function hideFileConfirmDeletePopup(fileID) {
   fullID = "confirm-delete-popup-" + fileID;
   document.getElementById(fullID).style.display = "none";
+}
+
+function showItemConfirmDeletePopup() {
+  document.getElementById("confirm-delete-popup").style.display = "block";
+  // set focus to "Cancel" button
+  document.getElementById("cancel").focus();
+}
+
+function hideItemConfirmDeletePopup() {
+  document.getElementById("confirm-delete-popup").style.display = "none";
 }

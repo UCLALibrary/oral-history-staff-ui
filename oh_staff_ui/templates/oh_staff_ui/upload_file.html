@@ -62,7 +62,7 @@
       {% endfor %}
     </ul>
     {% endif %}
-    <a href="#" class="btn btn-primary" id="cancel-{{file.id}}" onclick="hideConfirmDeletePopup('{{file.id}}')">Cancel</a>
+    <a href="#" class="btn btn-primary" id="cancel-{{file.id}}" onclick="hideFileConfirmDeletePopup('{{file.id}}')">Cancel</a>
     <a href="{% url 'delete_file' file.id %}" class="btn btn-secondary">Delete</a> 
   </div>
   <tr>
@@ -80,7 +80,7 @@
     <td>{{ file.sequence }}</td>
     {% if staff_status %}  
     <td>
-      <button class="delete-link btn btn-primary" onclick="showConfirmDeletePopup('{{ file.id }}')">Delete</button>
+      <button class="delete-link btn btn-primary" onclick="showFileConfirmDeletePopup('{{ file.id }}')">Delete</button>
     </td>
     {% endif %}
   </tr>
