@@ -7,6 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.management.base import CommandError
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from django.http.request import HttpRequest  # for code completion
 from django.http.response import HttpResponse  # for code completion
 from django.views.static import serve
@@ -88,6 +89,7 @@ def add_item(request: HttpRequest, parent_id: int | None = None) -> HttpResponse
 
 
 @login_required
+@never_cache
 def edit_item(request: HttpRequest, item_id: int) -> HttpResponse:
     if request.method == "POST":
         save_all_item_data(item_id, request)
