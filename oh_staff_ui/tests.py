@@ -1848,3 +1848,115 @@ class FileDeletionTestCase(TestCase):
         # delete MediaFile objects starting with the parent - CASCADE will delete children
         for parent_mf in media_files.filter(parent__isnull=True):
             parent_mf.delete()
+
+
+class ItemDeletionTestCase(TestCase):
+    fixtures = [
+        "item-status-data.json",
+        "item-type-data.json",
+        "media-file-type-data.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        # set up a user with no permissions
+        cls.unauthorized_user = User.objects.create_user("tester")
+        cls.unauthorized_mock_request = HttpRequest()
+        cls.unauthorized_mock_request.user = User.objects.get(
+            username=cls.unauthorized_user.username
+        )
+        # set up a user in the Oral History Staff group, who should be able to delete items
+        cls.authorized_user = User.objects.create_user("auth_tester")
+        cls.authorized_group, created = Group.objects.get_or_create(
+            name="Oral History Staff"
+        )
+        cls.authorized_user.groups.add(cls.authorized_group)
+        cls.authorized_mock_request = HttpRequest()
+        cls.authorized_mock_request.user = User.objects.get(
+            username=cls.authorized_user.username
+        )
+
+    def test_unauthorized_user_cannot_delete_projectitem_via_view(self):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=self.unauthorized_user,
+            last_modified_by=self.unauthorized_user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        #
+        self.client.force_login(self.unauthorized_user)
+        response = self.client.get(f"/delete_item/{item.id}")
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+        # Check that the item still exists
+        self.assertTrue(ProjectItem.objects.filter(id=item.id).exists())
+
+    def test_authorized_user_can_delete_projectitem_via_view(self):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef2",
+            created_by=self.authorized_user,
+            last_modified_by=self.authorized_user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        self.client.force_login(self.authorized_user)
+        # Test item has no parent, so deletion should redirect to item search page
+        expected_url = "/item_search/"
+        response = self.client.get(f"/delete_item/{item.id}")
+        self.assertRedirects(response, expected_url=expected_url)
+        # Check that the item has been deleted
+        self.assertFalse(ProjectItem.objects.filter(id=item.id).exists())
+
+    def test_cannot_delete_item_with_children(self):
+        parent_item = ProjectItem.objects.create(
+            ark="fake/abcdef1",
+            created_by=self.authorized_user,
+            last_modified_by=self.authorized_user,
+            title="Fake parent",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        child_item = ProjectItem.objects.create(
+            ark="fake/abcdef2",
+            created_by=self.authorized_user,
+            last_modified_by=self.authorized_user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+            parent=parent_item,
+        )
+
+        # use the authorized user to try to delete the parent item
+        self.client.force_login(self.authorized_user)
+        response = self.client.get(f"/delete_item/{parent_item.id}")
+        # Parent item did not have a parent,
+        # so this should redirect to item search page without deleting the item
+        expected_url = "/item_search/"
+        self.assertRedirects(response, expected_url=expected_url)
+        # Check that the parent item still exists
+        self.assertTrue(ProjectItem.objects.filter(id=parent_item.id).exists())
+        # Check that the child item still exists
+        self.assertTrue(ProjectItem.objects.filter(id=child_item.id).exists())
+
+    def test_cannot_delete_item_with_mediafiles(self):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef",
+            created_by=self.authorized_user,
+            last_modified_by=self.authorized_user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        MediaFile.objects.create(
+            item=item,
+            file_type=MediaFileType.objects.get(file_code="image_master"),
+            file="fake_image_name.jpg",
+            created_by=self.authorized_user,
+        )
+
+        # use the authorized user to try to delete the item
+        self.client.force_login(self.authorized_user)
+        response = self.client.get(f"/delete_item/{item.id}")
+        # Item has media files but no parent,
+        # so this should redirect to item search page without deleting the item
+        expected_url = "/item_search/"
+        self.assertRedirects(response, expected_url=expected_url)
+        # Check that the item still exists
+        self.assertTrue(ProjectItem.objects.filter(id=item.id).exists())

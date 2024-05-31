@@ -162,7 +162,7 @@ def get_ark() -> str:
             raise
 
 
-def get_edit_item_context(item_id: int) -> dict:
+def get_edit_item_context(item_id: int, user: User) -> dict:
     # Populate forms with data from database
     item = ProjectItem.objects.get(pk=item_id)
     # item_form is "bound" with this data
@@ -203,6 +203,12 @@ def get_edit_item_context(item_id: int) -> dict:
         item_id, SubjectUsageForm, ItemSubjectUsage, "subjects"
     )
     relatives = get_relatives(item)
+    # for use in the template to display delete button if needed,
+    # determine if user is in the OH Staff group
+    staff_status = user_in_oh_staff_group(user)
+    # for use in the template to prevent deletion if item has children
+    # or associated MediaFiles, get these dependencies
+    children, media_files = get_item_dependencies(item)
     return {
         "item": item,
         "item_form": item_form,
@@ -219,6 +225,9 @@ def get_edit_item_context(item_id: int) -> dict:
         "subject_formset": subject_formset,
         "relatives": relatives,
         "public_site_url": get_public_site_url(item),
+        "staff_status": staff_status,
+        "children_blocking_delete": children,
+        "media_files_blocking_delete": media_files,
     }
 
 
@@ -639,3 +648,29 @@ def delete_file(media_file: MediaFile, user: User) -> None:
         )
     logger.info(f"File {file_name} deleted by user {user}.")
     media_file.delete()
+
+
+def delete_projectitem(project_item: ProjectItem, user: User) -> None:
+    # check if item has child ProjectItems or MediaFiles, and block deletion if so
+    children, media_files = get_item_dependencies(project_item)
+    if children:
+        logger.error(
+            f"Item {project_item.title} has child items and cannot be deleted."
+        )
+        return
+    if media_files:
+        logger.error(
+            f"Item {project_item.title} has associated MediaFiles and cannot be deleted."
+        )
+        return
+    # finally, delete the item
+    logger.info(f"Item {project_item.title} deleted by user {user}.")
+    project_item.delete()
+
+
+def get_item_dependencies(item: ProjectItem) -> tuple:
+    # to check if we can delete an item, we need to check for both
+    # child ProjectItems and associated MediaFiles
+    children = ProjectItem.objects.filter(parent=item)
+    media_files = MediaFile.objects.filter(item=item)
+    return children, media_files
