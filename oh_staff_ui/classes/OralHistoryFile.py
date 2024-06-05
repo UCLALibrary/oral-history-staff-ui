@@ -84,25 +84,23 @@ class OralHistoryFile:
         )
 
         # Read the original file, copying it to new_name and saving the MediaFile.
-        with Path(self._original_file_name).open(mode="rb") as f:
-            new_file.file = File(f, name=new_name)
-            # Use original file size, since it's not available in this context.
-            new_file.file_size = self._file_size
-            new_file.save()
-            # Also store it for read-only access by callers.
-            self._media_file = new_file
-
-        # Apparently, creating a MediaFile can silently fail, at least for audio files.
-        # Not sure how best to handle this; for now, check to see if the new file was
-        # created by Django.
-        new_disk_file = Path(settings.MEDIA_ROOT).joinpath(new_file.file.name)
-        if not new_disk_file.exists():
-            # Capture error to database for display in template as well.
-            # Since we don't know what went wrong, dump new_file via vars().
+        try:
+            with Path(self._original_file_name).open(mode="rb") as f:
+                new_file.file = File(f, name=new_name)
+                # Use original file size, since it's not available in this context.
+                new_file.file_size = self._file_size
+                new_file.save()
+                # Also store it for read-only access by callers.
+                self._media_file = new_file
+        except OSError as ex:
+            # Django could not copy the file from source to the relevant target directory.
+            # Since we don't know exactly what went wrong, dump new_file via vars().
             error_message = (
                 f"Unable to create MediaFile for an unknown reason - contact DIIT."
                 f"{vars(new_file)}"
+                f"Exception: {ex=}"
             )
+            # Capture error to database for display in template as well.
             MediaFileError.objects.create(
                 file_name=self.file_name,
                 item=self.item,
