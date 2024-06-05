@@ -78,8 +78,10 @@ class AudioFileHandler(BaseFileHandler):
             # Before processing, check to see if item already has files,
             # and reject this new file if it does.
             if self._item_has_files():
-                error_message = f"Error: Cannot add {self._master_file.file_name}; "
-                "this item already has files."
+                error_message = (
+                    f"Error: Cannot add {self._master_file.file_name}; "
+                    f"this item already has files."
+                )
                 # Capture error to database for display in template as well.
                 MediaFileError.objects.create(
                     file_name=self._master_file.file_name,
