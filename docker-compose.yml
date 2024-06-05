@@ -9,7 +9,7 @@ services:
       - .docker-compose_db.env
     ports: 
       # Variables here must be set in environment, or in .env - not in any env_file
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       - db
     extra_hosts:
@@ -21,5 +21,7 @@ services:
       - .docker-compose_db.env
     volumes:
       - pg_data:/var/lib/postgresql/data/
+    ports:
+      - "127.0.0.1:5432:5432"
 volumes:
   pg_data:
