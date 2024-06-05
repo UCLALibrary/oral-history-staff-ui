@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: uclalibrary/oral-history-staff-ui
-  tag: v1.1.8
+  tag: v1.1.9
   pullPolicy: Always
 
 nameOverride: ""
