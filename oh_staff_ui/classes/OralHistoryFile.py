@@ -1,10 +1,13 @@
 # Utility functions for file handling.
+import logging
 from pathlib import Path
 from django.conf import settings
 from django.core.files import File
 from django.db.models import Max
 from django.http import HttpRequest
-from oh_staff_ui.models import MediaFile, MediaFileType, ProjectItem
+from oh_staff_ui.models import MediaFile, MediaFileError, MediaFileType, ProjectItem
+
+logger = logging.getLogger(__name__)
 
 
 class OralHistoryFile:
@@ -71,7 +74,6 @@ class OralHistoryFile:
         new_file_name = self.get_new_file_name(next_sequence)
         # Combine filename with directory to get full path for MediaFile creation.
         new_name = f"{self._target_dir}/{new_file_name}"
-
         new_file = MediaFile(
             created_by=self._request.user,
             item=self._item,
@@ -80,15 +82,32 @@ class OralHistoryFile:
             sequence=next_sequence,
             parent_id=parent_id,
         )
+
         # Read the original file, copying it to new_name and saving the MediaFile.
-        # Get original filesize first, since it's not available in the context below.
-        file_size = self._file_size
-        with Path(self._original_file_name).open(mode="rb") as f:
-            new_file.file = File(f, name=new_name)
-            new_file.file_size = file_size
-            new_file.save()
-            # Also store it for read-only access by callers.
-            self._media_file = new_file
+        try:
+            with Path(self._original_file_name).open(mode="rb") as f:
+                new_file.file = File(f, name=new_name)
+                # Use original file size, since it's not available in this context.
+                new_file.file_size = self._file_size
+                new_file.save()
+                # Also store it for read-only access by callers.
+                self._media_file = new_file
+        except OSError as ex:
+            # Django could not copy the file from source to the relevant target directory.
+            # Since we don't know exactly what went wrong, dump new_file via vars().
+            error_message = (
+                f"Unable to create MediaFile for an unknown reason - contact DIIT."
+                f"{vars(new_file)}"
+                f"Exception: {ex=}"
+            )
+            # Capture error to database for display in template as well.
+            MediaFileError.objects.create(
+                file_name=self.file_name,
+                item=self.item,
+                message=error_message,
+            )
+            # ValueError seems to fit best here for now, and is handled by callers.
+            raise ValueError(error_message)
 
     def get_content_type(self, file_name: str) -> str:
         """Get broad type of content based on file extension.
