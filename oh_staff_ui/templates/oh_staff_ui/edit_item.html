@@ -100,7 +100,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field name_form.usage_id %} {% bootstrap_field name_form.type show_label=False %}</td>
             <td>{% bootstrap_field name_form.value show_label=False %}</td>
-            <td>{% bootstrap_field name_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field name_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="name_empty_form" class="empty_form">
@@ -108,7 +108,7 @@
             <td class="qualifier">{% bootstrap_field name_formset.empty_form.usage_id %} 
                 {% bootstrap_field name_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field name_formset.empty_form.value show_label=False %}</td>
-            <td>{% bootstrap_field name_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field name_formset.empty_form.DELETE %}</td>
         </tr>
         {% for subject_form in subject_formset %}
         <tr>
@@ -118,7 +118,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field subject_form.usage_id %} {% bootstrap_field subject_form.type show_label=False %}</td>
             <td>{% bootstrap_field subject_form.value show_label=False %}</td>
-            <td>{% bootstrap_field subject_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field subject_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="subject_empty_form" class="empty_form">
@@ -126,7 +126,7 @@
             <td class="qualifier">{% bootstrap_field subject_formset.empty_form.usage_id %} 
                 {% bootstrap_field subject_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field subject_formset.empty_form.value show_label=False %}</td>
-            <td>{% bootstrap_field subject_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field subject_formset.empty_form.DELETE %}</td>
         </tr>
         {% for publisher_form in publisher_formset %}
         <tr>
@@ -136,7 +136,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field publisher_form.usage_id %} {% bootstrap_field publisher_form.type show_label=False %}</td>
             <td>{% bootstrap_field publisher_form.value show_label=False %}</td>
-            <td>{% bootstrap_field publisher_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field publisher_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="publisher_empty_form" class="empty_form">
@@ -144,7 +144,7 @@
             <td class="qualifier">{% bootstrap_field publisher_formset.empty_form.usage_id %} 
                 {% bootstrap_field publisher_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field publisher_formset.empty_form.value show_label=False %}</td>
-            <td>{% bootstrap_field publisher_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field publisher_formset.empty_form.DELETE %}</td>
         </tr>
         {% for copyright_form in copyright_formset %}
         <tr>
@@ -154,7 +154,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field copyright_form.usage_id %} {% bootstrap_field copyright_form.type show_label=False %}</td>
             <td>{% bootstrap_field copyright_form.value show_label=False %}</td>
-            <td>{% bootstrap_field copyright_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field copyright_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="copyright_empty_form" class="empty_form">
@@ -162,7 +162,7 @@
             <td class="qualifier">{% bootstrap_field copyright_formset.empty_form.usage_id %} 
                 {% bootstrap_field copyright_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field copyright_formset.empty_form.value show_label=False %}</td>
-            <td>{% bootstrap_field copyright_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field copyright_formset.empty_form.DELETE %}</td>
         </tr>
         {% for resource_form in resource_formset %}
         <tr>
@@ -172,7 +172,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field resource_form.usage_id %} {% bootstrap_field resource_form.type show_label=False %}</td>
             <td>{% bootstrap_field resource_form.value show_label=False %}</td>
-            <td>{% bootstrap_field resource_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field resource_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="resource_empty_form" class="empty_form">
@@ -180,7 +180,7 @@
             <td class="qualifier">{% bootstrap_field resource_formset.empty_form.usage_id %} 
                 {% bootstrap_field resource_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field resource_formset.empty_form.value show_label=False %}</td>
-            <td>{% bootstrap_field resource_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field resource_formset.empty_form.DELETE %}</td>
         </tr>
         {% for alt_title_form in alt_title_formset %}
         <tr>
@@ -190,7 +190,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field alt_title_form.usage_id %} {% bootstrap_field alt_title_form.type show_label=False %}</td>
             <td>{% bootstrap_field alt_title_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field alt_title_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field alt_title_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="alt_title_empty_form" class="empty_form">
@@ -198,7 +198,7 @@
             <td class="qualifier">{% bootstrap_field alt_title_formset.empty_form.usage_id %} 
                 {% bootstrap_field alt_title_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field alt_title_formset.empty_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field alt_title_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field alt_title_formset.empty_form.DELETE %}</td>
         </tr>
         {% for alt_id_form in alt_id_formset %}
         <tr>
@@ -208,7 +208,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field alt_id_form.usage_id %} {% bootstrap_field alt_id_form.type show_label=False %}</td>
             <td>{% bootstrap_field alt_id_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field alt_id_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field alt_id_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="alt_id_empty_form" class="empty_form">
@@ -216,7 +216,7 @@
             <td class="qualifier">{% bootstrap_field alt_id_formset.empty_form.usage_id %} 
                 {% bootstrap_field alt_id_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field alt_id_formset.empty_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field alt_id_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field alt_id_formset.empty_form.DELETE %}</td>
         </tr>
         {% for description_form in description_formset %}
         <tr class = "description text-nowrap">
@@ -226,7 +226,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field description_form.usage_id %} {% bootstrap_field description_form.type show_label=False %}</td>
             <td>{% bootstrap_field description_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field description_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field description_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="description_empty_form" class="empty_form">
@@ -234,7 +234,7 @@
             <td class="qualifier">{% bootstrap_field description_formset.empty_form.usage_id %} 
                 {% bootstrap_field description_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field description_formset.empty_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field description_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field description_formset.empty_form.DELETE %}</td>
         </tr>
         {% for date_form in date_formset %}
         <tr>
@@ -244,7 +244,7 @@
             </td>
             <td class="qualifier">{% bootstrap_field date_form.usage_id %} {% bootstrap_field date_form.type show_label=False %}</td>
             <td>{% bootstrap_field date_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field date_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field date_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="date_empty_form" class="empty_form">
@@ -252,7 +252,7 @@
             <td class="qualifier">{% bootstrap_field date_formset.empty_form.usage_id %} 
                 {% bootstrap_field date_formset.empty_form.type show_label=False %}</td>
             <td>{% bootstrap_field date_formset.empty_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field date_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field date_formset.empty_form.DELETE %}</td>
         </tr>
         {% for format_form in format_formset %}
         <tr>
@@ -262,14 +262,14 @@
             </td>
             <td>{% bootstrap_field format_form.usage_id %}</td>
             <td>{% bootstrap_field format_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field format_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field format_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="format_empty_form" class="empty_form">
             <td></td>
             <td>{% bootstrap_field format_formset.empty_form.usage_id %}</td>
             <td>{% bootstrap_field format_formset.empty_form.value show_label=False placeholder="" %}</td>
-            <td>{% bootstrap_field format_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field format_formset.empty_form.DELETE %}</td>
         </tr>
         {% for language_form in language_formset %}
         <tr>
@@ -279,14 +279,14 @@
             </td>
             <td>{% bootstrap_field language_form.usage_id %}</td>
             <td>{% bootstrap_field language_form.value show_label=False %}</td>
-            <td>{% bootstrap_field language_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field language_form.DELETE %}</td>
         </tr>
         {% endfor %}
         <tr id="language_empty_form" class="empty_form">
             <td></td>
             <td>{% bootstrap_field language_formset.empty_form.usage_id %}</td>
             <td>{% bootstrap_field language_formset.empty_form.value show_label=False %}</td>
-            <td>{% bootstrap_field language_formset.empty_form.DELETE %}</td>
+            <td class="form-checkbox">{% bootstrap_field language_formset.empty_form.DELETE %}</td>
         </tr>
     </table>
     <br>

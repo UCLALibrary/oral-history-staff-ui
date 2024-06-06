@@ -28,9 +28,20 @@ td.search-type {
   font-weight: bold;
 }
 
+#edit_item .form-control {
+  display: inline;
+}
+
+#edit_item tr,
 td.label,
-td.qualifier {
-  vertical-align: baseline;
+td.qualifier,
+#edit_item textarea {
+  vertical-align: top;
+}
+
+td.label button,
+td.form-checkbox {
+  vertical-align: middle;
 }
 
 td.label {
