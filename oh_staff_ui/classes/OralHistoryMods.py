@@ -179,7 +179,8 @@ class OralHistoryMods(MODSv34):
         for ts in MediaFile.objects.filter(
             item=pi, file_type__file_code="text_master_transcript"
         ):
-            if ts.file_url != "" and ts.file_url.endswith(".xml"):
+            # Add only for submasters, the public-access copy
+            if ts.file_url.endswith("submaster.xml"):
                 # Due to legacy design the text_master_transcript can have 2 file types
                 # associated with it, we only want to show xml (TEI), and ignore html files
                 ri.locations.append(LocationOH(url=ts.file_url, usage="timed log"))
@@ -208,7 +209,8 @@ class OralHistoryMods(MODSv34):
         for f in MediaFile.objects.filter(
             item=self._item, file_type__file_code__in=fc_to_label.keys()
         ).order_by("sequence"):
-            if f.file_url != "":
+            # Add only for submasters, the public-access copy
+            if "submaster" in f.file_url:
                 label = fc_to_label[f.file_type.file_code]
                 usage = ""
 
@@ -219,7 +221,8 @@ class OralHistoryMods(MODSv34):
                         label = f"{label} (TEI/P5 XML)"
                         usage = "timed log"
 
-                # If our MediaFile is TEI/P5 XML, a usage attribute is populated and should be included
+                # If our MediaFile is TEI/P5 XML, a usage attribute is populated
+                # and should be included
                 if usage:
                     self.locations.append(
                         LocationOH(url=f.file_url, label=label, usage=usage)

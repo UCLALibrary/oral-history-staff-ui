@@ -1543,6 +1543,12 @@ class ModsTestCase(TestCase):
         # That title should not be present, since that item has been Sealed.
         self.assertNotIn("Fake audio", related_titles)
 
+    def test_master_file_urls_are_excluded(self):
+        # Confirm that master file URLs, which are only used in the staff UI,
+        # are not included in the OAI feed.
+        ohmods = self.get_mods_from_interview_item()
+        self.assertFalse(b"/oh_masters/" in ohmods.serializeDocument())
+
 
 class FileMetadataMigrationTestCase(SimpleTestCase):
     # Test logic not already covered by OralHistoryFile tests.
