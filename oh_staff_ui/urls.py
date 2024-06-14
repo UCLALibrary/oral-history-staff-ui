@@ -10,7 +10,7 @@ urlpatterns = [
     path("item_search/", views.item_search, name="item_search"),
     path(
         "search_results/<str:search_type>/<str:media_file_type_filter>/"
-        "<str:item_type_filter>/<str:query>",
+        "<str:item_type_filter>/<path:query>",
         views.search_results,
         name="search_results",
     ),

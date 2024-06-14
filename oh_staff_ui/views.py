@@ -106,8 +106,6 @@ def item_search(request: HttpRequest) -> HttpResponse:
                 typed_query = form.cleaned_data["status_query"]
             else:
                 typed_query = form.cleaned_data["char_query"]
-                # remove slashes from query to prevent url errors
-                typed_query = typed_query.replace("/", " ")
 
             # check for filter values, and set to known defaults if not present
             item_type_filter = form.cleaned_data["item_type_filter"]
