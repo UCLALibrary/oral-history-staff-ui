@@ -144,6 +144,20 @@ class ItemSearchForm(forms.Form):
         label="Query",
         widget=forms.Select(attrs={"class": "status-query", "style": "display: none"}),
     )
+    item_type_filter = forms.ModelChoiceField(
+        required=False,
+        queryset=ItemType.objects.all().order_by("type"),
+        label="Item type",
+        widget=forms.Select(attrs={"class": "item-type-filter"}),
+    )
+    media_file_type_filter = forms.ModelChoiceField(
+        required=False,
+        queryset=MediaFileType.objects.filter(file_code__contains="_master").order_by(
+            "file_type"
+        ),
+        label="Type of attached media files",
+        widget=forms.Select(attrs={"class": "media-file-type-filter"}),
+    )
 
 
 class NameUsageForm(forms.Form):

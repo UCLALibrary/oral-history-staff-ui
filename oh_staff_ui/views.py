@@ -106,9 +106,22 @@ def item_search(request: HttpRequest) -> HttpResponse:
                 typed_query = form.cleaned_data["status_query"]
             else:
                 typed_query = form.cleaned_data["char_query"]
+                # remove slashes from query to prevent url errors
+                typed_query = typed_query.replace("/", " ")
+
+            # check for filter values, and set to known defaults if not present
+            item_type_filter = form.cleaned_data["item_type_filter"]
+            media_file_type_filter = form.cleaned_data["media_file_type_filter"]
+            if form.cleaned_data["item_type_filter"] is None:
+                item_type_filter = "all"
+            if form.cleaned_data["media_file_type_filter"] is None:
+                media_file_type_filter = "all"
+
             return redirect(
                 "search_results",
                 search_type=form.cleaned_data["search_type"],
+                item_type_filter=item_type_filter,
+                media_file_type_filter=media_file_type_filter,
                 query=typed_query,
             )
     else:
@@ -117,9 +130,27 @@ def item_search(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def search_results(request: HttpRequest, search_type: str, query: str) -> HttpResponse:
-    results = get_search_results(search_type, query)
-    return render(request, "oh_staff_ui/search_results.html", {"results": results})
+def search_results(
+    request: HttpRequest,
+    search_type: str,
+    query: str,
+    item_type_filter: str = "",
+    media_file_type_filter: str = "",
+) -> HttpResponse:
+    results = get_search_results(
+        search_type, query, item_type_filter, media_file_type_filter
+    )
+    return render(
+        request,
+        "oh_staff_ui/search_results.html",
+        {
+            "results": results,
+            "query": query,
+            "search_type": search_type,
+            "item_type_filter": item_type_filter,
+            "media_file_type_filter": media_file_type_filter,
+        },
+    )
 
 
 @login_required
