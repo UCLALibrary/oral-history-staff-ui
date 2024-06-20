@@ -4,14 +4,29 @@
 {% block content %}
 <form name="item_search" onsubmit ="return validateSearchForm()" id="item_search" method="POST">
     {% csrf_token %}
+    <p>Enter "*" to perform a wildcard search matching all items. This must be used together with a filter for status, item type, or media file type.</p>
     <table>
         <tr>
             <td class="search-type">{% bootstrap_field form.search_type layout="floating" %}</td>
-            <td></td>
             <td>{% bootstrap_field form.char_query layout="floating" placeholder=""%}</td>
-            <td>{% bootstrap_field form.status_query layout="floating"%}</td>
+            
         </tr>
+        <tr>
+            <td>{% bootstrap_field form.status_filter layout="floating"%}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>{% bootstrap_field form.item_type_filter layout="floating" %}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>{% bootstrap_field form.media_file_type_filter layout="floating" %}</td>
+            <td></td>
+        </tr>
+
     </table>
+   
     {% bootstrap_button button_type="submit" content="Search" %}
+    
 </form>
 {% endblock %}

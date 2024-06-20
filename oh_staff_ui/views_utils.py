@@ -9,7 +9,7 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib import messages
 from django.core.management import call_command
-from django.db.models import CharField, Model, Q, QuerySet
+from django.db.models import CharField, Model, Q
 from django.contrib.auth.models import User
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
@@ -117,28 +117,64 @@ def get_result_items(queryset_list: list) -> list[ProjectItem]:
     return output_projectitems_deduped
 
 
-def get_search_results(search_type: str, query: str) -> list[ProjectItem]:
+def get_search_results(
+    search_type: str,
+    query: str,
+    item_type_filter: str,
+    media_file_type_filter: str,
+    status_filter: str,
+) -> list[ProjectItem]:
     # Return a list of items matching the search.  Different searches have
     # different return types and sort orders; this unifies them for consistent
     # use in the view and template.
-    if search_type == "title":
+
+    # first, check if this is a wildcard search - if so, return all items
+    # no need to check search_type
+    if query == "*":
+        qs_results = ProjectItem.objects.all().order_by("title")
+        results_list = [item for item in qs_results]
+
+    elif search_type == "title":
         full_query = construct_keyword_query("title", query)
         qs_results = ProjectItem.objects.filter(full_query).order_by("title")
+        results_list = [item for item in qs_results]
+
     elif search_type == "ark":
         qs_results = ProjectItem.objects.filter(ark__icontains=query).order_by("ark")
-    elif search_type == "status":
-        qs_results = ProjectItem.objects.filter(status__status=query).order_by("title")
+        results_list = [item for item in qs_results]
+
     elif search_type == "keyword":
         search_data = get_keyword_results(query)
         # This is a sorted list of ProjectItems already, so does not need conversion to list below.
-        qs_results = get_result_items(search_data)
-    # Convert query results from QuerySet to list of items, if needed.
-    # qs_results is already sorted as desired based on search_type.
-    if isinstance(qs_results, QuerySet):
-        results = [item for item in qs_results]
-    else:
-        results = qs_results
-    return results
+        results_list = get_result_items(search_data)
+
+    filtered_results = filter_results_list(
+        results_list, item_type_filter, media_file_type_filter, status_filter
+    )
+    return filtered_results
+
+
+def filter_results_list(
+    results_list: list[ProjectItem],
+    item_type_filter: str,
+    media_file_type_filter: str,
+    status_filter: str,
+) -> list[ProjectItem]:
+    if item_type_filter != "all":
+        results_list = [
+            item for item in results_list if item.type.type == item_type_filter
+        ]
+    if media_file_type_filter != "all":
+        media_files = MediaFile.objects.filter(
+            file_type__file_type=media_file_type_filter
+        )
+        media_file_items = [media_file.item.id for media_file in media_files]
+        results_list = [item for item in results_list if item.id in media_file_items]
+    if status_filter != "all":
+        results_list = [
+            item for item in results_list if item.status.status == status_filter
+        ]
+    return results_list
 
 
 def get_ark() -> str:
