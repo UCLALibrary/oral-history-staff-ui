@@ -128,21 +128,15 @@ function checkDuplicateValues() {
 }
 
 function validateSearchForm() {
-  if (document.getElementById("id_search_type").value == "status") {
-    if (document.getElementById("id_status_query").value == "") {
-      alert("Please select a Status value.");
-      return false;
-    }
-  } else {
-    if (document.getElementById("id_char_query").value.trim().length === 0) {
-      alert("Please enter a search query.");
-      return false;
-    }
+  if (document.getElementById("id_char_query").value.trim().length === 0) {
+    alert("Please enter a search query.");
+    return false;
   }
   if (
     document.getElementById("id_char_query").value === "*" &&
     document.getElementById("id_item_type_filter").value === "" &&
-    document.getElementById("id_media_file_type_filter").value === ""
+    document.getElementById("id_media_file_type_filter").value === "" &&
+    document.getElementById("id_status_filter").value == ""
   ) {
     alert("To use wildcard search, please use at least one filter.");
     return false;

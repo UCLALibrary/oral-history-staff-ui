@@ -110,16 +110,20 @@ def item_search(request: HttpRequest) -> HttpResponse:
             # check for filter values, and set to known defaults if not present
             item_type_filter = form.cleaned_data["item_type_filter"]
             media_file_type_filter = form.cleaned_data["media_file_type_filter"]
+            status_filter = form.cleaned_data["status_filter"]
             if form.cleaned_data["item_type_filter"] is None:
                 item_type_filter = "all"
             if form.cleaned_data["media_file_type_filter"] is None:
                 media_file_type_filter = "all"
+            if form.cleaned_data["status_filter"] is None:
+                status_filter = "all"
 
             return redirect(
                 "search_results",
                 search_type=form.cleaned_data["search_type"],
                 item_type_filter=item_type_filter,
                 media_file_type_filter=media_file_type_filter,
+                status_filter=status_filter,
                 query=typed_query,
             )
     else:
@@ -134,20 +138,15 @@ def search_results(
     query: str,
     item_type_filter: str = "",
     media_file_type_filter: str = "",
+    status_filter: str = "",
 ) -> HttpResponse:
     results = get_search_results(
-        search_type, query, item_type_filter, media_file_type_filter
+        search_type, query, item_type_filter, media_file_type_filter, status_filter
     )
     return render(
         request,
         "oh_staff_ui/search_results.html",
-        {
-            "results": results,
-            "query": query,
-            "search_type": search_type,
-            "item_type_filter": item_type_filter,
-            "media_file_type_filter": media_file_type_filter,
-        },
+        {"results": results},
     )
 
 

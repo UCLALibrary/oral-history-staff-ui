@@ -127,7 +127,6 @@ class ItemSearchForm(forms.Form):
     # If these change, views_utils.get_search_results() must be updated too.
     search_types = [
         ("title", "Title"),
-        ("status", "Status"),
         ("keyword", "Keyword"),
         ("ark", "ARK"),
     ]
@@ -138,11 +137,11 @@ class ItemSearchForm(forms.Form):
         widget=forms.TextInput(attrs={"size": 80, "class": "char-query"}),
         label="Query",
     )
-    status_query = forms.ModelChoiceField(
+    status_filter = forms.ModelChoiceField(
         required=False,
         queryset=ItemStatus.objects.all().order_by("status"),
-        label="Query",
-        widget=forms.Select(attrs={"class": "status-query", "style": "display: none"}),
+        label="Status",
+        widget=forms.Select(attrs={"class": "status-filter"}),
     )
     item_type_filter = forms.ModelChoiceField(
         required=False,
