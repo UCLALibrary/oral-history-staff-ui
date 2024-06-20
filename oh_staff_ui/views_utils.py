@@ -9,7 +9,7 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib import messages
 from django.core.management import call_command
-from django.db.models import CharField, Model, Q, QuerySet
+from django.db.models import CharField, Model, Q
 from django.contrib.auth.models import User
 from django.forms import BaseFormSet, Form, formset_factory
 from django.http.request import HttpRequest  # for code completion
