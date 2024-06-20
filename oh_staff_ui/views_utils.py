@@ -133,33 +133,24 @@ def get_search_results(
     if query == "*":
         qs_results = ProjectItem.objects.all().order_by("title")
         results_list = [item for item in qs_results]
-        filtered_results = filter_results_list(
-            results_list, item_type_filter, media_file_type_filter, status_filter
-        )
 
     elif search_type == "title":
         full_query = construct_keyword_query("title", query)
         qs_results = ProjectItem.objects.filter(full_query).order_by("title")
         results_list = [item for item in qs_results]
-        filtered_results = filter_results_list(
-            results_list, item_type_filter, media_file_type_filter, status_filter
-        )
 
     elif search_type == "ark":
         qs_results = ProjectItem.objects.filter(ark__icontains=query).order_by("ark")
         results_list = [item for item in qs_results]
-        filtered_results = filter_results_list(
-            results_list, item_type_filter, media_file_type_filter, status_filter
-        )
 
     elif search_type == "keyword":
         search_data = get_keyword_results(query)
         # This is a sorted list of ProjectItems already, so does not need conversion to list below.
         results_list = get_result_items(search_data)
-        filtered_results = filter_results_list(
-            results_list, item_type_filter, media_file_type_filter, status_filter
-        )
 
+    filtered_results = filter_results_list(
+        results_list, item_type_filter, media_file_type_filter, status_filter
+    )
     return filtered_results
 
 

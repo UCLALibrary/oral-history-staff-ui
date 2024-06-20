@@ -111,11 +111,11 @@ def item_search(request: HttpRequest) -> HttpResponse:
             item_type_filter = form.cleaned_data["item_type_filter"]
             media_file_type_filter = form.cleaned_data["media_file_type_filter"]
             status_filter = form.cleaned_data["status_filter"]
-            if form.cleaned_data["item_type_filter"] is None:
+            if item_type_filter is None:
                 item_type_filter = "all"
-            if form.cleaned_data["media_file_type_filter"] is None:
+            if media_file_type_filter is None:
                 media_file_type_filter = "all"
-            if form.cleaned_data["status_filter"] is None:
+            if status_filter is None:
                 status_filter = "all"
 
             return redirect(
