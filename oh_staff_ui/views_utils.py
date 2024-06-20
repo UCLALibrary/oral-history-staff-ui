@@ -132,80 +132,58 @@ def get_search_results(
     # no need to check search_type
     if query == "*":
         qs_results = ProjectItem.objects.all().order_by("title")
-        filtered_results = filter_non_keyword_results_queryset(
-            qs_results, item_type_filter, media_file_type_filter, status_filter
+        results_list = [item for item in qs_results]
+        filtered_results = filter_results_list(
+            results_list, item_type_filter, media_file_type_filter, status_filter
         )
+
     elif search_type == "title":
         full_query = construct_keyword_query("title", query)
         qs_results = ProjectItem.objects.filter(full_query).order_by("title")
-        filtered_results = filter_non_keyword_results_queryset(
-            qs_results, item_type_filter, media_file_type_filter, status_filter
+        results_list = [item for item in qs_results]
+        filtered_results = filter_results_list(
+            results_list, item_type_filter, media_file_type_filter, status_filter
         )
+
     elif search_type == "ark":
         qs_results = ProjectItem.objects.filter(ark__icontains=query).order_by("ark")
-        filtered_results = filter_non_keyword_results_queryset(
-            qs_results, item_type_filter, media_file_type_filter, status_filter
+        results_list = [item for item in qs_results]
+        filtered_results = filter_results_list(
+            results_list, item_type_filter, media_file_type_filter, status_filter
         )
-    elif search_type == "status":
-        qs_results = ProjectItem.objects.filter(status__status=query).order_by("title")
-        filtered_results = filter_non_keyword_results_queryset(
-            qs_results, item_type_filter, media_file_type_filter, status_filter
-        )
+
     elif search_type == "keyword":
         search_data = get_keyword_results(query)
         # This is a sorted list of ProjectItems already, so does not need conversion to list below.
-        qs_results = get_result_items(search_data)
-        filtered_results = filter_keyword_results_list(
-            qs_results, item_type_filter, media_file_type_filter, status_filter
+        results_list = get_result_items(search_data)
+        filtered_results = filter_results_list(
+            results_list, item_type_filter, media_file_type_filter, status_filter
         )
 
-    # Convert query results from QuerySet to list of items, if needed.
-    # qs_results is already sorted as desired based on search_type.
-    if isinstance(filtered_results, QuerySet):
-        results = [item for item in filtered_results]
-    else:
-        results = filtered_results
-    return results
+    return filtered_results
 
 
-def filter_keyword_results_list(
-    qs_results: list[ProjectItem],
+def filter_results_list(
+    results_list: list[ProjectItem],
     item_type_filter: str,
     media_file_type_filter: str,
     status_filter: str,
 ) -> list[ProjectItem]:
     if item_type_filter != "all":
-        qs_results = [item for item in qs_results if item.type.type == item_type_filter]
-    if media_file_type_filter != "all":
-        media_files = MediaFile.objects.filter(
-            file_type__file_type=media_file_type_filter
-        )
-        media_file_items = [media_file.item.id for media_file in media_files]
-        qs_results = [item for item in qs_results if item.id in media_file_items]
-    if status_filter != "all":
-        qs_results = [
-            item for item in qs_results if item.status.status == status_filter
+        results_list = [
+            item for item in results_list if item.type.type == item_type_filter
         ]
-    return qs_results
-
-
-def filter_non_keyword_results_queryset(
-    qs_results: QuerySet,
-    item_type_filter: str,
-    media_file_type_filter: str,
-    status_filter: str,
-) -> QuerySet:
-    if item_type_filter != "all":
-        qs_results = qs_results.filter(type__type=item_type_filter)
     if media_file_type_filter != "all":
         media_files = MediaFile.objects.filter(
             file_type__file_type=media_file_type_filter
         )
         media_file_items = [media_file.item.id for media_file in media_files]
-        qs_results = qs_results.filter(pk__in=media_file_items)
+        results_list = [item for item in results_list if item.id in media_file_items]
     if status_filter != "all":
-        qs_results = qs_results.filter(status__status=status_filter)
-    return qs_results
+        results_list = [
+            item for item in results_list if item.status.status == status_filter
+        ]
+    return results_list
 
 
 def get_ark() -> str:
