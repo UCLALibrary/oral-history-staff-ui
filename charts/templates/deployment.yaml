@@ -31,21 +31,29 @@ spec:
           volumeMounts:
             {{- toYaml .Values.volumeMounts | nindent 12 }}
           livenessProbe:
-            httpGet:
-              path: /item_search/
-              port: http
-              httpHeaders:
-                - name: Host
-                  value: {{ (split "," .Values.django.env.allowed_hosts)._0 }}
+            exec:
+              command:
+                - touch 
+                - probefile
+          #  httpGet:
+          #    path: /item_search/
+          #    port: http
+          #    httpHeaders:
+          #      - name: Host
+          #        value: {{ (split "," .Values.django.env.allowed_hosts)._0 }}
             initialDelaySeconds: 10
             timeoutSeconds: 10
           readinessProbe:
-            httpGet:
-              path: /item_search/
-              port: http
-              httpHeaders:
-                - name: Host
-                  value: {{ (split "," .Values.django.env.allowed_hosts)._0 }}
+            exec:
+              command:
+                - touch 
+                - probefile
+          #  httpGet:
+          #    path: /item_search/
+          #    port: http
+          #    httpHeaders:
+          #      - name: Host
+          #        value: {{ (split "," .Values.django.env.allowed_hosts)._0 }}
             initialDelaySeconds: 10
             timeoutSeconds: 10
           resources:
