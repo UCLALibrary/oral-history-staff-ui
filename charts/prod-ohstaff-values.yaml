@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: uclalibrary/oral-history-staff-ui
-  tag: v1.1.14
+  tag: v1.1.15
   pullPolicy: Always
 
 nameOverride: ""
@@ -46,7 +46,7 @@ django:
       - https://oh-staff.library.ucla.edu
     ark_minter: "http://noid.library.ucla.edu/noidu_zz8+?mint+1"
     # Now pointing to production db
-    db_backend: "django.db.backends.postgresql_psycopg2"
+    db_backend: "django.db.backends.postgresql_psycopg"
     db_host: "p-d-postgres.library.ucla.edu"
     db_port: 5432
     db_name: "oral_history_staff"
