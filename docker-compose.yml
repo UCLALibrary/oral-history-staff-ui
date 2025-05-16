@@ -15,7 +15,7 @@ services:
       # For access to remote database via ssh tunnel on host
       - "host.docker.internal:host-gateway"
   db:
-    image: postgres:12
+    image: postgres:16
     env_file:
       - .docker-compose_db.env
     volumes:

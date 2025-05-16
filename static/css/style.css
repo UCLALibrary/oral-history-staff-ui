@@ -13,11 +13,19 @@ ul.navbar {
   border-right: 1px solid #bcbcc5;
 }
 
-.navbar li a {
+.navbar li a,
+.navbar li button {
   display: block;
   text-align: center;
-  padding: 10px 12px;
   text-decoration: none;
+}
+
+.navbar li a {
+  padding: 10px 12px;
+}
+
+.navbar li form {
+  height: 24px;
 }
 
 td.search-type {
