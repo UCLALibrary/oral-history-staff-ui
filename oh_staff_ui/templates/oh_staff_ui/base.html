@@ -23,7 +23,11 @@
         <li><a href="/admin/">Admin (Metadata Configuration)</a></li>
         <li><a href="/logs/">Logs</a></li>
         <li><a href="/release_notes/">Release Notes</a></li>
-        <li><a href="/admin/logout/">Logout</a></li>
+        <li><form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            {% bootstrap_button "Logout" button_type="submit" button_class="link-primary" %}
+        </form>
+        </li>
     </ul>
     <br>
     <div class="container">
