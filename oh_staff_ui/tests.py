@@ -7,8 +7,10 @@ from django.conf import settings
 from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
+from django.db.models.deletion import ProtectedError
 from django.http import HttpRequest
 from django.test import SimpleTestCase, TestCase, override_settings
+from django.utils.safestring import SafeText
 from django.contrib.auth.models import User, Group
 from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
@@ -888,7 +890,7 @@ class ProjectItemFormTestCase(TestCase):
         # Check the form field's initial value.
         self.assertEqual(form_type_field.initial, selected_type)
         # Check the HTML also has that value selected, just to be sure
-        self.assertInHTML('<option value="2" selected>Series</option>', str(form))
+        self.assertInHTML('<option value="2" selected>Series</option>', SafeText(form))
 
     def test_series_form_item_type_is_series(self):
         # Test that the form handles display of choices for series items.
@@ -909,7 +911,7 @@ class ProjectItemFormTestCase(TestCase):
         # Check the form field's initial value.
         self.assertEqual(form_type_field.initial, selected_type)
         # Check the HTML also has that value selected, just to be sure
-        self.assertInHTML('<option value="2" selected>Series</option>', str(form))
+        self.assertInHTML('<option value="2" selected>Series</option>', SafeText(form))
 
     def test_interview_form_item_type_is_interview(self):
         # Test that the form handles display of choices for interview items.
@@ -930,7 +932,9 @@ class ProjectItemFormTestCase(TestCase):
         # Check the form field's initial value.
         self.assertEqual(form_type_field.initial, selected_type)
         # Check the HTML also has that value selected, just to be sure
-        self.assertInHTML('<option value="3" selected>Interview</option>', str(form))
+        self.assertInHTML(
+            '<option value="3" selected>Interview</option>', SafeText(form)
+        )
 
     def test_audio_form_item_type_is_audio(self):
         # Test that the form handles display of choices for audio items.
@@ -951,7 +955,7 @@ class ProjectItemFormTestCase(TestCase):
         # Check the form field's initial value.
         self.assertEqual(form_type_field.initial, selected_type)
         # Check the HTML also has that value selected, just to be sure
-        self.assertInHTML('<option value="4" selected>Audio</option>', str(form))
+        self.assertInHTML('<option value="4" selected>Audio</option>', SafeText(form))
 
     def test_post_to_item_form(self):
         # Test that the form handles posted data correctly.
@@ -1858,9 +1862,12 @@ class FileDeletionTestCase(TestCase):
 
 class ItemDeletionTestCase(TestCase):
     fixtures = [
+        "authority-source-data.json",
+        "description-type-data.json",
         "item-status-data.json",
         "item-type-data.json",
         "media-file-type-data.json",
+        "name-type-data.json",
     ]
 
     @classmethod
@@ -1966,3 +1973,42 @@ class ItemDeletionTestCase(TestCase):
         self.assertRedirects(response, expected_url=expected_url)
         # Check that the item still exists
         self.assertTrue(ProjectItem.objects.filter(id=item.id).exists())
+
+    def test_projectitem_with_description_is_deletable(self):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef2",
+            created_by=self.authorized_user,
+            last_modified_by=self.authorized_user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        # Create a basic Description linked to the item.
+        Description.objects.create(
+            value="My description", item=item, type=DescriptionType.objects.first()
+        )
+        # Not checking permissions, just ability to delete an item with CASCADE foreign key
+        # on description.
+        # This should just succeed; if it raises any error, the test fails.
+        item.delete()
+
+    def test_projectitem_with_name_is_not_deletable(self):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef2",
+            created_by=self.authorized_user,
+            last_modified_by=self.authorized_user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        # Create a basic Name linked to the item.
+        name = Name.objects.create(
+            value="My name", source=AuthoritySource.objects.first()
+        )
+        # Link the Name to the Item
+        ItemNameUsage.objects.create(
+            item=item, value=name, type=NameType.objects.first()
+        )
+        # Not checking permissions, just ability to delete an item with PROTECT foreign key
+        # on name (usage)
+        # This is not allowed.
+        with self.assertRaises(ProtectedError):
+            item.delete()
