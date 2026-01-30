@@ -290,7 +290,7 @@ class DescriptionType(models.Model):
 class Description(models.Model):
     value = models.CharField(max_length=8000, blank=False, null=False)
     item = models.ForeignKey(
-        ProjectItem, on_delete=models.PROTECT, blank=False, null=False
+        ProjectItem, on_delete=models.CASCADE, blank=False, null=False
     )
     type = models.ForeignKey(
         DescriptionType, on_delete=models.PROTECT, blank=False, null=False
