@@ -9,6 +9,7 @@ from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.http import HttpRequest
 from django.test import SimpleTestCase, TestCase, override_settings
+from django.utils.safestring import SafeText
 from django.contrib.auth.models import User, Group
 from eulxml.xmlmap import load_xmlobject_from_string, mods
 from oh_staff_ui.classes.GeneralFileHandler import GeneralFileHandler
@@ -888,7 +889,7 @@ class ProjectItemFormTestCase(TestCase):
         # Check the form field's initial value.
         self.assertEqual(form_type_field.initial, selected_type)
         # Check the HTML also has that value selected, just to be sure
-        self.assertInHTML('<option value="2" selected>Series</option>', str(form))
+        self.assertInHTML('<option value="2" selected>Series</option>', SafeText(form))
 
     def test_series_form_item_type_is_series(self):
         # Test that the form handles display of choices for series items.
@@ -909,7 +910,7 @@ class ProjectItemFormTestCase(TestCase):
         # Check the form field's initial value.
         self.assertEqual(form_type_field.initial, selected_type)
         # Check the HTML also has that value selected, just to be sure
-        self.assertInHTML('<option value="2" selected>Series</option>', str(form))
+        self.assertInHTML('<option value="2" selected>Series</option>', SafeText(form))
 
     def test_interview_form_item_type_is_interview(self):
         # Test that the form handles display of choices for interview items.
@@ -930,7 +931,9 @@ class ProjectItemFormTestCase(TestCase):
         # Check the form field's initial value.
         self.assertEqual(form_type_field.initial, selected_type)
         # Check the HTML also has that value selected, just to be sure
-        self.assertInHTML('<option value="3" selected>Interview</option>', str(form))
+        self.assertInHTML(
+            '<option value="3" selected>Interview</option>', SafeText(form)
+        )
 
     def test_audio_form_item_type_is_audio(self):
         # Test that the form handles display of choices for audio items.
@@ -951,7 +954,7 @@ class ProjectItemFormTestCase(TestCase):
         # Check the form field's initial value.
         self.assertEqual(form_type_field.initial, selected_type)
         # Check the HTML also has that value selected, just to be sure
-        self.assertInHTML('<option value="4" selected>Audio</option>', str(form))
+        self.assertInHTML('<option value="4" selected>Audio</option>', SafeText(form))
 
     def test_post_to_item_form(self):
         # Test that the form handles posted data correctly.
