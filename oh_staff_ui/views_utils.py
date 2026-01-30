@@ -536,7 +536,7 @@ def run_process_file_command(
     connection.close()
 
 
-def get_records_oai(verb: str, ark: str = None, req_url: str = None) -> str:
+def get_records_oai(verb: str, ark: str = None, req_url: str = None) -> bytes:
     # Only items with these statuses should be published via OAI.
     pi_set = ProjectItem.objects.filter(
         status__status__in=["Completed", "Completed with minimal metadata"]
@@ -555,7 +555,7 @@ def get_records_oai(verb: str, ark: str = None, req_url: str = None) -> str:
 
 def wrap_oai_content(
     xml_element: etree.Element, verb: str, ark: str, req_url: str
-) -> str:
+) -> bytes:
     oai_tree = get_oai_envelope()
     oai_tree.append(get_response_date_element())
     oai_tree.append(get_request_element(verb, ark, req_url))
@@ -597,7 +597,7 @@ def get_request_element(
     return e_req
 
 
-def get_bad_arg_error_xml(verb: str, req_url: str = None) -> str:
+def get_bad_arg_error_xml(verb: str, req_url: str = None) -> bytes:
     """If a missing or bad argument is submitted with a request, OAI best practice is to
     return an OAI error response rather than returning a HTTP error code.
 
@@ -609,7 +609,7 @@ def get_bad_arg_error_xml(verb: str, req_url: str = None) -> str:
     return wrap_oai_error(verb, error_elem, req_url)
 
 
-def get_bad_verb_error_xml(verb: str, req_url: str = None) -> str:
+def get_bad_verb_error_xml(verb: str, req_url: str = None) -> bytes:
     """If a missing or bad verb is submitted with a request, OAI best practice is to
     return an OAI error response rather than returning a HTTP error code.
 
@@ -621,7 +621,7 @@ def get_bad_verb_error_xml(verb: str, req_url: str = None) -> str:
     return wrap_oai_error(verb, error_elem, req_url)
 
 
-def wrap_oai_error(verb: str, error_elem: etree.Element, req_url: str = None) -> str:
+def wrap_oai_error(verb: str, error_elem: etree.Element, req_url: str = None) -> bytes:
     """OAI best practice is to return an OAI error response rather than returning a
     HTTP error code in certain cases.
 
