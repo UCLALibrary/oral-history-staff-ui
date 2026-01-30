@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.files import File
 from django.core.management.base import CommandError
 from django.db import IntegrityError
+from django.db.models.deletion import ProtectedError
 from django.http import HttpRequest
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils.safestring import SafeText
@@ -1861,9 +1862,12 @@ class FileDeletionTestCase(TestCase):
 
 class ItemDeletionTestCase(TestCase):
     fixtures = [
+        "authority-source-data.json",
+        "description-type-data.json",
         "item-status-data.json",
         "item-type-data.json",
         "media-file-type-data.json",
+        "name-type-data.json",
     ]
 
     @classmethod
@@ -1969,3 +1973,42 @@ class ItemDeletionTestCase(TestCase):
         self.assertRedirects(response, expected_url=expected_url)
         # Check that the item still exists
         self.assertTrue(ProjectItem.objects.filter(id=item.id).exists())
+
+    def test_projectitem_with_description_is_deletable(self):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef2",
+            created_by=self.authorized_user,
+            last_modified_by=self.authorized_user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        # Create a basic Description linked to the item.
+        Description.objects.create(
+            value="My description", item=item, type=DescriptionType.objects.first()
+        )
+        # Not checking permissions, just ability to delete an item with CASCADE foreign key
+        # on description.
+        # This should just succeed; if it raises any error, the test fails.
+        item.delete()
+
+    def test_projectitem_with_name_is_not_deletable(self):
+        item = ProjectItem.objects.create(
+            ark="fake/abcdef2",
+            created_by=self.authorized_user,
+            last_modified_by=self.authorized_user,
+            title="Fake title",
+            type=ItemType.objects.get(type="Audio"),
+        )
+        # Create a basic Name linked to the item.
+        name = Name.objects.create(
+            value="My name", source=AuthoritySource.objects.first()
+        )
+        # Link the Name to the Item
+        ItemNameUsage.objects.create(
+            item=item, value=name, type=NameType.objects.first()
+        )
+        # Not checking permissions, just ability to delete an item with PROTECT foreign key
+        # on name (usage)
+        # This is not allowed.
+        with self.assertRaises(ProtectedError):
+            item.delete()
