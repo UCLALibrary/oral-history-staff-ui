@@ -22,7 +22,7 @@ Related repositories:
 The development environment requires:
 * git (at least version 2)
 * docker (current version recommended: 20.10.12)
-* docker-compose (at least version 1.25.0; current recommended: 1.29.2)
+* docker compose (at least version 1.25.0; current recommended: 1.29.2)
 
 #### PostgreSQL container
 
@@ -30,7 +30,7 @@ The development database is a Docker container running PostgreSQL 12, which matc
 
 #### Django container
 
-This uses Django 4.1, in a Debian 11 (Bullseye) container running Python 3.11.  All code 
+This uses Django 5.2.13, in a Debian 11 (Bullseye) container running Python 3.14.  All code 
 runs in the container, so local version of Python does not matter.
 
 The container runs via `docker_scripts/entrypoint.sh`, which
@@ -50,39 +50,39 @@ The container runs via `docker_scripts/entrypoint.sh`, which
 
    ```$ cd oral-history-staff-ui```
 
-3. Build using docker-compose.
+3. Build using docker compose.
 
-   ```$ docker-compose build```
+   ```$ docker compose build```
 
 4. Bring the system up, with containers running in the background.
 
-   ```$ docker-compose up -d```
+   ```$ docker compose up -d```
 
 5. Logs can be viewed, if needed (`-f` to tail logs).
 
    ```
-   $ docker-compose logs -f db
-   $ docker-compose logs -f django
+   $ docker compose logs -f db
+   $ docker compose logs -f django
    ```
 
 6. Run commands in the containers, if needed.
 
    ```
    # Open psql client in the dev database container
-   $ docker-compose exec db psql -d oral_history -U oral_history
+   $ docker compose exec db psql -d oral_history -U oral_history
    # Open a shell in the django container
-   $ docker-compose exec django bash
+   $ docker compose exec django bash
    # Django-aware Python shell
-   $ docker-compose exec django python manage.py shell
+   $ docker compose exec django python manage.py shell
    # Apply new migrations without a restart
-   $ docker-compose exec django python manage.py migrate
+   $ docker compose exec django python manage.py migrate
    # Populate database with seed data (once it exists...)
-   $ docker-compose exec django python manage.py loaddata --app oh_staff_ui seed-data
+   $ docker compose exec django python manage.py loaddata --app oh_staff_ui seed-data
    #
    # Load full set of item data
-   $ docker-compose exec django python manage.py import_projectitems migration_data/project-items-export.tsv
+   $ docker compose exec django python manage.py import_projectitems migration_data/project-items-export.tsv
    # Load full set of name data
-   $ docker-compose exec django python manage.py import_names migration_data/Name.tsv
+   $ docker compose exec django python manage.py import_names migration_data/Name.tsv
    ```
 7. Connect to the running application via browser
 
@@ -92,11 +92,11 @@ The container runs via `docker_scripts/entrypoint.sh`, which
 
 8. Edit code locally.  All changes are immediately available in the running container, but if a restart is needed:
 
-   ```$ docker-compose restart django```
+   ```$ docker compose restart django```
 
 9. Shut down the system when done.
 
-   ```$ docker-compose down```
+   ```$ docker compose down```
 
 ### Resetting the local database
 
@@ -129,11 +129,11 @@ This will not normally need to be done during development, but may be needed for
 
 3. Shut down your local application, if running:
 
-   ```$ docker-compose down```
+   ```$ docker compose down```
 
 4. Start your local application, using the specially-configured `docker-compose_REMOTE.yml`.  This will start just the Django container, skipping the usual local database container and instead connecting to the remote database via information in `.docker-compose_secrets.env`:
 
-   ```$ docker-compose -f docker-compose_REMOTE.yml up -d```
+   ```$ docker compose -f docker-compose_REMOTE.yml up -d```
 
 5. _*Be very careful - your local application is now connected to the production database!*_
 
@@ -149,7 +149,7 @@ Once connected (either directly, or via tunnel as documented above), run either:
 $ docker_scripts/reset_prod_db.sh
 
 # If connected from local system via tunnel
-$ docker-compose exec django docker_scripts/reset_prod_db.sh
+$ docker compose exec django docker_scripts/reset_prod_db.sh
 ```
 
 ### Logging
@@ -201,7 +201,7 @@ In deployed container:
 Tests focus on code which has significant side effects, like creating & changing files.  
 Run tests in the container:
 
-```$ docker-compose exec django python manage.py test```
+```$ docker compose exec django python manage.py test```
 
 ### File management
 
@@ -218,13 +218,13 @@ Processed files go into various subdirectories below these top-level ones, depen
 To check the contents of `/tmp/media_dev`, which is only in the container:
 ```
 # Easiest, but harder to read
-$ docker-compose exec django bash -c "ls -lR /tmp/media_dev"
+$ docker compose exec django bash -c "ls -lR /tmp/media_dev"
 
 # Extra step needed after container rebuilds, but easier to read
 # Install tree utility as root (in container):
-$ docker-compose exec -u root django bash -c "apt-get install tree"
+$ docker compose exec -u root django bash -c "apt-get install tree"
 # Then run tree (in container) as normal django user
-$ docker-compose exec django bash -c "tree /tmp/media_dev"
+$ docker compose exec django bash -c "tree /tmp/media_dev"
 ```
 
 Example, after uploading 1 of each type of file, showing masters and derivatives:
