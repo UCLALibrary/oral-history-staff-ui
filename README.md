@@ -26,11 +26,11 @@ The development environment requires:
 
 #### PostgreSQL container
 
-The development database is a Docker container running PostgreSQL 12, which matches our deployment environment.
+The development database is a Docker container running PostgreSQL 16, which matches our deployment environment.
 
 #### Django container
 
-This uses Django 5.2.13, in a Debian 11 (Bullseye) container running Python 3.14.  All code 
+This uses Django 5.2.13, in a Debian 13 (Bookworm) container running Python 3.13.  All code 
 runs in the container, so local version of Python does not matter.
 
 The container runs via `docker_scripts/entrypoint.sh`, which
