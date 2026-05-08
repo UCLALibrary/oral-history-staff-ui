@@ -40,8 +40,10 @@ class OralHistoryMods(MODSv34):
         self._populate_rights()
         self._populate_subjects()
         self._populate_constituent_audio()
-        self._populate_interviewee_image()
         self._populate_interview_content()
+        # Add image after interview content so it won't be the first download option
+        # on the public site.
+        self._populate_interviewee_image()
         self._populate_series_content()
 
     def _populate_titles(self):
