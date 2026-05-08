@@ -19,7 +19,6 @@ from oh_staff_ui.models import (
     ProjectItem,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -248,7 +247,8 @@ class OralHistoryMods(MODSv34):
         p.mkdir(exist_ok=True, parents=True)
 
         with open(f"{p}/{self._item.ark_ns}-mods.xml", "wb") as mods_file:
-            mods_file.write(self.serializeDocument(pretty=True))
+            # Ignore type for serializeDocument(), buried deep in 3rd party code.
+            mods_file.write(self.serializeDocument(pretty=True))  # type: ignore
             logger.info(
                 f"Wrote MODS for item id: {self._item.id} to file: {self._item.ark_ns}-mods.xml"
             )
