@@ -19,7 +19,6 @@ from oh_staff_ui.models import (
     ProjectItem,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -41,8 +40,10 @@ class OralHistoryMods(MODSv34):
         self._populate_rights()
         self._populate_subjects()
         self._populate_constituent_audio()
-        self._populate_interviewee_image()
         self._populate_interview_content()
+        # Add image after interview content so it won't be the first download option
+        # on the public site.
+        self._populate_interviewee_image()
         self._populate_series_content()
 
     def _populate_titles(self):
@@ -196,9 +197,11 @@ class OralHistoryMods(MODSv34):
             )
 
     def _populate_interview_content(self):
+        # These are MediaFileType codes for files which may be attached to the interview
+        # record, and should potentially be offered for download on the public site.
         fc_to_label = {
             "pdf_master": "Interview Full Transcript (PDF)",
-            "text_master_transcript": "Interview Full Transcript",
+            "text_master_transcript": "Interview Full Transcript (HTML)",
             "text_master_biography": "Interviewee Biography",
             "text_master_interview_history": "Interview History",
             "pdf_master_appendix": "Appendix to Interview",
@@ -206,29 +209,51 @@ class OralHistoryMods(MODSv34):
             "pdf_master_resume": "Narrator's Resume",
         }
 
-        for f in MediaFile.objects.filter(
-            item=self._item, file_type__file_code__in=fc_to_label.keys()
-        ).order_by("sequence"):
-            # Add only for submasters, the public-access copy
-            if "submaster" in f.file_url:
-                label = fc_to_label[f.file_type.file_code]
-                usage = ""
+        # Find all files attached to this item which have file_type codes of interest.
+        # Convert the queryset to a list, so all relevant data is retrieved.
+        media_files = list(
+            MediaFile.objects.filter(
+                item=self._item, file_type__file_code__in=fc_to_label.keys()
+            ).order_by("sequence")
+        )
 
-                if f.file_type.file_code == "text_master_transcript":
-                    if f.file_name_only.endswith(".html"):
-                        label = f"{label} (Printable Version)"
-                    else:
-                        label = f"{label} (TEI/P5 XML)"
-                        usage = "timed log"
+        # We only want submasters, the public-access copy.
+        # This can't be done via query filter because the file info is stored in
+        # a FileField, which doesn't support "contains" queries, and file_url
+        # is a property on the model, not queryable.
+        submasters = [mf for mf in media_files if "submaster" in mf.file_url]
 
-                # If our MediaFile is TEI/P5 XML, a usage attribute is populated
-                # and should be included
-                if usage:
-                    self.locations.append(
-                        LocationOH(url=f.file_url, label=label, usage=usage)
-                    )
-                else:
-                    self.locations.append(LocationOH(url=f.file_url, label=label))
+        # Files need to be sent in a specific order: first transcripts, then any others.
+        # Transcripts need special handling:
+        # If there's a PDF transcript, put it first.
+        ordered_files = [
+            file for file in submasters if file.file_type.file_code == "pdf_master"
+        ]
+        # Next, add HTML transcripts (if any). These will wind up first,
+        # if there weren't PDFs.
+        # XML transcripts (which also are text_master_transcript) will not be included.
+        ordered_files.extend(
+            [
+                file
+                for file in submasters
+                if file.file_type.file_code == "text_master_transcript"
+                and file.file_name_only.endswith(".html")
+            ]
+        )
+        # Finally, add remaining submasters not already handled.
+        ordered_files.extend(
+            [
+                file
+                for file in submasters
+                if file.file_type.file_code
+                not in ["pdf_master", "text_master_transcript"]
+            ]
+        )
+
+        # Finally, add these carefully ordered files to this MODS item's locations.
+        for file in ordered_files:
+            label = fc_to_label[file.file_type.file_code]
+            self.locations.append(LocationOH(url=file.file_url, label=label))
 
     def _populate_series_content(self):
         p = self._item.parent
@@ -248,7 +273,8 @@ class OralHistoryMods(MODSv34):
         p.mkdir(exist_ok=True, parents=True)
 
         with open(f"{p}/{self._item.ark_ns}-mods.xml", "wb") as mods_file:
-            mods_file.write(self.serializeDocument(pretty=True))
+            # Ignore type for serializeDocument(), buried deep in 3rd party code.
+            mods_file.write(self.serializeDocument(pretty=True))  # type: ignore
             logger.info(
                 f"Wrote MODS for item id: {self._item.id} to file: {self._item.ark_ns}-mods.xml"
             )

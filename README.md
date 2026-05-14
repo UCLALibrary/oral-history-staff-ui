@@ -24,6 +24,14 @@ The development environment requires:
 * docker (current version recommended: 20.10.12)
 * docker compose (at least version 1.25.0; current recommended: 1.29.2)
 
+Note: This project depends on [eulxml](https://github.com/emory-libraries/eulxml), which may [no longer be supported](https://github.com/emory-libraries/eulxml/issues/41).
+
+Running most `django` commands will show this warning, which can be ignored for now (as of May 2026):
+```
+/home/django/.local/lib/python3.13/site-packages/eulxml/__init__.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+```
+
 #### PostgreSQL container
 
 The development database is a Docker container running PostgreSQL 16, which matches our deployment environment.
@@ -291,7 +299,7 @@ Two verbs are supported:
 * `GetRecord` - Given an ark, will return information about the item related to that ark, a single record.
 * `ListRecords` - No arguments are required, all qualified records will be returned, without pagination.
 
-The implementation details are located in the `oh_staff_ui\classes\OralHistoryMods.py` class.
+The implementation details are located in the `oh_staff_ui/classes/OralHistoryMods.py` class.
 The `populate_fields()` method contains the methods called for each element in the MODS record.
 
 If an item contains the following subjects, the subject value is not included in the MODS subject output:
@@ -324,8 +332,7 @@ This also has some label mapping to be aware of based on the internal `file_code
 | File Code              | Display Label                          |
 | -----------------------|----------------------------------------|
 | pdf_master             | Interview Full Transcript (PDF)        |
-| text_master_transcript (file ends with `.html`) | Interview Full Transcript  (Printable Version)|
-| text_master_transcript (all other cases) | Interview Full Transcript  (TEI/P5 XML)
+| text_master_transcript (file ends with `.html`) | Interview Full Transcript  (HTML)|
 | text_master_biography  | Interviewee Biography                  |
 | text_master_interview_history | Interview History               |
 | pdf_master_appendix    | Appendix to Interview                  |
