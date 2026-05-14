@@ -1199,14 +1199,14 @@ class ModsTestCase(TestCase):
             file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
             item=cls.audio_item,
             original_file_name="FAKE_TEI_TIMED_LOG",
-            file="oh_static/text/submasters/fake-abcdef-2-master-tei.xml",
+            file="oh_static/text/submasters/fake-abcdef-2-submaster.xml",
         )
 
     @classmethod
     def tearDownClass(cls):
         # Remove test mods folder and file(s) created by test_writing_single_mods()
         p = Path(f"{settings.MEDIA_ROOT}/{settings.OH_STATIC}/mods/")
-        rmtree(p)
+        rmtree(p, ignore_errors=True)
         super().tearDownClass()
 
     # Utility methods to pretty print xml
@@ -1238,7 +1238,6 @@ class ModsTestCase(TestCase):
         if type == "audio":
             item = self.audio_item
         ohmods = OralHistoryMods(item)
-        ohmods.populate_fields()
         return ohmods
 
     # Utility methods to save items with specifc status, for OAI feed testing
@@ -1382,7 +1381,7 @@ class ModsTestCase(TestCase):
             b'playlist.m3u8" type="constituent">' in ohmods.serializeDocument()
         )
 
-    def test_valid_timing_log(self):
+    def test_valid_table_of_contents(self):
         ohmods = self.get_mods_from_interview_item()
         self.assertTrue(b"<mods:tableOfContents>" in ohmods.serializeDocument())
 
@@ -1423,16 +1422,13 @@ class ModsTestCase(TestCase):
         )
 
     def test_timed_log_attribute_is_added(self):
-        # If an item contains a TEI/XML transcript, it should have a usage attribute
-        # with value "timed_log"
-        if MediaFile(
-            item=self.audio_item,
-            file_type=MediaFileType.objects.get(file_code="text_master_transcript"),
-        ):
-            ohmods = self.get_mods_from_audio_item()
-            self.assertTrue(
-                b'<mods:url usage="timed log">' in ohmods.serializeDocument()
-            )
+        # Our audio item has a TEI/XML transcript, so the item-level MODS should have
+        # a usage attribute with value "timed_log".
+        # We need to test the interview item because this is done in
+        # _create_relateditem_audio(), which is called via _populate_constituent_audio(),
+        # relevant only when populating audio children of an interview.
+        ohmods = self.get_mods_from_interview_item()
+        self.assertTrue(b'<mods:url usage="timed log">' in ohmods.serializeDocument())
 
     def test_absence_of_timed_log_with_text_master_index(self):
         # If an item does not contain a file_code of text_master_transcript,
