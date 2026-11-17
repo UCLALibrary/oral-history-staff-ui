@@ -26,7 +26,7 @@ The development environment requires:
 
 Note: This project depends on [eulxml](https://github.com/emory-libraries/eulxml), which may [no longer be supported](https://github.com/emory-libraries/eulxml/issues/41).
 
-Running most `django` commands will show this warning, which can be ignored for now (as of May 2026):
+Running most `django` commands will show this warning, which can be ignored for now (as of November 2026):
 ```
 /home/django/.local/lib/python3.13/site-packages/eulxml/__init__.py:19: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
